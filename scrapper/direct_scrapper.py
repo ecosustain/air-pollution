@@ -38,7 +38,7 @@ def get_data(session_id, interval_years=(2000, 2024), interval_size=1):
                 payload = {
                     'dataInicialStr': f"01/01/{year - interval_size}",
                     'dataFinalStr': f"01/01/{year}",
-                    'estacaoVO.nestcaMonto': stations[station],
+                    'estacaoVO.nestcaMonto': stations[station][0],
                     'nparmtsSelecionados': indicators[indicator],
                 }
 
