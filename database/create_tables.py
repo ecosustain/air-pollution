@@ -1,4 +1,3 @@
-from meta_data import stations
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey)
 from sqlalchemy.ext.declarative import declarative_base

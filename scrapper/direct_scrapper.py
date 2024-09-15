@@ -1,5 +1,4 @@
 import requests
-from meta_data import stations, indicators
 from credentials import login, password
 import os
 

@@ -1,4 +1,3 @@
-from meta_data import stations
 import os
 import pandas as pd
 from utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
