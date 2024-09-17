@@ -12,7 +12,7 @@ csv_dir = './scrapper/scrapped_data'
 
 # Function to determine table name (assuming CSV name matches table name, adjust if necessary)
 def get_table_name(file_name):
-    table_name = file_name.split('.')[:-1]  # Removes '.csv' from the filename
+    table_name = file_name.replace(".csv", "")
     return table_name
 
 def adjust_time(dt_str):
