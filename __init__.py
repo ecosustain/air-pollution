@@ -1,1 +1,0 @@
-from scrapper.meta_data import stations, indicators

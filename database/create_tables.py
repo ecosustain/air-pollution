@@ -2,10 +2,12 @@ from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTim
                         text, String, Boolean, ForeignKey)
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
-
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from metadata.meta_data import stations, indicators
 
 # Database connection string
-DATABASE_URL = "mysql+pymysql://root:root@localhost"
+DATABASE_URL = "mysql+pymysql://root:root@localhost" # change username and password
 
 # Create an engine
 engine = create_engine(DATABASE_URL)
@@ -47,7 +49,7 @@ for station in stations:
         ('id', Integer, True),  # (column_name, column_type, is_primary_key)
         ('datetime', DateTime, False)
     ]
-    df = pd.read_csv(f"./stations_data/{station}.csv", nrows=1)
+    df = pd.read_csv(f"./scrapper/scrapped_data/{station}.csv", nrows=1)
     df_cols = df.columns
     df_cols = df_cols[1:]
 

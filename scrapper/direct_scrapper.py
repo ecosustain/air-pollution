@@ -1,6 +1,8 @@
 import requests
 from credentials import login, password
-import os
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from metadata.meta_data import stations, indicators
 
 
 def get_session_id():
@@ -48,7 +50,7 @@ def get_data(session_id, interval_years=(2000, 2024), interval_size=1):
 
 
 def save_csv_file(data, station_name, indicator_name, start_year, end_year):
-    directory = "./scrapped_data"
+    directory = "./scrapper/scrapped_data"
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_path = f"{directory}/{station_name}_{indicator_name}_{start_year}_{end_year}.csv"

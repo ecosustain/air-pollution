@@ -1,16 +1,17 @@
-import os
+import os, sys
 import pandas as pd
 from utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from metadata.meta_data import stations
 
-
-def join_files(path="./scrapped_data", verbose=True):
+def join_files(path="./scrapper/scrapped_data", verbose=True):
     files = os.listdir(path)
     for station in stations:
         station_indicators = {}
         for file in files:
             if file.split("_")[0] == station:
                 indicator = file.split("_")[1].lower()
-                df = pd.read_csv(f"./scrapped_data/{file}",
+                df = pd.read_csv(f"./scrapper/scrapped_data/{file}",
                                  sep=";", skiprows=7, encoding="latin1")
                 df.columns = ["date", "time", indicator.lower()]
                 df['datetime'] = df['date'].values + " " + df['time'].values
@@ -30,7 +31,7 @@ def join_files(path="./scrapped_data", verbose=True):
         for indicator in station_indicators:
             station_df = pd.merge(station_df, station_indicators[indicator], on="datetime", how="left").drop_duplicates()
 
-        station_df.to_csv(f"./stations_data/{station}.csv", index=False)
+        station_df.to_csv(f"./scrapper/stations_data/{station}.csv", index=False)
 
 
 join_files()
