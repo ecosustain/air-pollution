@@ -1,9 +1,7 @@
-from meta_data import stations
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
-                        text, String, Boolean, ForeignKey)
+                        text, String, Boolean, ForeignKey, Index)
 from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
-
 
 # Database connection string
 DATABASE_URL = "mysql+pymysql://root:root@localhost"
@@ -19,6 +17,7 @@ with engine.connect() as connection:
 # Create a base class
 Base = declarative_base()
 
+# Define the table structures
 tables_and_columns = {
     "stations": [
         ("id", Integer, True),
@@ -40,24 +39,15 @@ tables_and_columns = {
         ("idIndicator", Integer, False, "indicators.id"),
         ("description", String(255), False),
         ("period", DateTime, False)
+    ],
+    "measure_indicator": [
+        ("id", Integer, True),
+        ("idStation", Integer, False, "stations.id"),
+        ("idIndicator", Integer, False, "indicators.id"),
+        ("datetime", DateTime, False),
+        ("value", Double, False)
     ]
 }
-
-for station in stations:
-    cols = [
-        ('id', Integer, True),  # (column_name, column_type, is_primary_key)
-        ('datetime', DateTime, False)
-    ]
-    df = pd.read_csv(f"./stations_data/{station}.csv", nrows=1)
-    df_cols = df.columns
-    df_cols = df_cols[1:]
-
-    for col in df_cols:
-        cols.append((str(col), Double, False))
-
-    tables_and_columns[station] = cols
-
-print(tables_and_columns)
 
 # Create tables dynamically with foreign key constraints
 metadata = MetaData(schema='poluicao')
@@ -73,9 +63,18 @@ for table_name, columns in tables_and_columns.items():
         table_columns.append(column)
 
     # Define the table
-    Table(table_name, metadata, *table_columns)
+    table = Table(table_name, metadata, *table_columns)
+
+    # If it's the "measure_indicator" table, add indexes
+    if table_name == 'measure_indicator':
+        # B+ Tree index (default) on datetime
+        Index('idx_datetime', table.c.datetime)
+        
+        # Hash indexes on idStation and idIndicator
+        Index('idx_idStation_hash', table.c.idStation, mysql_using='hash')
+        Index('idx_idIndicator_hash', table.c.idIndicator, mysql_using='hash')
 
 # Create all tables
 metadata.create_all(engine)
 
-print("Tables created successfully.")
+print("Tables and indexes created successfully.")
