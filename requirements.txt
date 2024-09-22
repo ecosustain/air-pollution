@@ -1,3 +1,7 @@
+numpy
 pandas
+requests
+scikit-learn
+pyproj
 pymysql
-SQLAlchemy
+sqlalchemy
