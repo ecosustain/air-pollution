@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import pandas as pd
 
 # Database connection string
-DATABASE_URL = "mysql+pymysql://root:root@localhost" # change username and password
+DATABASE_URL = "mysql+pymysql://root:root@localhost"
 
 # Create an engine
 engine = create_engine(DATABASE_URL)
