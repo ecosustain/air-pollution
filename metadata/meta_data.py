@@ -1,3 +1,7 @@
+# Please, add the bollean that states if the indicator is a pollutant, and add the string description,
+# and add the measure unit string.
+# After that, change the populate_tables.py file.
+
 indicators = {
     "BEN": 61,
     "CO": 16,
@@ -8,7 +12,7 @@ indicators = {
     "MP2.5": 57,
     "NO": 17,
     "NO2": 15,
-    "NOx": 18,
+    "NOX": 18,
     "O3": 63,
     "PRESS": 29,
     "RADG": 26,
@@ -20,6 +24,7 @@ indicators = {
     "VV": 24
 }
 
+# Please, add the description and change the populate_tables.py file
 
 stations = {
     "Cambuci": (90, -23.566208579985688, -46.612390087515855),

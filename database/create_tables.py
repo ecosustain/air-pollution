@@ -34,17 +34,14 @@ tables_and_columns = {
         ("is_pollutant", Boolean, False),
     ],
     "station_indicators": [
-        ("id", Integer, True),
-        ("idStation", Integer, False, "stations.id"),
-        ("idIndicator", Integer, False, "indicators.id"),
+        ("idStation", Integer, True, "stations.id"),
+        ("idIndicator", Integer, True, "indicators.id"),
         ("description", String(255), False),
-        ("period", DateTime, False)
     ],
     "measure_indicator": [
-        ("id", Integer, True),
-        ("idStation", Integer, False, "stations.id"),
-        ("idIndicator", Integer, False, "indicators.id"),
-        ("datetime", DateTime, False),
+        ("idStation", Integer, True, "stations.id"),
+        ("idIndicator", Integer, True, "indicators.id"),
+        ("datetime", DateTime, True),
         ("value", Double, False)
     ]
 }
@@ -66,6 +63,7 @@ for table_name, columns in tables_and_columns.items():
     table = Table(table_name, metadata, *table_columns)
 
     # If it's the "measure_indicator" table, add indexes
+    
     if table_name == 'measure_indicator':
         # B+ Tree index (default) on datetime
         Index('idx_datetime', table.c.datetime)
