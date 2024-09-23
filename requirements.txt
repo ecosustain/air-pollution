@@ -5,3 +5,5 @@ scikit-learn
 pyproj
 pymysql
 sqlalchemy
+folium
+geopandas
