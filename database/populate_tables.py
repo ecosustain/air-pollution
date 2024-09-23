@@ -8,7 +8,7 @@ from metadata.meta_data import stations, indicators
 db_connection = create_engine('mysql+pymysql://root:root@localhost/poluicao')
 
 # Directory containing the CSV files
-csv_dir = '../scrapper/scrapped_data'
+csv_dir = './data/scraped_data'
 
 # Function to determine table name (assuming CSV name matches table name, adjust if necessary)
 def get_table_name(file_name):
