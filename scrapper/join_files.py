@@ -17,6 +17,11 @@ def join_files(path="./data/scraped_data", verbose=True):
                 df['datetime'] = df['date'].values + " " + df['time'].values
                 df.drop(['date', 'time'], axis=1, inplace=True)
                 df['datetime'] = df['datetime'].map(ddmmyyyyhhmm_yyyymmddhhmm)
+                
+                mask = df['datetime'].dt.strftime('%H:%M') == '24:00' # Identify rows where time is 24:00
+                df.loc[mask, 'datetime'] = df.loc[mask, 'datetime'] + timedelta(days=1)
+                df.loc[mask, 'datetime'] = df.loc[mask, 'datetime'].dt.replace(hour=0, minute=0)
+
                 df[indicator.lower()] = df[indicator.lower()].map(string_to_float)
                 df.drop_duplicates(inplace=True)
                 df.dropna(inplace=True)
