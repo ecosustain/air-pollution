@@ -11,10 +11,6 @@ app = Flask(__name__)
 def index():
     return "<h1>MAC 0476<h1/>"
 
-@app.route('/mapa')
-def map():
-    return "mapa"
-
 @app.route(rule='/mapa/<map_name>',
            methods=['POST', 'GET'])
 def map_name(map_name):
@@ -43,11 +39,15 @@ def fake_login():
         response = make_response()
         response = jsonify(teste="444")
         response.status_code = 201
-        
+
         return response
     
     if request.method == 'GET':
         return f""
+    
+@app.route('/heat_map')
+def heat_map():
+    return "mapa"
 
 
 if __name__ == "__main__":
