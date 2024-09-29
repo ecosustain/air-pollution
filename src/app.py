@@ -42,6 +42,8 @@ def fake_login():
     if request.method == 'POST':
         response = make_response()
         response = jsonify(teste="444")
+        response.status_code = 201
+        
         return response
     
     if request.method == 'GET':
