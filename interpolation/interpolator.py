@@ -4,17 +4,81 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import LeaveOneOut, cross_val_score
 import numpy as np
 import math
+from pykrige.ok import OrdinaryKriging
+from pykrige.rk import Krige
+import itertools
+import sys 
+import os
 
-class KNNInterpolator():
-    def __init__(self, data, verbose=False, k='auto'):
-        """
-        data -> dict com pares "coord" : "medida"
-        """
+class Interpolator():
+    def __init__(self, data, verbose=False):
         self.P = pyproj.Proj(proj='utm', zone=23, south=True, ellps='WGS84') # Projeção para a zona de SP
         self.scaler = MinMaxScaler()
         self.X, self.y = self.__preprocess_data__(data)
 
         self.verbose = verbose
+
+    def __preprocess_data__(self, data):
+
+        X = data.keys()
+        y = [data[k] for k in X if not math.isnan(data[k])]
+        X = [self.P(c[1], c[0]) for c in X  if not math.isnan(data[c])] # input é long, lat
+        X = self.scaler.fit_transform(X)
+        return X,y
+    
+    def predict(self, X):
+        """
+        X -> Lista de pares (lat, lon)
+        retorna uma lista com valores interpolados
+        """
+        _X = [self.P(x[1], x[0]) for x in X]
+        _X = self.scaler.transform(_X)
+        return self.interpolator.predict(_X)
+    
+class KrigingInterpolator(Interpolator):
+    def __init__(self, data, param_dict, verbose=False,):
+        """
+        data -> dict com pares "coord" : "medida"
+        """
+        super().__init__(data, verbose=verbose)
+        self.param_dict = param_dict
+        params = self.__find_params__()
+
+        self.interpolator = Krige(**params)
+        self.interpolator.fit(self.X,self.y)
+
+    def __find_params__(self):
+
+        best_score = -np.inf
+        best_params = {}
+
+        combinations = [dict(zip(self.param_dict.keys(), valores)) for valores in itertools.product(*self.param_dict.values())]
+
+        for c in combinations:
+            cv = LeaveOneOut()
+            model = Krige(**c, verbose=False)
+            scores = cross_val_score(model, self.X, self.y, scoring='neg_root_mean_squared_error', cv=cv, n_jobs=-1, verbose=0)
+            score = np.mean(scores)
+
+            if score > best_score:
+                best_score = score
+                best_params = c
+
+            if self.verbose:
+                print(f"RMSE: {-score}; params={c}")
+
+        if self.verbose:
+            print(f"Best RMSE: {-1 * best_score}; params={best_params}")
+        return best_params
+        
+
+
+class KNNInterpolator(Interpolator):
+    def __init__(self, data, verbose=False, k='auto'):
+        """
+        data -> dict com pares "coord" : "medida"
+        """
+        super().__init__(data, verbose=verbose)
         self.k = self.__find_k__() if k == 'auto' else k
 
         if verbose and k != 'auto':
@@ -26,15 +90,8 @@ class KNNInterpolator():
 
         self.interpolator = KNeighborsRegressor(n_neighbors = self.k, weights = 'distance')
         self.interpolator.fit(self.X,self.y)
+        
 
-    
-    def __preprocess_data__(self, data):
-
-        X = data.keys()
-        y = [data[k] for k in X if not math.isnan(data[k])]
-        X = [self.P(c[1], c[0]) for c in X  if not math.isnan(data[c])] # input is long, lat
-        X = self.scaler.fit_transform(X)
-        return X,y
     
     def __find_k__(self):
 
@@ -58,13 +115,6 @@ class KNNInterpolator():
             print(f"Best RMSE: {-1 * best_score}; k={best_k}")
         return best_k
     
-    def predict(self, X):
-        """
-        X -> Lista de pares (lat, lon)
-        """
-        _X = [self.P(x[1], x[0]) for x in X]
-        _X = self.scaler.transform(_X)
-        return self.interpolator.predict(_X)
 
     
     
@@ -125,6 +175,17 @@ def main():
     print(interpolator.predict(X))
     print(100*"#")
     interpolator = KNNInterpolator(data, verbose=True, k='auto')
+    print(interpolator.predict(X))
+    print(100*"#")
+
+    param_dict = {
+    "method": ["ordinary", "universal"],
+    "variogram_model": ["linear", "power", "gaussian", "spherical"],
+    "nlags": [4, 6, 8],
+    "weight": [True, False]
+    }
+
+    interpolator = KrigingInterpolator(data,param_dict, verbose=True)
     print(interpolator.predict(X))
 
     return
