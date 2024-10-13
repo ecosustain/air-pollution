@@ -1,6 +1,13 @@
 # poluicao-ar-rmsp
 
+# Installation
+- sudo apt install mysql-server
+- pip install -r requirements.txt
 
+# Usage
+- sudo systemctl start mysql
+- python3 database/create_tables.py 
+- python3 database/populate_tables.py 
 
 ## Getting started
 
