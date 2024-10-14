@@ -5,6 +5,31 @@ from flask import (
     jsonify,
 )
 
+from controllers import (
+    HeatMapController
+)
+
+from models import (
+    Indicators,
+    MeasureIndicators,
+    Stations,
+    StationIndicators,
+)
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+DATABASE_URI = 'mysql+pymysql://root:root@localhost/poluicao'
+engine = create_engine(DATABASE_URI)
+
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+Base.metadata.create_all(engine)
+
+Session = sessionmaker(bind=engine)
+SESSION = Session()
+
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -47,7 +72,18 @@ def fake_login():
     
 @app.route('/heat_map')
 def heat_map():
-    return "mapa"
+    # if request.method == 'GET':
+    #     response = make_response()
+    #     measure_indicators = HeatMapController(SESSION).get_heat_map(date="") 
+    #     response = jsonify(data=measure_indicators)
+
+    session = SESSION
+    indicators = session.query(Indicators).all()
+    result = [{"id": indicator.id, "name": indicator.name} for indicator in indicators]
+    session.close()
+    return jsonify(result), 200
+
+    return response
 
 
 if __name__ == "__main__":

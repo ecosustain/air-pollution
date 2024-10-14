@@ -1,8 +1,13 @@
+from repositories import (
+    MeasureIndicatorRepository
+)
+
 import datetime
 
 class HeatMapController:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, session) -> None:
+        self.measure_indicator_repository = MeasureIndicatorRepository(session)
+        self.session = session
 
     def get_heat_map(self, date: datetime) -> list[dict]:
 
@@ -16,8 +21,9 @@ class HeatMapController:
 
         # retornar lista de dicts {"latitude": , "longitude":, "valor": }
 
+        measure_indicators = self.measure_indicator_repository.get_measure_indicators(limit=5)
 
-        return []
+        return measure_indicators
 
 
 
