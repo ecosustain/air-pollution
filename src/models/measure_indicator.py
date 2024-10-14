@@ -1,15 +1,18 @@
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, ForeignKey, Double, DateTime
-from models import Station, Indicator
+from sqlalchemy import Column, Integer, ForeignKey, Float, DateTime
+from models import Stations, Indicators
 
-class MeasureIndicator():
-    __tablename__ = "measure_indicator"
+from sqlalchemy.ext.declarative import declarative_base
+Base = declarative_base()
+
+class MeasureIndicators(Base):
+    __tablename__ = "measure_indicators"
 
     id = Column(Integer, primary_key=True)
-    station_id = Column(ForeignKey(Station.id))
-    indicator_id = Column(ForeignKey(Indicator.id))
+    station_id = Column(ForeignKey(Stations.id))
+    indicator_id = Column(ForeignKey(Indicators.id))
     datetime = Column(DateTime)
-    value = Column(Double)
+    value = Column(Float)
 
-    station = relationship("Station")
-    indicator = relationship("Indicator")
+    station = relationship("Stations")
+    indicator = relationship("Indicators")
