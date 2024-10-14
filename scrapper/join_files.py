@@ -3,6 +3,7 @@ import pandas as pd
 from utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from metadata.meta_data import stations
+from datetime import timedelta
 
 def join_files(path="./data/scraped_data", verbose=True):
     files = os.listdir(path)

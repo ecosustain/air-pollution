@@ -67,7 +67,7 @@ for file_name in os.listdir(csv_dir):
         # Read the CSV file
         df = pd.read_csv(file_path)
         df['datetime'] = df['datetime'].apply(adjust_time)
-        df['datetime'] = pd.to_datetime(df['datetime'], format='%Y/%m/%d %H:%M')
+        df['datetime'] = pd.to_datetime(df['datetime']).dt.strftime('%Y-%m-%d %H:%M')
         
         dict_station_indicators = {
             "idStation": [],
@@ -96,6 +96,6 @@ for file_name in os.listdir(csv_dir):
         #print(station_indicators_df)
         station_indicators_df.to_sql('station_indicators', con=db_connection, if_exists='append', index=False)
         
-        print(f"Data from {file_name} has been inserted into {table_name}")
+        print(f"Data from {file_name} has been inserted into measure_indicator")
 
 print("All files processed successfully.")
