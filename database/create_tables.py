@@ -1,6 +1,6 @@
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey, Index)
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 import pandas as pd
 
 # Database connection string
