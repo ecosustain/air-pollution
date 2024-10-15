@@ -2,9 +2,13 @@ from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTim
                         text, String, Boolean, ForeignKey, Index)
 from sqlalchemy.orm import declarative_base
 import pandas as pd
+import sys, os
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from scrapper.credentials import login_mysql, password_mysql
 
 # Database connection string
-DATABASE_URL = "mysql+pymysql://root:root@localhost"
+DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost"
 
 # Create an engine
 engine = create_engine(DATABASE_URL)

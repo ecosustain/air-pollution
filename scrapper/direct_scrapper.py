@@ -4,7 +4,7 @@ TO-DO:
 '''
 
 import requests
-from credentials import login, password
+from credentials import login_qualar, password_qualar, login_mysql, password_mysql
 import os, sys
 import pandas as pd
 from datetime import datetime, timedelta
@@ -17,8 +17,8 @@ from metadata.meta_data import stations, indicators
 def login_qualar():
     url = 'https://qualar.cetesb.sp.gov.br/qualar/autenticador'
     payload = {
-        'cetesb_login': login,
-        'cetesb_password': password,
+        'cetesb_login': login_qualar,
+        'cetesb_password': password_qualar,
         'enviar': 'OK'
     }
     response = requests.post(url, data=payload)
@@ -153,7 +153,8 @@ def adjust_columns_and_data(df, station, indicator):
     return df.dropna(), df_to_update_csv.dropna()
 
 def update_database(data, station, indicator):
-    db_connection = create_engine('mysql+pymysql://root:root@localhost/poluicao')
+    db_url = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao"
+    db_connection = create_engine(db_url)
     with tempfile.TemporaryDirectory() as temp_dir:
         file_path = os.path.join(temp_dir, "temp_file.csv")
         with open(file_path, "w") as file:

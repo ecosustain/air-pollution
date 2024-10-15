@@ -1,2 +1,5 @@
-login = "insira seu email da cetesb aqui"
-password = "insira sua senha da cetesb aqui"
+login_qualar = ""
+password_qualar = ""
+
+login_mysql = ""
+password_mysql = ""

@@ -3,9 +3,13 @@ import pandas as pd
 from sqlalchemy import create_engine
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from metadata.meta_data import stations, indicators
+from scrapper.credentials import login_mysql, password_mysql
+
+# Database connection string
+DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao"
 
 # MySQL connection setup (change username and password)
-db_connection = create_engine('mysql+pymysql://root:root@localhost/poluicao')
+db_connection = create_engine(DATABASE_URL)
 
 # Directory containing the CSV files
 csv_dir = './data/scraped_data'
