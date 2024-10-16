@@ -1,9 +1,10 @@
 import os, sys
 import pandas as pd
 from sqlalchemy import create_engine
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from backend.data.utils.credentials import login_mysql, password_mysql
 from metadata.meta_data import stations, indicators
-from scrapper.credentials import login_mysql, password_mysql
 
 # Database connection string
 DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao"
@@ -12,7 +13,7 @@ DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluic
 db_connection = create_engine(DATABASE_URL)
 
 # Directory containing the CSV files
-csv_dir = './data/scraped_data'
+csv_dir = '../scraped_data'
 
 # Function to determine table name (assuming CSV name matches table name, adjust if necessary)
 def get_table_name(file_name):
@@ -97,7 +98,6 @@ for file_name in os.listdir(csv_dir):
 
         # Store the data into the MySQL table
         station_indicators_df = pd.DataFrame(dict_station_indicators)
-        #print(station_indicators_df)
         station_indicators_df.to_sql('station_indicators', con=db_connection, if_exists='append', index=False)
         
         print(f"Data from {file_name} has been inserted into measure_indicator")

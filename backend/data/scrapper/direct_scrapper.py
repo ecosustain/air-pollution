@@ -1,8 +1,7 @@
 import os, sys
 
-from utils import get_session_id, get_request_response
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from backend.data.utils.utils import get_session_id, get_request_response
 from metadata.meta_data import stations, indicators
 
 def get_data(session_id, interval_years=(2000, 2024), interval_size=1):
@@ -18,7 +17,7 @@ def get_data(session_id, interval_years=(2000, 2024), interval_size=1):
                     print(f"Succesfully saved: {station} - {indicator} - {year - interval_size}:{year}")
 
 def save_csv_file(data, station_name, indicator_name, start_year, end_year):
-    directory = "./data/scraped_data"
+    directory = "../scraped_data"
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_path = f"{directory}/{station_name}_{indicator_name}_{start_year}_{end_year}.csv"

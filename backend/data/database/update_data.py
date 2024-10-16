@@ -4,11 +4,11 @@ import tempfile
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 
-from utils import ddmmyyyyhhmm_yyyymmddhhmm, string_to_float, get_request_response, get_session_id
-from credentials import login_mysql, password_mysql
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from backend.data.utils.credentials import login_mysql, password_mysql
 from metadata.meta_data import stations, indicators
+from backend.data.utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
+                                      get_request_response, get_session_id)
 
 def update_data(session_id, data_directory="./data/scraped_data"):
     for file in os.listdir(data_directory):

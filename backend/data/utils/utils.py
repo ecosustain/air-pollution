@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-from credentials import login_qualar, password_qualar
+from backend.data.utils.credentials import login_qualar, password_qualar
 
 def get_session_id():
     cookies = access_qualar()

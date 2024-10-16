@@ -1,11 +1,10 @@
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey, Index)
 from sqlalchemy.orm import declarative_base
-import pandas as pd
 import sys, os
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scrapper.credentials import login_mysql, password_mysql
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from backend.data.utils.credentials import login_mysql, password_mysql
 
 # Database connection string
 DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost"

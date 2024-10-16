@@ -1,18 +1,19 @@
 import os, sys
 import pandas as pd
-from utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from metadata.meta_data import stations
 from datetime import timedelta
 
-def join_files(path="./data/scraped_data", verbose=True):
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from backend.data.utils.utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
+from metadata.meta_data import stations
+
+def join_files(path="../scraped_data", verbose=True):
     files = os.listdir(path)
     for station in stations:
         station_indicators = {}
         for file in files:
             if file.split("_")[0] == station:
                 indicator = file.split("_")[1].lower()
-                df = pd.read_csv(f"./data/scraped_data/{file}",
+                df = pd.read_csv(f"{path}/{file}",
                                  sep=";", skiprows=7, encoding="latin1")
                 df.columns = ["date", "time", indicator.lower()]
                 df['datetime'] = df['date'].values + " " + df['time'].values
@@ -31,13 +32,14 @@ def join_files(path="./data/scraped_data", verbose=True):
                     station_indicators[indicator] = pd.concat([current_indicator_df, df])
                 else:
                     station_indicators[indicator] = df
+                os.remove(f"{path}/{file}")
 
         station_df = generate_date_range_df()
 
         for indicator in station_indicators:
             station_df = pd.merge(station_df, station_indicators[indicator], on="datetime", how="left").drop_duplicates()
 
-        station_df.to_csv(f"./scrapper/stations_data/{station}.csv", index=False)
+        station_df.to_csv(f"{path}/{station}.csv", index=False)
 
-
-join_files()
+if __name__ == "__main__":
+    join_files()
