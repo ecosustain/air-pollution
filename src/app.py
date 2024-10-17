@@ -67,21 +67,16 @@ def fake_login():
     
 @app.route('/heat_map')
 def heat_map():
-    # if request.method == 'GET':
-    #     response = make_response()
-    #     measure_indicators = HeatMapController(SESSION).get_heat_map(date="") 
-    #     response = jsonify(data=measure_indicators)
-
     session = SESSION
-    print("Vo tenta")
-    indicators = session.query(MeasureIndicator).limit(5).all()
-    print("Passei")
-    result = [{"idStation": indicator.idStation, "name": indicator.value} for indicator in indicators]
+
+    payload = request.get_json()
+
+    measure_indicators = HeatMapController(session=session).get_heat_map(payload=payload)
     session.close()
+    
+    result = [{"idStation": indicator.idStation, "name": indicator.value} for indicator in measure_indicators]
+
     return jsonify(result), 200
-
-    return response
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0',
