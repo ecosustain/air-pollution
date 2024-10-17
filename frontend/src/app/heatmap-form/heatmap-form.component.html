@@ -1,0 +1,39 @@
+<form [formGroup]="mapaDeCalorForm" (ngSubmit)="onSubmit()">
+    <label for="indicator">Indicator</label>
+    <select formControlName="indicator" id="indicator">
+      <option value="">Select an indicator</option>
+      <option value="Indicator1">Indicator 1</option>
+      <option value="Indicator2">Indicator 2</option>
+    </select>
+  
+    <label for="timePeriod">Time Period</label>
+    <select formControlName="timePeriod" (change)="onTimePeriodChange($event)">
+      <option value="">Select time period</option>
+      <option value="Anual">Anual</option>
+      <option value="Mensal">Mensal</option>
+      <option value="Horária">Horária</option>
+    </select>
+  
+    <div *ngIf="timePeriodType === 'Anual'">
+      <label for="startYear">Start Year</label>
+      <input type="number" formControlName="startYear" id="startYear" />
+      
+      <label for="endYear">End Year</label>
+      <input type="number" formControlName="endYear" id="endYear" />
+    </div>
+  
+    <div *ngIf="timePeriodType === 'Mensal'">
+      <label for="year">Year</label>
+      <input type="number" formControlName="year" id="year" />
+    </div>
+  
+    <div *ngIf="timePeriodType === 'Horária'">
+      <label>Specific Date</label>
+      <input type="number" formControlName="specificDate.day" placeholder="Day" />
+      <input type="number" formControlName="specificDate.month" placeholder="Month" />
+      <input type="number" formControlName="specificDate.year" placeholder="Year" />
+    </div>
+  
+    <button type="submit">Confirmar</button>
+  </form>
+  
