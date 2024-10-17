@@ -10,7 +10,7 @@ from metadata.meta_data import stations, indicators
 from backend.data.utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
                                       get_request_response, get_session_id)
 
-def update_data(session_id, data_directory="./data/collected_csvs"):
+def update_data(session_id, data_directory="./backend/data/collected_csvs"):
     for file in os.listdir(data_directory):
         dfs_to_update_csv = {}
         df = get_df_from_csv(data_directory, file)
@@ -32,7 +32,7 @@ def update_database(data, station, indicator):
     db_connection = create_engine(db_url)
     with tempfile.TemporaryDirectory() as temp_dir:
         file_path = os.path.join(temp_dir, "temp_file.csv")
-        with open(file_path, "w") as file:
+        with open(file_path, "w+") as file:
             file.write(data)
             df_to_update_csv = update_measure_indicator_table(file_path, station, indicator,
                                                               db_connection)

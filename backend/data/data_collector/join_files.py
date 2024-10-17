@@ -6,7 +6,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 from backend.data.utils.utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
 from metadata.meta_data import stations
 
-def join_files(path="../collected_csvs"):
+def join_files(path="./backend/data/collected_csvs"):
     files = os.listdir(path)
     for station in stations:
         station_indicators = {}
@@ -26,7 +26,8 @@ def join_files(path="../collected_csvs"):
         station_df = generate_date_range_df()
         for indicator in station_indicators:
             station_df = pd.merge(station_df, station_indicators[indicator], on="datetime", how="left").drop_duplicates()
-        station_df.to_csv(f"{path}/{station}.csv", index=False)
+        if station_indicators:
+            station_df.to_csv(f"{path}/{station}.csv", index=False)
 
 def get_indicator_and_df(path, file):
     indicator = file.split("_")[1].lower()

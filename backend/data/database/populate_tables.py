@@ -7,7 +7,7 @@ from backend.data.utils.credentials import login_mysql, password_mysql
 from metadata.meta_data import stations, indicators
 
 def populate_tables():
-    CSV_DIRECTORY = '../collected_csvs'
+    CSV_DIRECTORY = './backend/data/collected_csvs'
     db_connection = create_engine(f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao")
     insert_stations_data(db_connection)
     insert_indicators_data(db_connection)
@@ -54,8 +54,8 @@ def insert_data_from_station(file_path, station_name, db_connection):
         if col != 'datetime':
             station_indicators = append_to_station_indicators_dict(station_indicators, station_name, col)
             if append_to_measure_indicator_table(df, station_name, col, db_connection):
-                print(f"Data from {file_path} has been inserted into measure_indicator")
-    append_to_station_indicators_table(station_indicators)
+                print(f"{file_path} - {col} inserted into measure_indicator")
+    append_to_station_indicators_table(station_indicators, db_connection)
 
 def append_to_station_indicators_dict(station_indicators, station_name, column):
     station_indicators['idStation'].append(stations[station_name][0])
