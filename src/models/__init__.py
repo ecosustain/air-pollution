@@ -1,6 +1,4 @@
-from models.indicator import Indicators
-from models.station import Stations
-from models.measure_indicator import MeasureIndicators
-from models.station_indicator import StationIndicators
-
-__all__ = ["Station", "Indicator", "MeasureIndicator", "StationIndicator"]
+from models.stations import Stations
+from models.indicators import Indicators
+from models.station_indicators import StationIndicators
+from models.measure_indicator import MeasureIndicator

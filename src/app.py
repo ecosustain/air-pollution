@@ -11,9 +11,9 @@ from controllers import (
 
 from models import (
     Indicators,
-    MeasureIndicators,
     Stations,
     StationIndicators,
+    MeasureIndicator,
 )
 
 from sqlalchemy import create_engine
@@ -22,13 +22,8 @@ from sqlalchemy.orm import sessionmaker
 DATABASE_URI = 'mysql+pymysql://root:root@localhost/poluicao'
 engine = create_engine(DATABASE_URI)
 
-from sqlalchemy.ext.declarative import declarative_base
-Base = declarative_base()
-Base.metadata.create_all(engine)
-
 Session = sessionmaker(bind=engine)
 SESSION = Session()
-
 
 app = Flask(__name__)
 
@@ -78,8 +73,10 @@ def heat_map():
     #     response = jsonify(data=measure_indicators)
 
     session = SESSION
-    indicators = session.query(Indicators).all()
-    result = [{"id": indicator.id, "name": indicator.name} for indicator in indicators]
+    print("Vo tenta")
+    indicators = session.query(MeasureIndicator).limit(5).all()
+    print("Passei")
+    result = [{"idStation": indicator.idStation, "name": indicator.value} for indicator in indicators]
     session.close()
     return jsonify(result), 200
 

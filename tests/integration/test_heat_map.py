@@ -18,4 +18,4 @@ class TestRequest:
         )
 
         assert response.status_code == 200
-        assert "id" in response.json()[0] 
+        assert "idStation" in response.json()[0] 
