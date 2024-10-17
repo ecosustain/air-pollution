@@ -6,100 +6,87 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../.
 from backend.data.utils.credentials import login_mysql, password_mysql
 from metadata.meta_data import stations, indicators
 
-# Database connection string
-DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao"
+def populate_tables():
+    CSV_DIRECTORY = '../collected_csvs'
+    db_connection = create_engine(f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao")
+    insert_stations_data(db_connection)
+    insert_indicators_data(db_connection)
+    for file_name in os.listdir(CSV_DIRECTORY):
+        if file_name.endswith('.csv'):
+            file_path = os.path.join(CSV_DIRECTORY, file_name)
+            station_name = file_name.replace(".csv", "")
+            insert_data_from_station(file_path, station_name, db_connection)
+    print("All files processed successfully.")
 
-# MySQL connection setup (change username and password)
-db_connection = create_engine(DATABASE_URL)
+def insert_stations_data(db_connection):
+    stations_data = {
+        "id": [stations[station][0] for station in stations],
+        "name": [station for station in stations],
+        "latitude": [stations[station][1] for station in stations],
+        "longitude": [stations[station][2] for station in stations],
+        "description": ["" for _ in stations]  # Placeholder for description
+    }
+    stations_df = pd.DataFrame(stations_data)
+    stations_df.to_sql('stations', con=db_connection, if_exists='append', index=False)
 
-# Directory containing the CSV files
-csv_dir = '../scraped_data'
+def insert_indicators_data(db_connection):
+    indicator_data = {
+        "id": [indicators[indicator] for indicator in indicators],
+        "name": [indicator.lower() for indicator in indicators],
+        "description": ["" for _ in indicators],  # Placeholder for description
+        "measure_unit": ["" for _ in indicators],  # Placeholder for measure unit
+        "is_pollutant": [True for _ in indicators]  # Assume all are pollutants
+    }
+    indicators_df = pd.DataFrame(indicator_data)
+    indicators_df.to_sql('indicators', con=db_connection, if_exists='append', index=False)
 
-# Function to determine table name (assuming CSV name matches table name, adjust if necessary)
-def get_table_name(file_name):
-    table_name = file_name.replace(".csv", "")
-    return table_name
+def insert_data_from_station(file_path, station_name, db_connection):
+    df = pd.read_csv(file_path)
+    df['datetime'] = df['datetime'].apply(adjust_time_string)
+    df['datetime'] = pd.to_datetime(df['datetime']).dt.strftime('%Y-%m-%d %H:%M')
 
-def adjust_time(dt_str):
-    if '24:00' in dt_str:
-        date_part = dt_str.split(' ')[0]
+    station_indicators = {
+        "idStation": [],
+        "idIndicator": [],
+        "description": [],
+    }
+    for col in df.columns:
+        if col != 'datetime':
+            station_indicators = append_to_station_indicators_dict(station_indicators, station_name, col)
+            if append_to_measure_indicator_table(df, station_name, col, db_connection):
+                print(f"Data from {file_path} has been inserted into measure_indicator")
+    append_to_station_indicators_table(station_indicators)
+
+def append_to_station_indicators_dict(station_indicators, station_name, column):
+    station_indicators['idStation'].append(stations[station_name][0])
+    station_indicators['idIndicator'].append(indicators[column.upper()])
+    station_indicators['description'].append("")
+    return station_indicators
+
+def append_to_measure_indicator_table(df, station_name, column, db_connection):
+    df_indicator = df[['datetime', column]].copy()
+    df_indicator['idStation'] = stations[station_name][0]
+    df_indicator['idIndicator'] = indicators[column.upper()]
+    df_indicator.rename(columns={column: 'value'}, inplace=True)
+    df_indicator = df_indicator.dropna()
+    try:
+        df_indicator.to_sql('measure_indicator', con=db_connection, if_exists='append',
+                            index=False, chunksize=1000)
+        return True
+    except:
+        return False
+
+def append_to_station_indicators_table(station_indicators, db_connection):
+    station_indicators_df = pd.DataFrame(station_indicators)
+    station_indicators_df.to_sql('station_indicators', con=db_connection, if_exists='append', index=False)
+
+def adjust_time_string(datetime_str):
+    """Adjust '24:00' to '00:00' of the next day in datetime strings."""
+    if '24:00' in datetime_str:
+        date_part = datetime_str.split(' ')[0]
         new_date = pd.to_datetime(date_part) + pd.DateOffset(days=1)
         return new_date.strftime('%Y/%m/%d') + ' 00:00'
-    return dt_str
+    return datetime_str
 
-dict_aux = {
-    "id": [],
-    "name": [],
-    "longitude": [],
-    "latitude": [],
-    "description": [],
-}
-
-for station in stations:
-    dict_aux["id"].append(stations[station][0])
-    dict_aux["name"].append(station)
-    dict_aux["latitude"].append(stations[station][1])
-    dict_aux["longitude"].append(stations[station][2])
-    dict_aux["description"].append("")
-
-stations_df = pd.DataFrame(dict_aux)
-stations_df.to_sql('stations', con=db_connection, if_exists='append', index=False)    
-
-dict_aux = {
-    "id": [],
-    "name": [],
-    "description": [],
-    "measure_unit": [],
-    "is_pollutant": [],
-}
-
-for indicator in indicators:
-    dict_aux["id"].append(indicators[indicator])
-    dict_aux["name"].append(str(indicator).lower())
-    dict_aux["description"].append("")
-    dict_aux["measure_unit"].append("")
-    dict_aux["is_pollutant"].append(True)
-
-indicators_df = pd.DataFrame(dict_aux)
-indicators_df.to_sql('indicators', con=db_connection, if_exists='append', index=False)  
-
-#station_indicators_df = pd.DataFrame(dict_aux) 
-# Loop through all CSV files in the directory
-for file_name in os.listdir(csv_dir):
-    if file_name.endswith('.csv'):  # Process only CSV files
-        file_path = os.path.join(csv_dir, file_name)
-        
-        # Read the CSV file
-        df = pd.read_csv(file_path)
-        df['datetime'] = df['datetime'].apply(adjust_time)
-        df['datetime'] = pd.to_datetime(df['datetime']).dt.strftime('%Y-%m-%d %H:%M')
-        
-        dict_station_indicators = {
-            "idStation": [],
-            "idIndicator": [],
-            "description": [],
-        }
-
-        # Get the corresponding table name
-        table_name = get_table_name(file_name)
-        for col in df.columns:
-            if col != 'datetime':
-                dict_station_indicators['description'].append("")
-                dict_station_indicators['idStation'].append(stations[table_name][0])
-                dict_station_indicators['idIndicator'].append(indicators[str(col).upper()])
-
-
-                df_aux = df[['datetime', col]].copy()
-                df_aux['idStation'] = stations[table_name][0]
-                df_aux['idIndicator'] = indicators[str(col).upper()]
-                df_aux.rename(columns={col : 'value'}, inplace=True)
-                df_aux = df_aux.dropna()
-                df_aux.to_sql('measure_indicator', con=db_connection, if_exists='append', index=False, chunksize=1000)
-
-        # Store the data into the MySQL table
-        station_indicators_df = pd.DataFrame(dict_station_indicators)
-        station_indicators_df.to_sql('station_indicators', con=db_connection, if_exists='append', index=False)
-        
-        print(f"Data from {file_name} has been inserted into measure_indicator")
-
-print("All files processed successfully.")
+if __name__ == "__main__":
+    populate_tables()

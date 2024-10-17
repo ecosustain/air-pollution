@@ -17,7 +17,7 @@ def get_data(session_id, interval_years=(2000, 2024), interval_size=1):
                     print(f"Succesfully saved: {station} - {indicator} - {year - interval_size}:{year}")
 
 def save_csv_file(data, station_name, indicator_name, start_year, end_year):
-    directory = "../scraped_data"
+    directory = "../collected_csvs"
     if not os.path.exists(directory):
         os.makedirs(directory)
     file_path = f"{directory}/{station_name}_{indicator_name}_{start_year}_{end_year}.csv"
