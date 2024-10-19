@@ -6,7 +6,8 @@ from flask import (
 )
 
 from controllers import (
-    HeatMapController
+    HeatMapController,
+    UpdateController,
 )
 
 from sqlalchemy import create_engine
@@ -27,6 +28,18 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return "<h1>MAC 0476<h1/>"
+
+@app.route('/update_data', methods=['PUT'])
+def update_data():
+    response = make_response()
+
+    if request.method == 'PUT':
+        response = UpdateController().update_data()
+        
+        response = jsonify(response)
+        response.status = 200
+    
+    return response
     
 @app.route('/heat_map', methods=['GET'])
 def heat_map():
