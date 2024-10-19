@@ -1,5 +1,5 @@
-login_qualar = ""
-password_qualar = ""
+LOGIN_QUALAR = ""
+PASSWORD_QUALAR = ""
 
-login_mysql = ""
-password_mysql = ""
+LOGIN_MYSQL = ""
+PASSWORD_MYSQL = ""
