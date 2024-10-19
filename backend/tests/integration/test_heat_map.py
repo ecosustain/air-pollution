@@ -13,12 +13,15 @@ class TestRequest:
         endpoint = f"/heat_map"
         method = "GET"
 
-        initial_date = datetime(2023, 10, 9, 17, 10)
-        final_date = datetime(2023, 10, 9, 18, 10)
+        initial_date = datetime(2023, 3, 1, 12, 10)
+        final_date = datetime(2023, 3, 1, 13, 10)
+
+        indicator = "MP2.5"
 
         payload = {
             "initial_date": initial_date.strftime('%Y-%m-%d %H:%M:%S'),
-            "final_date": final_date.strftime('%Y-%m-%d %H:%M:%S')
+            "final_date": final_date.strftime('%Y-%m-%d %H:%M:%S'),
+            "indicator": indicator,
         }
 
         url = f"{BASE_URL}{endpoint}"
