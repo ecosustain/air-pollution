@@ -1,8 +1,10 @@
 from requests import request
+import sys, os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from constants_test import (
     BASE_URL,
-    HEADERS
+    HEADERS,
 )
 
 class TestRequest:

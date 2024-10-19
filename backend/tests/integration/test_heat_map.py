@@ -1,11 +1,12 @@
 from requests import request
+from datetime import datetime
+import sys, os
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from constants_test import (
     BASE_URL,
     HEADERS,
 )
-
-from datetime import datetime
 
 class TestRequest:
     def test_get_map(self):
