@@ -47,24 +47,15 @@ def check_valid_dates(start_date, end_date):
 def string_to_float(value):
     return str(value).replace(",", ".")
 
-def mapper(value):
-    date, hour = str(value).split(" ")
-    if hour == "00:00":
-        hour = "24:00"
-
-    year, month, day = date.split("/")
-    return year + "/" + month + "/" + day + " " + hour
-
 def ddmmyyyyhhmm_yyyymmddhhmm(value):
     date, hour = str(value).split(" ")
     day, month, year = date.split("/")
     return year + "/" + month + "/" + day + " " + hour
 
-def generate_date_range_df():
-    date_range_hourly = pd.date_range(start='2000-01-01 00:00', end='2024-12-31 23:00', freq='H')
+def generate_date_range_df(maximum_date):
+    date_range_hourly = pd.date_range(start='2000-01-01 00:00',
+                                      end=maximum_date.strftime('%Y/%m/%d %H:%M'), freq='H')
     df_hourly = pd.DataFrame(date_range_hourly, columns=['datetime'])
-    df_hourly['datetime'] = df_hourly['datetime'].dt.strftime('%Y/%m/%d %H:00')
-    df_hourly['datetime'] = df_hourly['datetime'].astype(str)
-    df_hourly['datetime'] = df_hourly['datetime'].map(mapper)
+    df_hourly['datetime'] = pd.to_datetime(df_hourly['datetime'])
     df_hourly.sort_values(by="datetime", ascending=True, inplace=True)
     return df_hourly

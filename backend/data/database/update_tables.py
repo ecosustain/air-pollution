@@ -12,6 +12,7 @@ from backend.data.utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
 
 def update_data(session_id, data_directory="./backend/data/collected_csvs"):
     for file in os.listdir(data_directory):
+        print(f"Updating: {file}")
         dfs_to_update_csv = {}
         df = get_df_from_csv(data_directory, file)
         if df is None:
@@ -30,13 +31,12 @@ def update_data(session_id, data_directory="./backend/data/collected_csvs"):
 def update_database(data, station, indicator):
     db_url = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao"
     db_connection = create_engine(db_url)
-    with tempfile.TemporaryDirectory() as temp_dir:
-        file_path = os.path.join(temp_dir, "temp_file.csv")
-        with open(file_path, "w+") as file:
-            file.write(data)
-            df_to_update_csv = update_measure_indicator_table(file_path, station, indicator,
-                                                              db_connection)
-            update_station_indicators_table(station, indicator, db_connection)
+    with tempfile.NamedTemporaryFile(mode='w+', delete=True) as file:
+        file.write(data)
+        file.flush()
+        df_to_update_csv = update_measure_indicator_table(file.name, station, indicator,
+                                                            db_connection)
+        update_station_indicators_table(station, indicator, db_connection)
     return df_to_update_csv
 
 def get_dates_to_update(df):

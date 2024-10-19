@@ -8,6 +8,7 @@ def get_data(session_id, interval_years=(2000, 2024), interval_size=1):
     for station in stations:
         for indicator in indicators:
             for year in range(interval_years[1], interval_years[0], -interval_size):
+                print(f"Collecting data: {station} - {indicator} - {year - interval_size}:{year}")
                 start_date = f"01/01/{year - interval_size}"
                 end_date = f"01/01/{year}"
                 response_text = get_request_response(session_id, start_date, end_date,

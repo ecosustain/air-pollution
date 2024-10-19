@@ -22,12 +22,18 @@ def join_files(path="./backend/data/collected_csvs"):
             else:
                 station_indicators[indicator] = df
             os.remove(f"{path}/{file}")
-
-        station_df = generate_date_range_df()
-        for indicator in station_indicators:
-            station_df = pd.merge(station_df, station_indicators[indicator], on="datetime", how="left").drop_duplicates()
         if station_indicators:
+            max_date = get_maximum_date(station_indicators)
+            station_df = generate_date_range_df(max_date)
+            for indicator_df in station_indicators.values():
+                station_df = pd.merge(station_df, indicator_df,
+                                      on="datetime", how="left").drop_duplicates()
             station_df.to_csv(f"{path}/{station}.csv", index=False)
+
+def get_maximum_date(station_indicators):
+    max_dates = [df['datetime'].max() for df in station_indicators.values()]
+    overall_max_date = max(max_dates)
+    return overall_max_date
 
 def get_indicator_and_df(path, file):
     indicator = file.split("_")[1].lower()
@@ -42,9 +48,12 @@ def create_datetime_column(df, indicator):
     return df
 
 def adjust_incorrect_rows(df, indicator):
-    mask = df['datetime'].dt.strftime('%H:%M') == '24:00' # Identify rows where time is 24:00
-    df.loc[mask, 'datetime'] = df.loc[mask, 'datetime'] + timedelta(days=1)
-    df.loc[mask, 'datetime'] = df.loc[mask, 'datetime'].dt.replace(hour=0, minute=0)
+    df = df.rename(columns={'datetime': 'original_datetime'})
+    df['datetime'] = pd.to_datetime(df['original_datetime'], format='%Y/%m/%d %H:%M', errors='coerce')
+    mask = df['datetime'].isna() & df['original_datetime'].str.endswith('24:00')
+    df.loc[mask, 'datetime'] = pd.to_datetime(df.loc[mask, 'original_datetime'].str.replace('24:00', '00:00')) \
+                                + timedelta(days=1)
+    df.drop(['original_datetime'], axis=1, inplace=True)
     df[indicator.lower()] = df[indicator.lower()].map(string_to_float)
     df.drop_duplicates(inplace=True)
     df.dropna(inplace=True)
