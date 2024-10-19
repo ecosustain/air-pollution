@@ -27,11 +27,11 @@
       <input type="number" formControlName="year" id="year" />
     </div>
   
-    <div *ngIf="timePeriodType === 'Horária'">
+    <div *ngIf="timePeriodType === 'Horária'" formGroupName="specificDate">
       <label>Specific Date</label>
-      <input type="number" formControlName="specificDate.day" placeholder="Day" />
-      <input type="number" formControlName="specificDate.month" placeholder="Month" />
-      <input type="number" formControlName="specificDate.year" placeholder="Year" />
+      <input type="number" formControlName="day" placeholder="Day" />
+      <input type="number" formControlName="month" placeholder="Month" />
+      <input type="number" formControlName="year" placeholder="Year" />
     </div>
   
     <button type="submit">Confirmar</button>
