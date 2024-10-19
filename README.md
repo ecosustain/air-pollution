@@ -1,6 +1,16 @@
 # poluicao-ar-rmsp
 
+# Dependencies
+- Python
+- Mysql 
 
+# Installation
+- pip install -r requirements.txt
+
+# Usage
+- sudo systemctl start mysql
+- python3 create_tables.py (on /database directory)
+- python3 populate_tables.py (on /database directory)
 
 ## Getting started
 
