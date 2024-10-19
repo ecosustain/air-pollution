@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
-from metadata.meta_data import stations, indicators
+from metadata.meta_data import STATIONS, INDICATORS
 from backend.data.utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
                                       get_request_response, get_session_id)
 
@@ -25,9 +25,9 @@ class UpdateData:
                 continue
             start_date, end_date = self.get_dates_to_update(df)
             station = file[:-4]
-            for indicator in indicators:
+            for indicator in INDICATORS:
                 response_text = get_request_response(session_id, start_date, end_date,
-                                                        stations[station][0], indicators[indicator])
+                                                        STATIONS[station][0], INDICATORS[indicator])
                 if response_text is not None:
                     df_to_update_csv = self.update_database(response_text, station, indicator)
                     print(f"Successful database update: {station} - {indicator} - up to {end_date}")
@@ -76,8 +76,8 @@ class UpdateData:
         return df_to_update_csv
 
     def update_station_indicators_table(self, station, indicator, db_connection):
-        id_station = stations[station][0]
-        id_indicator = indicators[indicator]
+        id_station = STATIONS[station][0]
+        id_indicator = INDICATORS[indicator]
         with db_connection.connect() as connection:
             try:
                 exists_query = text("""
@@ -111,8 +111,8 @@ class UpdateData:
         df.columns = ["date", "time", "value"]
         df = self.adjust_datetime_column(df)
         df["value"] = df["value"].map(string_to_float)
-        df['idStation'] = stations[station][0]
-        df['idIndicator'] = indicators[indicator]
+        df['idStation'] = STATIONS[station][0]
+        df['idIndicator'] = INDICATORS[indicator]
         df.drop_duplicates(inplace=True)
         df = df[df['value'].notnull()]
         df['value'] = df['value'].astype(float)

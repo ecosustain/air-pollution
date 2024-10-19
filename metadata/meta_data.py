@@ -2,7 +2,7 @@
 # and add the measure unit string.
 # After that, change the populate_tables.py file.
 
-indicators = {
+INDICATORS = {
     "BEN": 61,
     "CO": 16,
     "DV": 23,
@@ -26,7 +26,7 @@ indicators = {
 
 # Please, add the description and change the populate_tables.py file
 
-stations = {
+STATIONS = {
     "Cambuci": (90, -23.566208579985688, -46.612390087515855),
     "CapaoRedondo": (269, -23.666256213135124, -46.77757667402106),
     "Carapicuiba": (263, -23.530099662416678, -46.835509169711806),
