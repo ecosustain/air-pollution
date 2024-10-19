@@ -47,11 +47,10 @@ def heat_map():
     response = make_response()
 
     if request.method == 'GET':
-        measure_indicators = HeatMapController(session=SESSION).get_heat_map(payload=payload)
+        heat_map = HeatMapController(session=SESSION).get_heat_map(payload=payload)
         SESSION.close()
         
-        result = [{"idStation": indicator.idStation, "name": indicator.value} for indicator in measure_indicators]
-        response = jsonify(result)
+        response = jsonify({"heat_map": heat_map})
         response.status = 200
 
     return response

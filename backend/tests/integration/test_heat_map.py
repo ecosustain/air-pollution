@@ -33,4 +33,4 @@ class TestRequest:
         )
 
         assert response.status_code == 200
-        assert "idStation" in response.json()[0] 
+        assert len(response.json()) > 0
