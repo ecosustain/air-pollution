@@ -2,7 +2,7 @@ import pandas as pd
 import requests
 from datetime import datetime
 
-from backend.data.utils.credentials import login_qualar, password_qualar
+from backend.data.utils.credentials import LOGIN_QUALAR, PASSWORD_QUALAR
 
 def get_session_id():
     cookies = access_qualar()
@@ -14,8 +14,8 @@ def get_session_id():
 def access_qualar():
     url = 'https://qualar.cetesb.sp.gov.br/qualar/autenticador'
     payload = {
-        'cetesb_login': login_qualar,
-        'cetesb_password': password_qualar,
+        'cetesb_login': LOGIN_QUALAR,
+        'cetesb_password': PASSWORD_QUALAR,
         'enviar': 'OK'
     }
     response = requests.post(url, data=payload)

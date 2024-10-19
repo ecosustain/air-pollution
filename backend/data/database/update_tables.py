@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from backend.data.utils.credentials import login_mysql, password_mysql
+from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from metadata.meta_data import stations, indicators
 from backend.data.utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
                                       get_request_response, get_session_id)
@@ -29,7 +29,7 @@ def update_data(session_id, data_directory="./backend/data/collected_csvs"):
         update_csv_file(df, dfs_to_update_csv, data_directory, file)
 
 def update_database(data, station, indicator):
-    db_url = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao"
+    db_url = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao"
     db_connection = create_engine(db_url)
     with tempfile.NamedTemporaryFile(mode='w+', delete=True) as file:
         file.write(data)

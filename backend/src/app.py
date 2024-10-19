@@ -14,9 +14,9 @@ from sqlalchemy.orm import sessionmaker
 import sys, os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from backend.data.utils.credentials import login_mysql, password_mysql
+from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
-DATABASE_URI = f'mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao'
+DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao'
 engine = create_engine(DATABASE_URI)
 
 Session = sessionmaker(bind=engine)
