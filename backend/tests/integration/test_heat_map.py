@@ -18,7 +18,14 @@ class TestRequest:
 
         indicator = "MP2.5"
 
-        interpolator = "KrigingInterpolator"
+        PARAM_DICT = {
+            "method": ["ordinary", "universal"],
+            "variogram_model": ["linear", "power", "gaussian", "spherical"],
+            "nlags": [4, 6, 8],
+            "weight": [True, False]
+        }
+
+        interpolator = ("KrigingInterpolator", PARAM_DICT)
 
         payload = {
             "initial_date": initial_date.strftime('%Y-%m-%d %H:%M:%S'),

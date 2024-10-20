@@ -33,7 +33,7 @@ class HeatMapController:
         initial_date_str = payload["initial_date"]
         final_date_str = payload["final_date"]
         indicator = payload["indicator"]
-        interpolator = payload["interpolator"]
+        interpolator, param = payload["interpolator"]
 
         initial_date = datetime.strptime(initial_date_str, '%Y-%m-%d %H:%M:%S')
         final_date = datetime.strptime(final_date_str, '%Y-%m-%d %H:%M:%S')
@@ -50,7 +50,7 @@ class HeatMapController:
                                                              measure_indicators=measure_indicators)
 
 
-        interpolator = self.interpolators[interpolator](data=interpolator_input)
+        interpolator = self.interpolators[interpolator](interpolator_input, param)
 
         y = interpolator.predict(X=area_discretization)
         response = [tuple([a,b]) for a,b in zip(area_discretization,y)]

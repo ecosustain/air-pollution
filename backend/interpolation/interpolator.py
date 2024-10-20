@@ -10,13 +10,6 @@ import itertools
 import sys 
 import os
 
-PARAM_DICT = {
-    "method": ["ordinary", "universal"],
-    "variogram_model": ["linear", "power", "gaussian", "spherical"],
-    "nlags": [4, 6, 8],
-    "weight": [True, False]
-    }
-
 class Interpolator():
     def __init__(self, data, verbose=False):
         self.P = pyproj.Proj(proj='utm', zone=23, south=True, ellps='WGS84') # Projeção para a zona de SP
@@ -43,7 +36,7 @@ class Interpolator():
         return self.interpolator.predict(_X)
     
 class KrigingInterpolator(Interpolator):
-    def __init__(self, data, param_dict=PARAM_DICT, verbose=False,):
+    def __init__(self, data, param_dict, verbose=False,):
         """
         data -> dict com pares "coord" : "medida"
         """
@@ -81,7 +74,7 @@ class KrigingInterpolator(Interpolator):
 
 
 class KNNInterpolator(Interpolator):
-    def __init__(self, data, verbose=False, k='auto'):
+    def __init__(self, data, k='auto', verbose=False):
         """
         data -> dict com pares "coord" : "medida"
         """
