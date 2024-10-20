@@ -8,14 +8,12 @@ class MeasureIndicatorRepository:
 
     def get_measure_indicators(
         self,
-        initial_date: datetime,
-        final_date: datetime,
+        date: datetime,
         indicator_id: int
     ) -> list[MeasureIndicator]:
         
         measure_indicators = (self.session.query(MeasureIndicator)
-                              .filter(MeasureIndicator.datetime >= initial_date)
-                              .filter(MeasureIndicator.datetime <= final_date)
+                              .filter(MeasureIndicator.datetime == date)
                               .filter(MeasureIndicator.idIndicator == indicator_id)
                               .all()
                               )
