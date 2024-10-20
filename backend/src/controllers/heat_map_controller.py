@@ -12,12 +12,19 @@ import math
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from metadata.meta_data import INDICATORS, STATIONS_ID
-from backend.interpolation.interpolator import KNNInterpolator
+from backend.interpolation.interpolator import (
+    KNNInterpolator,
+    KrigingInterpolator,
+)
 
 class HeatMapController:
     def __init__(self, session) -> None:
         self.measure_indicator_repository = MeasureIndicatorRepository(session)
         self.session = session
+        self.interpolators = {
+            "KNNInterpolator": KNNInterpolator,
+            "KrigingInterpolator": KrigingInterpolator,
+        }
 
     def get_heat_map(
         self,
@@ -26,6 +33,7 @@ class HeatMapController:
         initial_date_str = payload["initial_date"]
         final_date_str = payload["final_date"]
         indicator = payload["indicator"]
+        interpolator = payload["interpolator"]
 
         initial_date = datetime.strptime(initial_date_str, '%Y-%m-%d %H:%M:%S')
         final_date = datetime.strptime(final_date_str, '%Y-%m-%d %H:%M:%S')
@@ -42,7 +50,7 @@ class HeatMapController:
                                                              measure_indicators=measure_indicators)
 
 
-        interpolator = KNNInterpolator(data=interpolator_input)
+        interpolator = self.interpolators[interpolator](data=interpolator_input)
 
         y = interpolator.predict(X=area_discretization)
         response = [tuple([a,b]) for a,b in zip(area_discretization,y)]

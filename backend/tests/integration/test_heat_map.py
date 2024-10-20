@@ -18,10 +18,13 @@ class TestRequest:
 
         indicator = "MP2.5"
 
+        interpolator = "KrigingInterpolator"
+
         payload = {
             "initial_date": initial_date.strftime('%Y-%m-%d %H:%M:%S'),
             "final_date": final_date.strftime('%Y-%m-%d %H:%M:%S'),
             "indicator": indicator,
+            "interpolator": interpolator,
         }
 
         url = f"{BASE_URL}{endpoint}"
