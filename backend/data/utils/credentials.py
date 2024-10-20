@@ -1,0 +1,5 @@
+LOGIN_QUALAR = ""
+PASSWORD_QUALAR = ""
+
+LOGIN_MYSQL = "root"
+PASSWORD_MYSQL = "root"
