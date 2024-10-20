@@ -24,7 +24,10 @@ class TestRequest:
             "weight": [True, False]
         }
 
-        interpolator = ("KrigingInterpolator", PARAM_DICT)
+        interpolator = {
+            "method": "KrigingInterpolator",
+            "parameter": PARAM_DICT,
+        }
 
         payload = {
             "datetime": date.strftime('%Y-%m-%d %H:%M:%S'),
