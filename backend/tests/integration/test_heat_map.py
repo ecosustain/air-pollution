@@ -42,3 +42,8 @@ class TestRequest:
 
         assert response.status_code == 200
         assert len(response.json()) > 0
+
+        item = response.json()["heat_map"][0]
+        assert "lat" in item
+        assert "long" in item
+        assert "value" in item
