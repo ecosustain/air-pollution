@@ -1,18 +1,34 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
 import { Point } from '../../models/point.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class HeatmapService {
 
-  private url = environment.api
+  private url = `${environment.api}/heat_map`;
 
-  constructor(private httpClient: HttpClient) { }
+  constructor(private httpClient: HttpClient) {}
 
-  getInterpolatedPoints(){
-    return this.httpClient.get<Point[]>(this.url + '/heat_map')
+  // Method to get interpolated points
+  getInterpolatedPoints(
+    date: string,
+    indicator: string,
+    method: string,
+    params: any
+  ): Observable<Point[]> {
+    const payload = {
+      datetime: date,
+      indicator: indicator,
+      interpolator: {
+        method: method,
+        params: params
+      }
+    };
+
+    return this.httpClient.post<Point[]>(this.url, payload);
   }
 }
