@@ -1,0 +1,15 @@
+<div class="container" id="home-container">
+    <div class="container" id="form-container">
+        <form [formGroup]="formChoice">
+            <select formControlName="formKind" id="form-kind" (change)="onChoiceChange($event)">
+                <option>Mapa de Calor</option>
+                <option>Gráfico</option>
+            </select>
+        </form>
+        <app-heatmap-form *ngIf="chosenForm === 'Mapa de Calor'"></app-heatmap-form>
+    </div>
+    <div class="container" id="image-container">
+        <app-heatmap *ngIf="chosenForm === 'Mapa de Calor'"></app-heatmap>
+        <app-graph *ngIf="chosenForm === 'Gráfico'"></app-graph>
+    </div>
+</div>
