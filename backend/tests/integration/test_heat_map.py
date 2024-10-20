@@ -13,8 +13,7 @@ class TestRequest:
         endpoint = f"/heat_map"
         method = "GET"
 
-        initial_date = datetime(2023, 3, 1, 12, 10)
-        final_date = datetime(2023, 3, 1, 13, 10)
+        date = datetime(2023, 3, 1, 12)
 
         indicator = "MP2.5"
 
@@ -28,8 +27,7 @@ class TestRequest:
         interpolator = ("KrigingInterpolator", PARAM_DICT)
 
         payload = {
-            "initial_date": initial_date.strftime('%Y-%m-%d %H:%M:%S'),
-            "final_date": final_date.strftime('%Y-%m-%d %H:%M:%S'),
+            "datetime": date.strftime('%Y-%m-%d %H:%M:%S'),
             "indicator": indicator,
             "interpolator": interpolator,
         }
@@ -44,3 +42,8 @@ class TestRequest:
 
         assert response.status_code == 200
         assert len(response.json()) > 0
+
+        item = response.json()["heat_map"][0]
+        assert "lat" in item
+        assert "long" in item
+        assert "value" in item
