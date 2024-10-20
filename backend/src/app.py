@@ -6,14 +6,8 @@ from flask import (
 )
 
 from controllers import (
-    HeatMapController
-)
-
-from models import (
-    Indicators,
-    Stations,
-    StationIndicators,
-    MeasureIndicator,
+    HeatMapController,
+    UpdateController,
 )
 
 from sqlalchemy import create_engine
@@ -21,9 +15,9 @@ from sqlalchemy.orm import sessionmaker
 import sys, os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from backend.data.utils.credentials import login_mysql, password_mysql
+from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
-DATABASE_URI = f'mysql+pymysql://{login_mysql}:{password_mysql}@localhost/poluicao'
+DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao'
 engine = create_engine(DATABASE_URI)
 
 Session = sessionmaker(bind=engine)
@@ -35,52 +29,31 @@ app = Flask(__name__)
 def index():
     return "<h1>MAC 0476<h1/>"
 
-@app.route(rule='/mapa/<map_name>',
-           methods=['POST', 'GET'])
-def map_name(map_name):
-    if request.method == 'POST':
-        return f"You tried to post"
-    if request.method == 'GET':
-        return f"{map_name}"
+@app.route('/update_data', methods=['PUT'])
+def update_data():
+    response = make_response()
 
-@app.route('/estacoes/<int:n_stations>')
-def stations(n_stations):
-    response = make_response(f"{n_stations}")
-    response.status_code = 200
+    if request.method == 'PUT':
+        response = UpdateController().update_data()
+        
+        response = jsonify(response)
+        response.status = 200
     
     return response
-
-@app.route('/handle_params')
-def handle_params():
-    # use url: /handle_params?name=YourName
-    name = request.args.get('name')
-    return f"Ola, {name}"
-
-@app.route('/login',
-           methods=['GET', 'POST'])
-def fake_login():
-    if request.method == 'POST':
-        response = make_response()
-        response = jsonify(teste="444")
-        response.status_code = 201
-
-        return response
     
-    if request.method == 'GET':
-        return f""
-    
-@app.route('/heat_map')
+@app.route('/heat_map', methods=['GET'])
 def heat_map():
-    session = SESSION
-
     payload = request.get_json()
+    response = make_response()
 
-    measure_indicators = HeatMapController(session=session).get_heat_map(payload=payload)
-    session.close()
-    
-    result = [{"idStation": indicator.idStation, "name": indicator.value} for indicator in measure_indicators]
+    if request.method == 'GET':
+        heat_map = HeatMapController(session=SESSION).get_heat_map(payload=payload)
+        SESSION.close()
+        
+        response = jsonify({"heat_map": heat_map})
+        response.status = 200
 
-    return jsonify(result), 200
+    return response
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0',

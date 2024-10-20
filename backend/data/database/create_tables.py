@@ -3,7 +3,7 @@ from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTim
 import sys, os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from backend.data.utils.credentials import login_mysql, password_mysql
+from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
 def create_tables():
     engine = create_database()
@@ -21,7 +21,7 @@ def create_tables():
     print("Tables and indexes created successfully.")
 
 def create_database():
-    DATABASE_URL = f"mysql+pymysql://{login_mysql}:{password_mysql}@localhost"
+    DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost"
     engine = create_engine(DATABASE_URL)
     with engine.connect() as connection:
         connection.execute(text("CREATE DATABASE IF NOT EXISTS poluicao"))

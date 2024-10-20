@@ -13,12 +13,25 @@ class TestRequest:
         endpoint = f"/heat_map"
         method = "GET"
 
-        initial_date = datetime(2023, 10, 9, 17, 10)
-        final_date = datetime(2023, 10, 9, 18, 10)
+        initial_date = datetime(2023, 3, 1, 12, 10)
+        final_date = datetime(2023, 3, 1, 13, 10)
+
+        indicator = "MP2.5"
+
+        PARAM_DICT = {
+            "method": ["ordinary", "universal"],
+            "variogram_model": ["linear", "power", "gaussian", "spherical"],
+            "nlags": [4, 6, 8],
+            "weight": [True, False]
+        }
+
+        interpolator = ("KrigingInterpolator", PARAM_DICT)
 
         payload = {
             "initial_date": initial_date.strftime('%Y-%m-%d %H:%M:%S'),
-            "final_date": final_date.strftime('%Y-%m-%d %H:%M:%S')
+            "final_date": final_date.strftime('%Y-%m-%d %H:%M:%S'),
+            "indicator": indicator,
+            "interpolator": interpolator,
         }
 
         url = f"{BASE_URL}{endpoint}"
@@ -30,4 +43,4 @@ class TestRequest:
         )
 
         assert response.status_code == 200
-        assert "idStation" in response.json()[0] 
+        assert len(response.json()) > 0

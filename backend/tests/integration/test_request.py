@@ -9,8 +9,8 @@ from constants_test import (
 
 class TestRequest:
     def test_get_map(self):
-        endpoint = f"/login"
-        method = "POST"
+        endpoint = f"/"
+        method = "GET"
 
         url = f"{BASE_URL}{endpoint}"
         response = request(
@@ -19,5 +19,4 @@ class TestRequest:
             headers=HEADERS,
         )
 
-        assert response.status_code == 201
-        assert "teste" in response.json() 
+        assert response.status_code == 200

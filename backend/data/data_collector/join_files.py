@@ -4,11 +4,11 @@ from datetime import timedelta
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from backend.data.utils.utils import generate_date_range_df, ddmmyyyyhhmm_yyyymmddhhmm, string_to_float
-from metadata.meta_data import stations
+from metadata.meta_data import STATIONS
 
 def join_files(path="./backend/data/collected_csvs"):
     files = os.listdir(path)
-    for station in stations:
+    for station in STATIONS:
         station_indicators = {}
         for file in files:
             if file.split("_")[0] != station:

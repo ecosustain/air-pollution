@@ -10,13 +10,13 @@ class MeasureIndicatorRepository:
         self,
         initial_date: datetime,
         final_date: datetime,
-        limit: int
+        indicator_id: int
     ) -> list[MeasureIndicator]:
         
         measure_indicators = (self.session.query(MeasureIndicator)
                               .filter(MeasureIndicator.datetime >= initial_date)
                               .filter(MeasureIndicator.datetime <= final_date)
-                              .limit(limit)
+                              .filter(MeasureIndicator.idIndicator == indicator_id)
                               .all()
                               )
         

@@ -74,7 +74,7 @@ class KrigingInterpolator(Interpolator):
 
 
 class KNNInterpolator(Interpolator):
-    def __init__(self, data, verbose=False, k='auto'):
+    def __init__(self, data, k='auto', verbose=False):
         """
         data -> dict com pares "coord" : "medida"
         """
