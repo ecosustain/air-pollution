@@ -1,1 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
+/* Apply the Roboto font globally */
+body {
+    font-family: 'Roboto', sans-serif;
+}

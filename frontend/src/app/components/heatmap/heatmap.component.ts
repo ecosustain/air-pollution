@@ -30,29 +30,26 @@ export class HeatmapComponent implements OnInit, OnChanges {
       this.addRectangles(); // Update rectangles when points change
     }
   }
-  
 
   // Initialize the Leaflet map
   private initializeMap(): void {
     this.map = L.map('map').setView([-23.5489, -46.6388], 13);
-    // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    // }).addTo(this.map);
-
-    //this.loadShapefile()
-
-    L.geoJSON(spGeoJson, {
-      style: {
-        color: 'blue', // Line color for LineString or Polygon outlines
-        weight: 2,
-        fillOpacity: 0.5, // Fill opacity for Polygons
-      }
-    }).addTo(this.map);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     }).addTo(this.map);
+
+    L.geoJSON(spGeoJson, {
+      style: {
+        color: 'black', // Line color for LineString or Polygon outlines
+        weight: 1,
+        fillOpacity: 0.1, // Fill opacity for Polygons
+      }
+    }).addTo(this.map);
+
+    // Add legend after map is initialized
+    this.addLegend();
   }
 
   // Add rectangles to the map based on points array
@@ -66,13 +63,33 @@ export class HeatmapComponent implements OnInit, OnChanges {
       }
     });
 
+    const borders_coordinates = {
+      "min_lat": -24.00736242788278,
+      "max_lat": -23.35831688708724,
+      "min_long": -46.83459631388834,
+      "max_long": -46.36359807038185,
+    };
+
+    const number_of_lat_points = 20;
+
+    const lat_distance = borders_coordinates.max_lat - borders_coordinates.min_lat;
+    const long_distance = borders_coordinates.max_long - borders_coordinates.min_long;
+
+    const aspect_ratio = lat_distance / long_distance
+
+    const number_of_long_points = number_of_lat_points / aspect_ratio
+
+    const latStepSize = (borders_coordinates.max_lat - borders_coordinates.min_lat) / number_of_lat_points;
+    const longStepSize = (borders_coordinates.max_long - borders_coordinates.min_long) / number_of_long_points;
+
+
     const rectangleSize = 0.4/20; // Define the size of the rectangles (latitude/longitude range)
 
     console.log("The points is now: ", this.points)
 
     this.points.forEach(point => {
-      L.rectangle([[point.lat - (rectangleSize / 2), point.long - (rectangleSize / 2)],
-                    [point.lat + (rectangleSize / 2), point.long + (rectangleSize / 2)]], {
+      L.rectangle([[point.lat - (latStepSize / 2), point.long - (latStepSize / 2)],
+                    [point.lat + (longStepSize / 2), point.long + (longStepSize / 2)]], {
         color: 'transparent', // Can change color as needed
         fillColor: this.chooseColor(point.value),
         fillOpacity: 0.4,
@@ -81,23 +98,48 @@ export class HeatmapComponent implements OnInit, OnChanges {
     });
   }
 
-  private chooseColor (measure : number) {
-    if (measure < 25){
-      return 'green'
-    } else if (measure < 50){
-      return 'yellow'
-    } else if (measure < 75){
-      return 'pink'
-    } else if(measure < 125){
-      return 'red'
+  // Choose color based on measure
+  private chooseColor(measure: number): string {
+    if (measure < 25) {
+      return 'green';
+    } else if (measure < 50) {
+      return 'yellow';
+    } else if (measure < 75) {
+      return 'pink';
+    } else if (measure < 125) {
+      return 'red';
     } else {
-      return 'purple'
+      return 'purple';
     }
   }
 
+  // Add a legend control to the map
+  private addLegend(): void {
+    const legend = new (L.Control.extend({
+      options: { position: 'bottomright' },
+      
+      onAdd: (map: any) => {
+        const div = L.DomUtil.create('div', 'info legend');
+        const intervals = [0, 25, 50, 75, 125]; // Intervals based on chooseColor function
+        const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
+  
+        // Loop through intervals and generate a label with a color square and unit for each range
+        for (let i = 0; i < intervals.length; i++) {
+          div.innerHTML +=
+            '<i style="background:' + colors[i] + '; width: 18px; height: 18px; display: inline-block;"></i> ' +
+            intervals[i] + (intervals[i + 1] ? '&ndash;' + intervals[i + 1] : '+') + ' µg/m³<br>';
+        }
+        return div;
+      }
+    }))();
+  
+    legend.addTo(this.map);
+  }
+  
+    
+
   // Calculate opacity based on value (customize range as per your value scale)
   private calculateOpacity(max: number, min: number, value: number): number {
-
     return Math.min(Math.max(value / max, 0.1), 1); // Ensure opacity is between 0.1 and 1
   }
 }

@@ -62,25 +62,28 @@ class HeatMapController:
     top = [-23.5737757 + 0.4, -46.7369984 - 0.2]
     bottom = [-23.5737757 - 0.4, -46.7369984 + 0.6]
     
-    def __get_rectangular_discretization(
-        self
-    ) -> list[tuple]:
+    def __get_rectangular_discretization(self) -> list[tuple]:
         borders_coordinates = {
-            "min_lat": -23.5737757 - 0.2,
-            "max_lat": -23.5737757 + 0.2,
-            "min_long": -46.7369984 - 0.1,
-            "max_long": -46.7369984 + 0.3,
+            "min_lat": -24.00736242788278,
+            "max_lat": -23.35831688708724,
+            "min_long": -46.83459631388834,
+            "max_long": -46.36359807038185,
         }
 
-        number_of_points = 20
-
-        #step_size = 0.4/10
-
-        #lat_range = list(self.__get_range(borders_coordinates["min_lat"], borders_coordinates["max_lat"], step_size))
-        #long_range = list(self.__get_range(borders_coordinates["min_long"], borders_coordinates["max_long"], step_size))
-
-        lat_range = np.linspace(borders_coordinates['min_lat'], borders_coordinates['max_lat'], number_of_points)
-        long_range = np.linspace(borders_coordinates['min_long'], borders_coordinates['max_long'], number_of_points)
+        number_of_lat_points = 20  # Number of divisions in latitude
+        
+        lat_range = np.linspace(borders_coordinates['min_lat'], borders_coordinates['max_lat'], number_of_lat_points)
+        
+        # Calculate the aspect ratio between latitudinal and longitudinal distances
+        lat_distance = borders_coordinates['max_lat'] - borders_coordinates['min_lat']
+        long_distance = borders_coordinates['max_long'] - borders_coordinates['min_long']
+        
+        aspect_ratio = lat_distance / long_distance
+        
+        # Adjust the number of longitude points to preserve square proportions
+        number_of_long_points = int(number_of_lat_points / aspect_ratio)
+        
+        long_range = np.linspace(borders_coordinates['min_long'], borders_coordinates['max_long'], number_of_long_points)
 
         matrix_of_tuples = [(lat, lon) for lat in lat_range for lon in long_range]
 

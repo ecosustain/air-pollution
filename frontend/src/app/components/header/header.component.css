@@ -1,0 +1,13 @@
+#header-container {
+    width:100%;
+    background-color: rgba(80, 128, 210, 1);
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+h1 {
+    font-size: 35px;
+    color: white;
+}
