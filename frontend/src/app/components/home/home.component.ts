@@ -6,12 +6,18 @@ import { HeatmapComponent } from "../heatmap/heatmap.component";
 import { GraphComponent } from "../graph/graph.component";
 import { Point } from '../../models/point.model';
 import { HeatmapService } from '../../services/heatmap/heatmap.service';
-
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HeatmapFormComponent, HeatmapComponent, GraphComponent],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    HeatmapFormComponent, 
+    HeatmapComponent, 
+    GraphComponent,
+    DatePipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
@@ -22,7 +28,11 @@ export class HomeComponent implements OnInit{
   heatmapPoints : Point[] = [];
   errorMessage : string = ''
 
-  constructor (private fb : FormBuilder, private heatmapService: HeatmapService) {
+  constructor (
+    private fb : FormBuilder, 
+    private heatmapService: HeatmapService,
+    private datePipe: DatePipe) 
+    {
     this.formChoice = this.fb.group({
       formKind : ["Mapa de Calor", Validators.required]
     })
@@ -38,13 +48,27 @@ export class HomeComponent implements OnInit{
     this.chosenForm = selectedValue;
   }
 
-  handleFormSubmit(formValues: any) {
-    const { date, indicator, method, params } = formValues;
+  formatDate(day: number, month: number, year: number, hour: number): string {
+    const date = new Date(year, month - 1, day, hour); // month is 0-indexed in Date object
+    return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
+  }
 
-    this.heatmapService.getInterpolatedPoints(date, indicator, method, params)
+  handleFormSubmit(formValues: any) {
+    const date = this.formatDate(
+                            formValues.specificDate.day, 
+                            formValues.specificDate.month, 
+                            formValues.specificDate.year,
+                            formValues.specificDate.hour);
+    
+    const indicator = formValues.indicator;
+    const method = formValues.method;
+    const param = formValues.param;
+
+    this.heatmapService.getInterpolatedPoints(date, indicator, method, param)
       .subscribe({
         next: (points) => {
-          this.heatmapPoints = points;
+          console.log('Requisição deu certo')
+          this.heatmapPoints = points.heat_map;
         },
         error: (err) => {
           this.errorMessage = 'Failed to retrieve points';

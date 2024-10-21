@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -13,6 +13,7 @@ import { CommonModule } from '@angular/common';
 export class HeatmapFormComponent implements OnInit {
   mapaDeCalorForm: FormGroup;
   timePeriodType: string = '';
+  @Output() formSubmit = new EventEmitter<any>();
 
   constructor(private fb: FormBuilder) {
     this.mapaDeCalorForm = this.fb.group({
@@ -80,6 +81,7 @@ export class HeatmapFormComponent implements OnInit {
   onSubmit() {
     if (this.mapaDeCalorForm.valid) {
       console.log('Form submitted:', this.mapaDeCalorForm.value);
+      this.formSubmit.emit(this.mapaDeCalorForm.value);
     } else {
       console.log('Form is invalid');
     }

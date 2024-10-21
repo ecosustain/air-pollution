@@ -3,3 +3,7 @@ export interface Point {
     long : number,
     value : number 
 }
+
+export interface Heatmap{
+    heat_map : Point[]
+}
