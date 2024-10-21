@@ -9,6 +9,7 @@ from models import(
 from datetime import datetime
 import sys, os
 import math
+import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from metadata.meta_data import INDICATORS, STATIONS_ID
@@ -22,8 +23,8 @@ class HeatMapController:
         self.measure_indicator_repository = MeasureIndicatorRepository(session)
         self.session = session
         self.interpolators = {
-            "KNNInterpolator": KNNInterpolator,
-            "KrigingInterpolator": KrigingInterpolator,
+            "KNN": KNNInterpolator,
+            "Kriging": KrigingInterpolator,
         }
 
     def get_heat_map(
@@ -35,7 +36,7 @@ class HeatMapController:
         interpolator_dict = payload["interpolator"]
 
         interpolator_method = interpolator_dict["method"]
-        parameter = interpolator_dict["parameter"]
+        parameter = interpolator_dict["params"]
 
         date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
 
@@ -65,16 +66,21 @@ class HeatMapController:
         self
     ) -> list[tuple]:
         borders_coordinates = {
-            "min_lat": -23.5737757 - 0.4,
-            "max_lat": -23.5737757 + 0.4,
-            "min_long": -46.7369984 - 0.2,
-            "max_long": -46.7369984 + 0.6,
+            "min_lat": -23.5737757 - 0.2,
+            "max_lat": -23.5737757 + 0.2,
+            "min_long": -46.7369984 - 0.1,
+            "max_long": -46.7369984 + 0.3,
         }
 
-        step_size = 0.005
+        number_of_points = 20
 
-        lat_range = list(self.__get_range(borders_coordinates["min_lat"], borders_coordinates["max_lat"], step_size))
-        long_range = list(self.__get_range(borders_coordinates["min_long"], borders_coordinates["max_long"], step_size))
+        #step_size = 0.4/10
+
+        #lat_range = list(self.__get_range(borders_coordinates["min_lat"], borders_coordinates["max_lat"], step_size))
+        #long_range = list(self.__get_range(borders_coordinates["min_long"], borders_coordinates["max_long"], step_size))
+
+        lat_range = np.linspace(borders_coordinates['min_lat'], borders_coordinates['max_lat'], number_of_points)
+        long_range = np.linspace(borders_coordinates['min_long'], borders_coordinates['max_long'], number_of_points)
 
         matrix_of_tuples = [(lat, lon) for lat in lat_range for lon in long_range]
 
@@ -86,7 +92,7 @@ class HeatMapController:
         stop: float,
         step: float,
     ):
-        while start <= stop:
+        while start < stop:
             yield round(start, 6)
             start += step
 
