@@ -9,6 +9,7 @@ from models import(
 from datetime import datetime
 import sys, os
 import math
+import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from metadata.meta_data import INDICATORS, STATIONS_ID
@@ -22,8 +23,8 @@ class HeatMapController:
         self.measure_indicator_repository = MeasureIndicatorRepository(session)
         self.session = session
         self.interpolators = {
-            "KNNInterpolator": KNNInterpolator,
-            "KrigingInterpolator": KrigingInterpolator,
+            "KNN": KNNInterpolator,
+            "Kriging": KrigingInterpolator,
         }
 
     def get_heat_map(
@@ -35,7 +36,7 @@ class HeatMapController:
         interpolator_dict = payload["interpolator"]
 
         interpolator_method = interpolator_dict["method"]
-        parameter = interpolator_dict["parameter"]
+        parameter = interpolator_dict["params"]
 
         date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
 
@@ -61,20 +62,28 @@ class HeatMapController:
     top = [-23.5737757 + 0.4, -46.7369984 - 0.2]
     bottom = [-23.5737757 - 0.4, -46.7369984 + 0.6]
     
-    def __get_rectangular_discretization(
-        self
-    ) -> list[tuple]:
+    def __get_rectangular_discretization(self) -> list[tuple]:
         borders_coordinates = {
-            "min_lat": -23.5737757 - 0.4,
-            "max_lat": -23.5737757 + 0.4,
-            "min_long": -46.7369984 - 0.2,
-            "max_long": -46.7369984 + 0.6,
+            "min_lat": -24.00736242788278,
+            "max_lat": -23.35831688708724,
+            "min_long": -46.83459631388834,
+            "max_long": -46.36359807038185,
         }
 
-        step_size = 0.005
-
-        lat_range = list(self.__get_range(borders_coordinates["min_lat"], borders_coordinates["max_lat"], step_size))
-        long_range = list(self.__get_range(borders_coordinates["min_long"], borders_coordinates["max_long"], step_size))
+        number_of_lat_points = 20  # Number of divisions in latitude
+        
+        lat_range = np.linspace(borders_coordinates['min_lat'], borders_coordinates['max_lat'], number_of_lat_points)
+        
+        # Calculate the aspect ratio between latitudinal and longitudinal distances
+        lat_distance = borders_coordinates['max_lat'] - borders_coordinates['min_lat']
+        long_distance = borders_coordinates['max_long'] - borders_coordinates['min_long']
+        
+        aspect_ratio = lat_distance / long_distance
+        
+        # Adjust the number of longitude points to preserve square proportions
+        number_of_long_points = int(number_of_lat_points / aspect_ratio)
+        
+        long_range = np.linspace(borders_coordinates['min_long'], borders_coordinates['max_long'], number_of_long_points)
 
         matrix_of_tuples = [(lat, lon) for lat in lat_range for lon in long_range]
 
@@ -86,7 +95,7 @@ class HeatMapController:
         stop: float,
         step: float,
     ):
-        while start <= stop:
+        while start < stop:
             yield round(start, 6)
             start += step
 

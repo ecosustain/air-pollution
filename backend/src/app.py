@@ -10,6 +10,7 @@ from controllers import (
     UpdateController,
 )
 
+import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sys, os
@@ -44,9 +45,11 @@ def update_data():
     return response
 
 
-@app.route('/heat_map', methods=['GET'])
-def heat_map():
-    payload = request.get_json()
+@app.route('/heat_map/<string:payload>', methods=['GET'])
+def heat_map(payload):
+    print(payload)
+    payload = json.loads(payload)
+    print(payload)
     response = make_response()
 
     if request.method == 'GET':

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -13,10 +13,13 @@ import { CommonModule } from '@angular/common';
 export class HeatmapFormComponent implements OnInit {
   mapaDeCalorForm: FormGroup;
   timePeriodType: string = '';
+  @Output() formSubmit = new EventEmitter<any>();
 
   constructor(private fb: FormBuilder) {
     this.mapaDeCalorForm = this.fb.group({
-      indicator: ['', Validators.required],  
+      indicator: ['', Validators.required],
+      method:['', Validators.required],
+      param:['', Validators.required], 
       timePeriod: ['', Validators.required], 
       startYear: [''],    
       endYear: [''],     
@@ -24,8 +27,9 @@ export class HeatmapFormComponent implements OnInit {
       specificDate: this.fb.group({   
         day: [''],
         month: [''],
-        year: ['']
-      })
+        year: [''],
+        hour : ['']
+      }),
     });
   }
 
@@ -41,15 +45,16 @@ export class HeatmapFormComponent implements OnInit {
     this.clearValidators();
   
     // Set validators based on the selected value
-    if (selectedValue === 'Anual') {
+    if (this.timePeriodType === 'Anual') {
       this.mapaDeCalorForm.get('startYear')?.setValidators([Validators.required]);
       this.mapaDeCalorForm.get('endYear')?.setValidators([Validators.required]);
-    } else if (selectedValue === 'Mensal') {
+    } else if (this.timePeriodType === 'Mensal') {
       this.mapaDeCalorForm.get('year')?.setValidators([Validators.required]);
-    } else if (selectedValue === 'Horária') {
+    } else if (this.timePeriodType === 'Diária' || this.timePeriodType === 'Horária' ) {
       this.mapaDeCalorForm.get('specificDate.day')?.setValidators([Validators.required]);
       this.mapaDeCalorForm.get('specificDate.month')?.setValidators([Validators.required]);
       this.mapaDeCalorForm.get('specificDate.year')?.setValidators([Validators.required]);
+      this.mapaDeCalorForm.get('specificDate.hour')?.setValidators([Validators.required]);
     }
   
     // Update form validity
@@ -64,7 +69,8 @@ export class HeatmapFormComponent implements OnInit {
     this.mapaDeCalorForm.get('specificDate.day')?.clearValidators();
     this.mapaDeCalorForm.get('specificDate.month')?.clearValidators();
     this.mapaDeCalorForm.get('specificDate.year')?.clearValidators();
-    
+    this.mapaDeCalorForm.get('specificDate.hour')?.clearValidators();
+
     this.mapaDeCalorForm.get('startYear')?.reset();
     this.mapaDeCalorForm.get('endYear')?.reset();
     this.mapaDeCalorForm.get('year')?.reset();
@@ -75,6 +81,7 @@ export class HeatmapFormComponent implements OnInit {
   onSubmit() {
     if (this.mapaDeCalorForm.valid) {
       console.log('Form submitted:', this.mapaDeCalorForm.value);
+      this.formSubmit.emit(this.mapaDeCalorForm.value);
     } else {
       console.log('Form is invalid');
     }
