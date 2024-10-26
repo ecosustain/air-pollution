@@ -1,9 +1,11 @@
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, ForeignKey
 from models import Stations, Indicators
-
 from sqlalchemy.ext.declarative import declarative_base
+
+
 Base = declarative_base()
+
 
 class StationIndicators(Base):
     __tablename__ = "station_indicators"

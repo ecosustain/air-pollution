@@ -1,6 +1,6 @@
 from models import MeasureIndicator
-
 import datetime
+
 
 class MeasureIndicatorRepository:
     def __init__(self, session) -> None:

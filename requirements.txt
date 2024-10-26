@@ -8,4 +8,5 @@ sqlalchemy
 folium
 geopandas
 pykrige
+flask
 flask-cors

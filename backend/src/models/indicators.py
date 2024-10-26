@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, Numeric
-
 from sqlalchemy.ext.declarative import declarative_base
+
+
 Base = declarative_base()
+
 
 class Indicators(Base):
     __tablename__ = "indicators"
