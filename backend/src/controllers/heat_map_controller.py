@@ -55,11 +55,6 @@ class HeatMapController:
 
         y = interpolator.predict(X=area_discretization)
 
-        print(area_discretization)
-        print()
-        print(interpolator_input)
-        print()
-        print(len(interpolator_input))
         response = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
         
         return response
