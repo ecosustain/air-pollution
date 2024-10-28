@@ -97,14 +97,14 @@ class HeatMapController:
         area_discretization: list[tuple]
     ) -> list[tuple]:
         new_area_discretization = []
-        threshold = 10
+        threshold = 7
         for point in area_discretization:
             min_dist = float("inf")
             for station_coordinates in STATIONS_ID.values():
                 dist = self.__haversine_dist(point[0], point[1], station_coordinates[0], station_coordinates[1])
                 if dist < min_dist:
                     min_dist = dist
-            if dist < threshold:
+            if min_dist < threshold:
                 new_area_discretization.append(point)
         return new_area_discretization
 
