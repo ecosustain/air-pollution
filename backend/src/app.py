@@ -8,6 +8,7 @@ from flask_cors import CORS  # Import flask_cors
 from controllers import (
     HeatMapController,
     UpdateController,
+    LineGraphController
 )
 
 import json
@@ -47,16 +48,58 @@ def update_data():
 
 @app.route('/heat_map/<string:payload>', methods=['GET'])
 def heat_map(payload):
-    print(payload)
     payload = json.loads(payload)
-    print(payload)
     response = make_response()
 
     if request.method == 'GET':
-        heat_map = HeatMapController(session=SESSION).get_heat_map(payload=payload)
+        heatmap = HeatMapController(session=SESSION).get_heat_map(payload=payload)
         SESSION.close()
 
-        response = jsonify({"heat_map": heat_map})
+        response = jsonify({"heat_map": heatmap})
+        response.status = 200
+
+    return response
+
+
+@app.route('/linegraph/<string:payload>', methods=['GET'])
+def linegraph(payload):
+    payload = json.loads(payload)
+    response = make_response()
+    """
+    {
+        "interval": "yearly",
+        "indicators": ["MP2.5", "O3", "MP10"]
+    }
+
+    {
+        "interval": "monthly",
+        "month": 8,
+        "indicators": ["MP2.5", "O3", "MP10"]
+    }
+
+    {
+        "interval": "monthly",
+        "indicators": ["MP2.5", "O3", "MP10"]
+    }
+
+    {
+        "interval": "daily",
+        "year": 2008,
+        "month": 12,
+        "indicators": ["MP2.5", "O3", "MP10"]
+    }
+
+    {
+        "interval": "hourly",
+        "month": 1,
+        "indicators": ["MP2.5", "O3", "MP10"]
+    }
+    """
+    if request.method == 'GET':
+        heatmap = LineGraphController(session=SESSION).get_line_graph(payload=payload)
+        SESSION.close()
+
+        response = jsonify({"line_graph": heatmap})
         response.status = 200
 
     return response
