@@ -65,36 +65,7 @@ def heat_map(payload):
 def linegraph(payload):
     payload = json.loads(payload)
     response = make_response()
-    """
-    {
-        "interval": "yearly",
-        "indicators": ["MP2.5", "O3", "MP10"]
-    }
 
-    {
-        "interval": "monthly",
-        "month": 8,
-        "indicators": ["MP2.5", "O3", "MP10"]
-    }
-
-    {
-        "interval": "monthly",
-        "indicators": ["MP2.5", "O3", "MP10"]
-    }
-
-    {
-        "interval": "daily",
-        "year": 2008,
-        "month": 12,
-        "indicators": ["MP2.5", "O3", "MP10"]
-    }
-
-    {
-        "interval": "hourly",
-        "month": 1,
-        "indicators": ["MP2.5", "O3", "MP10"]
-    }
-    """
     if request.method == 'GET':
         heatmap = LineGraphController(session=SESSION).get_line_graph(payload=payload)
         SESSION.close()
