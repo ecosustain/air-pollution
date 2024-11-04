@@ -70,34 +70,56 @@ class HeatMapController:
             "max_long": -46.36359807038185,
         }
 
-        number_of_lat_points = 20  # Number of divisions in latitude
+        number_of_lat_points = 20 
         
         lat_range = np.linspace(borders_coordinates['min_lat'], borders_coordinates['max_lat'], number_of_lat_points)
         
-        # Calculate the aspect ratio between latitudinal and longitudinal distances
         lat_distance = borders_coordinates['max_lat'] - borders_coordinates['min_lat']
         long_distance = borders_coordinates['max_long'] - borders_coordinates['min_long']
         
         aspect_ratio = lat_distance / long_distance
-        
-        # Adjust the number of longitude points to preserve square proportions
         number_of_long_points = int(number_of_lat_points / aspect_ratio)
         
         long_range = np.linspace(borders_coordinates['min_long'], borders_coordinates['max_long'], number_of_long_points)
 
-        matrix_of_tuples = [(lat, lon) for lat in lat_range for lon in long_range]
+        area_discretization = [(lat, lon) for lat in lat_range for lon in long_range]
+        area_discretization = self.__remove_distant_points(area_discretization=area_discretization)
 
-        return matrix_of_tuples
-
-    def __get_range(
+        return  area_discretization
+    
+    def __remove_distant_points(
         self,
-        start: float,
-        stop: float,
-        step: float,
-    ):
-        while start < stop:
-            yield round(start, 6)
-            start += step
+        area_discretization: list[tuple]
+    ) -> list[tuple]:
+        new_area_discretization = []
+        threshold = 7
+        for point in area_discretization:
+            min_dist = float("inf")
+            for station_coordinates in STATIONS_ID.values():
+                dist = self.__haversine_dist(point[0], point[1], station_coordinates[0], station_coordinates[1])
+                if dist < min_dist:
+                    min_dist = dist
+            if min_dist < threshold:
+                new_area_discretization.append(point)
+        return new_area_discretization
+
+    def __haversine_dist(self, lat1, lon1, lat2, lon2):
+        R = 6371.0
+
+        lat1_rad = math.radians(lat1)
+        lon1_rad = math.radians(lon1)
+        lat2_rad = math.radians(lat2)
+        lon2_rad = math.radians(lon2)
+
+        dlat = lat2_rad - lat1_rad
+        dlon = lon2_rad - lon1_rad
+
+        a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+        distance = R * c
+
+        return distance
 
     def __build_interpolator_input(
         self,

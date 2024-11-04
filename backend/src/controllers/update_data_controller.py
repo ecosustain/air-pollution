@@ -5,10 +5,10 @@ from backend.data.database.update_tables import UpdateData
 
 class UpdateController:
     def __init__(self) -> None:
-        self.update_data = UpdateData()
+        self.update_data_object = UpdateData()
 
     def update_data(self) -> dict:
-        self.update_data.update_data()
+        self.update_data_object.update_data()
 
         response = {"status": "updated"}
 
