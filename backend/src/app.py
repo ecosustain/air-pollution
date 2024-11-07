@@ -45,18 +45,18 @@ def update_data():
     return response
 
 
-@app.route('/heat_map/<string:payload>', methods=['GET'])
-def heat_map(payload):
+@app.route('/heatmap/<string:payload>', methods=['GET'])
+def heatmap(payload):
     print(payload)
     payload = json.loads(payload)
     print(payload)
     response = make_response()
 
     if request.method == 'GET':
-        heat_map = HeatMapController(session=SESSION).get_heat_map(payload=payload)
+        heatmap = HeatMapController(session=SESSION).get_heatmap(payload=payload)
         SESSION.close()
 
-        response = jsonify({"heat_map": heat_map})
+        response = jsonify({"heatmap": heatmap})
         response.status = 200
 
     return response

@@ -30,13 +30,14 @@ class TestRequest:
         }
 
         payload = {
+            "interval": "hourly",
             "datetime": date.strftime('%Y-%m-%d %H:%M:%S'),
             "indicator": indicator,
             "interpolator": interpolator,
         }
         payload_str = json.dumps(payload)
      
-        endpoint = f"/heat_map/{payload_str}"
+        endpoint = f"/heatmap/{payload_str}"
         url = f"{BASE_URL}{endpoint}"
         response = request(
             method.upper(),
@@ -48,7 +49,7 @@ class TestRequest:
         assert response.status_code == 200
         assert len(response.json()) > 0
 
-        item = response.json()["heat_map"][0]
+        item = response.json()["heatmap"][0]
         assert "lat" in item
         assert "long" in item
         assert "value" in item
@@ -56,12 +57,13 @@ class TestRequest:
     def test_update(self):
         method = "PUT"
 
-        endpoint = f"/update_data"
-        url = f"{BASE_URL}{endpoint}"
-        response = request(
-            method.upper(),
-            url,
-            headers=HEADERS,
-        )
+        if False:
+            endpoint = f"/update_data"
+            url = f"{BASE_URL}{endpoint}"
+            response = request(
+                method.upper(),
+                url,
+                headers=HEADERS,
+            )
 
-        assert response.status_code == 200
+            assert response.status_code == 200

@@ -1,2 +1,2 @@
-from controllers.heat_map_controller import HeatMapController
+from controllers.heatmap_controller import HeatMapController
 from controllers.update_data_controller import UpdateController
