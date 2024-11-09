@@ -38,24 +38,44 @@ export class GraphComponent implements AfterViewInit {
     });
   }
 
+  getXAxisLabel(timeField: string) {
+    const labels = new Map<string, string>([
+      ["year", "Ano"],
+      ["day", "Dia"],
+      ["hour", "Hora"]
+    ]);
+    return labels.get(timeField);
+  }
+
   updateChart(data: any) {
+    const timeField = Object.keys(data.line_graph[0][Object.keys(data.line_graph[0])[0]][0]).find(
+      key => key === 'year' || key === 'day' || key === 'hour'
+    );
+    
+    if (!timeField) {
+      console.error('No valid time field found in the data.');
+      return;
+    }
+    
+    // Extract labels by sorting the points based on the identified time field
     const labels = data.line_graph[0][Object.keys(data.line_graph[0])[0]]
       .slice()
-      .sort((a: any, b: any) => a.year - b.year)
-      .map((point: any) => point.year);
-
+      .sort((a: any, b: any) => a[timeField] - b[timeField])
+      .map((point: any) => point[timeField]);
+    
+    // Generate datasets, sorting by the time field and extracting values in the sorted order
     const datasets = data.line_graph.map((pollutantObj: any) => {
-      const pollutantKey = Object.keys(pollutantObj)[0];
+      const pollutantKey = Object.keys(pollutantObj)[0]; // Get pollutant key (e.g., "MP2.5", "O3")
       const points = pollutantObj[pollutantKey]
         .slice()
-        .sort((a: any, b: any) => a.year - b.year);
-
+        .sort((a: any, b: any) => a[timeField] - b[timeField]); // Sort by the dynamic time field
+    
       return {
-        label: pollutantKey, // Use the pollutant key as the label
-        data: points.map((point: any) => point.average_value), // Extract the average values for the data
-        borderColor: 'rgb(75, 192, 192)', // Customize the color as needed
-        fill: false, // Don't fill the area under the line
-        tension: 0.1 // Set the line tension (smoothing)
+        label: pollutantKey, // Pollutant name as label
+        data: points.map((point: any) => point.average_value), // Extract sorted average values
+        borderColor: 'rgb(75, 192, 192)', // Customize color
+        fill: false,
+        tension: 0.1,
       };
     });
 
@@ -71,7 +91,7 @@ export class GraphComponent implements AfterViewInit {
         scales: {
           x: {
             type: 'category',
-            title: { display: true, text: 'Ano' }
+            title: { display: true, text: this.getXAxisLabel(timeField) }
           },
           y: {
             type: 'linear',
