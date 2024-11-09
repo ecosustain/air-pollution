@@ -35,16 +35,12 @@ export class HeatmapFormComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  // Handle time period change
   onTimePeriodChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement; // Cast to HTMLSelectElement
-    const selectedValue = selectElement.value; // Now we can safely access .value
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedValue = selectElement.value;
     this.timePeriodType = selectedValue;
-  
-    // Clear previous validators
     this.clearValidators();
   
-    // Set validators based on the selected value
     if (this.timePeriodType === 'Anual') {
       this.mapaDeCalorForm.get('startYear')?.setValidators([Validators.required]);
       this.mapaDeCalorForm.get('endYear')?.setValidators([Validators.required]);
@@ -56,12 +52,9 @@ export class HeatmapFormComponent implements OnInit {
       this.mapaDeCalorForm.get('specificDate.year')?.setValidators([Validators.required]);
       this.mapaDeCalorForm.get('specificDate.hour')?.setValidators([Validators.required]);
     }
-  
-    // Update form validity
     this.mapaDeCalorForm.updateValueAndValidity();
   }
 
-  // Helper function to clear validators from fields when switching time period
   clearValidators() {
     this.mapaDeCalorForm.get('startYear')?.clearValidators();
     this.mapaDeCalorForm.get('endYear')?.clearValidators();
@@ -77,7 +70,6 @@ export class HeatmapFormComponent implements OnInit {
     this.mapaDeCalorForm.get('specificDate')?.reset();
   }
 
-  // Form submission
   onSubmit() {
     if (this.mapaDeCalorForm.valid) {
       console.log('Form submitted:', this.mapaDeCalorForm.value);

@@ -11,18 +11,15 @@ export class GraphService {
   constructor(private http: HttpClient) {}
 
   fetchGraphData(formData: any): Observable<any> {
-    // Structure the payload as required by the endpoint
     const payload = {
       interval: formData.timePeriod,
       year: formData.specificDate?.year || null,
       month: formData.month || formData.specificDate?.month || null,
       indicators: formData.indicators
     };
-
-    // Encode the payload for the URL
+    
     const encodedPayload = encodeURIComponent(JSON.stringify(payload));
     const fullUrl = `${this.apiUrl}/${encodedPayload}`;
-    
     return this.http.get<any>(fullUrl);
   }
 }

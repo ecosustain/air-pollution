@@ -14,19 +14,16 @@ export class HeatmapService {
 
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
-    // Add more headers if needed, like authorization
   });
 
   constructor(private httpClient: HttpClient) {}
 
-  // Method to get interpolated points
   getInterpolatedPoints(
     date: string,
     indicator: string,
     method: string,
     params: any
   ): Observable<Heatmap> {
-    // Create HttpParams object to hold the query parameters
     let payload = {
       datetime : date,
       indicator : indicator,
@@ -38,7 +35,6 @@ export class HeatmapService {
     
     let payload_encoded = JSON.stringify(payload)
     
-    // Use get method with the constructed URL and query parameters
     return this.httpClient.get<Heatmap>(this.url+'/'+ payload_encoded, 
       {
         headers : this.headers
