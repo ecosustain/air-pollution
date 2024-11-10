@@ -15,9 +15,21 @@ import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sys, os
-
+from apscheduler.schedulers.background import BackgroundScheduler
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+import atexit
+
+
+def scheduled_update():
+    UpdateController().update_data()
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(scheduled_update, 'cron', hour=3, minute=0)
+scheduler.start()
+atexit.register(lambda: scheduler.shutdown())
+
 
 DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao'
 engine = create_engine(DATABASE_URI)
@@ -27,6 +39,7 @@ SESSION = Session()
 
 app = Flask(__name__)
 CORS(app)
+
 
 @app.route('/')
 def index():
