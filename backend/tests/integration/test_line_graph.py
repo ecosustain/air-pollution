@@ -1,6 +1,7 @@
 from requests import request
 import sys
 import os
+import json
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from constants_test import (
     BASE_URL,
@@ -36,19 +37,26 @@ POSSIBILITIES = [
         "interval": "hourly",
         "month": 1,
         "indicators": ["MP2.5", "O3", "MP10"]
+    },
+    {
+        "interval": "hourly",
+        "year": None,
+        "month": 12,
+        "indicators": ["MP2.5"]
     }
 ]
 
 
 class TestLineGraph:
     def test_line_graph(self):
-        endpoint = f"/linegraph"
+        endpoint = f"/linegraph/"
         method = "GET"
 
         for possibility in POSSIBILITIES:
             payload = possibility
-
-            url = f"{BASE_URL}{endpoint}"
+            endpoint_with_payload = endpoint + json.dumps(payload)
+            url = f"{BASE_URL}{endpoint_with_payload}"
+            print(url)
             response = request(
                 method.upper(),
                 url,
@@ -58,4 +66,9 @@ class TestLineGraph:
 
             # Change to meaningful asserts here
             print(payload)
-            print(response)
+            print(response.content)
+
+
+if __name__ == "__main__":
+    tlg = TestLineGraph()
+    tlg.test_line_graph()

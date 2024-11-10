@@ -65,3 +65,8 @@ class TestRequest:
         )
 
         assert response.status_code == 200
+
+
+if __name__ == "__main__":
+    tr = TestRequest()
+    tr.test_get_map()

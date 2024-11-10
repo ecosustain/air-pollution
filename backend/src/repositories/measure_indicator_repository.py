@@ -37,7 +37,7 @@ class MeasureIndicatorRepository:
 
         return [{"year": int(row.year), "average_value": row.average_value} for row in results]
 
-    def get_measure_indicator_by_month(self, month: int, indicator_id: int) -> list[dict]:
+    def get_measure_indicator_by_month_through_years(self, month: int, indicator_id: int) -> list[dict]:
         """
             Returns the average 'value' of MeasureIndicators grouped by year, filtered by month,
             for a specific indicator_id.
@@ -54,6 +54,23 @@ class MeasureIndicatorRepository:
         )
 
         return [{"year": int(row.year), "average_value": row.average_value} for row in results]
+
+    def get_measure_indicator_averaged_per_month_for_all_years(self, indicator_id) -> list[dict]:
+        """
+            Returns the average 'value' of MeasureIndicators grouped by month for a specific indicator_id.
+        """
+        results = (
+            self.session.query(
+                func.extract('month', MeasureIndicator.datetime).label('month'),
+                func.avg(MeasureIndicator.value).label('average_value')
+            )
+            .filter(MeasureIndicator.idIndicator == indicator_id)
+            .group_by(func.extract('month', MeasureIndicator.datetime))
+            .order_by(func.extract('month', MeasureIndicator.datetime))
+            .all()
+        )
+
+        return [{"month": int(row.month), "average_value": row.average_value} for row in results]
 
     def get_measure_indicator_by_day(self, year: int, month: int, indicator_id: int) -> list[dict]:
         """
@@ -74,20 +91,22 @@ class MeasureIndicatorRepository:
 
         return [{"day": int(row.day), "average_value": row.average_value} for row in results]
 
-    def get_measure_indicator_by_hour(self, parameter_month: int, indicator_id: int) -> list[dict]:
+    def get_measure_indicator_by_hour(self, month: int, indicator_id: int) -> list[dict]:
         """
         Returns the average 'value' of MeasureIndicators grouped by hour (from 00:00 to 23:00),
         filtered by month, for a specific indicator_id.
         """
+        hour_column = func.extract('hour', MeasureIndicator.datetime).label('hour')
+
         results = (
             self.session.query(
-                func.extract('hour', MeasureIndicator.datetime).label('hour'),
+                hour_column,
                 func.avg(MeasureIndicator.value).label('average_value')
             )
-            .filter(func.extract('month', MeasureIndicator.datetime) == parameter_month)
+            .filter(func.extract('month', MeasureIndicator.datetime) == month)
             .filter(MeasureIndicator.idIndicator == indicator_id)
-            .group_by(func.extract('hour', MeasureIndicator.datetime))
-            .order_by(func.extract('hour', MeasureIndicator.datetime))  # Sort by hour for sequential order
+            .group_by(hour_column)
+            .order_by(hour_column)
             .all()
         )
 
