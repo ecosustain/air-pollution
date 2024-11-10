@@ -6,22 +6,6 @@ from sqlalchemy import extract,func
 class MeasureIndicatorRepository:
     def __init__(self, session) -> None:
         self.session = session
-
-    def get_measure_indicators(
-        self,
-        first_time_reference: datetime,
-        last_time_reference: datetime,
-        indicator_id: int
-    ) -> list[MeasureIndicator]:
-        
-        measure_indicators = (self.session.query(MeasureIndicator)
-                              .filter(MeasureIndicator.datetime >= first_time_reference)
-                              .filter(MeasureIndicator.datetime <= last_time_reference)
-                              .filter(MeasureIndicator.idIndicator == indicator_id)
-                              .all()
-                              )
-        
-        return measure_indicators
     
     def get_mean_measure_indicators(
         self,

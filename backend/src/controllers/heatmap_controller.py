@@ -49,7 +49,6 @@ class HeatMapController:
             },
             "yearly": {
                 "isPeriod": True,
-                "mean_group": "year",
                 "first_time_reference": "first_year",
                 "last_time_reference": "last_year",
             },
@@ -75,6 +74,7 @@ class HeatMapController:
 
             heatmaps_keys = range(int(first_time_reference_str), int(last_time_reference_str) + 1)
 
+            time_reference_str = None
         else:
             payload_field = interval_map["payload_field"]
             time_reference_str = payload[payload_field]
@@ -106,7 +106,9 @@ class HeatMapController:
     ):
         response = {}
         for key in heatmaps_keys:
-            mean_values = self.measure_indicator_repository.get_mean_measure_indicators(time_reference_str=time_reference_str,
+            incremented_time_reference_str = self.__increment_time_reference_str(time_reference_str, key)
+
+            mean_values = self.measure_indicator_repository.get_mean_measure_indicators(time_reference_str=incremented_time_reference_str,
                                                                                         indicator_id=indicator_id)
             
             interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
@@ -122,6 +124,23 @@ class HeatMapController:
             response[key] = heat_map
         
         return response
+    
+    def __increment_time_reference_str(self, time_reference_str, key):
+        str_key = str(key)
+        if len(str_key) == 1:
+            str_key = "0" + str_key
+
+        if time_reference_str is None:
+            return str_key
+
+        datetime_list = time_reference_str.split(" ")
+
+        date_list = datetime_list[0].split("-")
+        if len(date_list) < 3:
+            return time_reference_str + str_key
+        if len(date_list) == 3:
+            return time_reference_str + " " + str_key
+
     
     def __get_rectangular_discretization(self) -> list[tuple]:
         borders_coordinates = {
