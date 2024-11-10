@@ -10,10 +10,10 @@ from constants_test import (
 )
 
 class TestRequest:
-    def test_get_map(self):
+    def test_instant_heatmap(self):
         method = "GET"
 
-        date = datetime(2023, 3, 1, 12)
+        date = "2023-03-01 12"
 
         indicator = "MP2.5"
 
@@ -30,8 +30,8 @@ class TestRequest:
         }
 
         payload = {
-            "interval": "hourly",
-            "datetime": date.strftime('%Y-%m-%d %H:%M:%S'),
+            "interval": "instant",
+            "hour": date,
             "indicator": indicator,
             "interpolator": interpolator,
         }
@@ -49,7 +49,55 @@ class TestRequest:
         assert response.status_code == 200
         assert len(response.json()) > 0
 
-        item = response.json()["heatmap"][0]
+        item = response.json()["1"][0]
+        assert "lat" in item
+        assert "long" in item
+        assert "value" in item
+
+
+    def test_hourly_heatmaps(self):
+        method = "GET"
+
+        date = "2023-03-01"
+
+        indicator = "MP2.5"
+
+        PARAM_DICT = {
+            "method": ["ordinary", "universal"],
+            "variogram_model": ["linear", "power", "gaussian", "spherical"],
+            "nlags": [4, 6, 8],
+            "weight": [True, False]
+        }
+
+        interpolator = {
+            "method": "Kriging",
+            "params": PARAM_DICT,
+        }
+
+        payload = {
+            "interval": "hourly",
+            "day": date,
+            "indicator": indicator,
+            "interpolator": interpolator,
+        }
+        payload_str = json.dumps(payload)
+     
+        endpoint = f"/heatmap/{payload_str}"
+        url = f"{BASE_URL}{endpoint}"
+        response = request(
+            method.upper(),
+            url,
+            headers=HEADERS,
+            json=payload
+        )
+
+        assert response.status_code == 200
+        assert len(response.json()) > 0
+
+        for item in range(0,24):
+            assert str(item) in response.json()
+
+        item = response.json()["1"][0]
         assert "lat" in item
         assert "long" in item
         assert "value" in item

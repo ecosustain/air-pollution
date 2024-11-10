@@ -27,28 +27,32 @@ class HeatMapController:
             "Kriging": KrigingInterpolator,
         }
         self.TIME_REFERENCE_MAP = {
+            "instant": {
+                "isPeriod": False,
+                "payload_field": "hour",
+                "heatmaps_keys": range(1,2),
+            },
             "hourly": {
                 "isPeriod": False,
-                "time_reference": "datetime",
-                "time_format": "%Y-%m-%d %H:%M:%S",
+                "payload_field": "day",
+                "heatmaps_keys": range(0,24),
             },
             "daily": {
                 "isPeriod": False,
-                "time_reference": "date",
-                "time_format": "%Y-%m-%d",
+                "payload_field": "month",
+                "heatmaps_keys": range(1,31),
             },
             "monthly": {
                 "isPeriod": False,
-                "time_reference": "year",
-                "time_format": "%Y-%m-%d %H:%M:%S",
+                "payload_field": "year",
+                "heatmaps_keys": range(1,13),
             },
             "yearly": {
                 "isPeriod": True,
+                "mean_group": "year",
                 "first_time_reference": "first_year",
                 "last_time_reference": "last_year",
-                "time_format": "%Y-%m-%d %H:%M:%S",
             },
-
         }
 
     def get_heatmap(
@@ -57,54 +61,67 @@ class HeatMapController:
     ) -> list[dict]:
         indicator = payload["indicator"]
         interpolator_dict = payload["interpolator"]
-        interval = payload["interval"]
+        indicator_id = INDICATORS[indicator]
 
         interpolator_method = interpolator_dict["method"]
-        parameter = interpolator_dict["params"]
+        parameters = interpolator_dict["params"]
 
+        interval = payload["interval"]
         interval_map = self.TIME_REFERENCE_MAP[interval]
+
         if interval_map["isPeriod"]:
             first_time_reference_str = payload[interval_map["first_time_reference"]]
             last_time_reference_str = payload[interval_map["last_time_reference"]]
 
-            time_format = interval_map["time_format"]
-            first_time_reference = datetime.strptime(first_time_reference_str, time_format)
-            last_time_reference = datetime.strptime(last_time_reference_str, time_format)
+            heatmaps_keys = range(int(first_time_reference_str), int(last_time_reference_str) + 1)
 
         else:
-            time_reference_str = payload[interval_map["time_reference"]]
+            payload_field = interval_map["payload_field"]
+            time_reference_str = payload[payload_field]
 
-            time_format = interval_map["time_format"]
-            time_reference = datetime.strptime(time_reference_str, time_format)
-
-        indicator_id = INDICATORS[indicator]
+            heatmaps_keys = interval_map["heatmaps_keys"]
 
         area_discretization = self.__get_rectangular_discretization()
-
-        measure_indicators = self.measure_indicator_repository.get_measure_indicators(date=time_reference,
-                                                                                      indicator_id=indicator_id)
         
-        interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
-                                                             measure_indicators=measure_indicators)
-
-
-        interpolator = self.interpolators[interpolator_method](interpolator_input, parameter)
-
-        y = interpolator.predict(X=area_discretization)
-
-        response = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
-        
-        response_structure = {
-            "heatmaps": {
-                "1": [],
-                "2": [],
-            }
-        }
+        response = self.__get_heatmaps(heatmaps_keys=heatmaps_keys,
+                                       time_reference_str=time_reference_str,
+                                       indicator_id=indicator_id,
+                                       area_discretization=area_discretization,
+                                       interpolator_method=interpolator_method,
+                                       parameters=parameters,)
          
         return response
     
     top = [-23.5737757 + 0.4, -46.7369984 - 0.2]
     bottom = [-23.5737757 - 0.4, -46.7369984 + 0.6]
+
+    def __get_heatmaps(
+        self,
+        heatmaps_keys: list,
+        time_reference_str: str,
+        indicator_id: int,
+        area_discretization,
+        interpolator_method: str,
+        parameters,
+    ):
+        response = {}
+        for key in heatmaps_keys:
+            mean_values = self.measure_indicator_repository.get_mean_measure_indicators(time_reference_str=time_reference_str,
+                                                                                        indicator_id=indicator_id)
+            
+            interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
+                                                                 measure_indicators=mean_values)
+            
+            interpolator = self.interpolators[interpolator_method](interpolator_input, parameters)
+
+            y = interpolator.predict(X=area_discretization)
+
+            heat_map = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
+
+            key = str(key)
+            response[key] = heat_map
+        
+        return response
     
     def __get_rectangular_discretization(self) -> list[tuple]:
         borders_coordinates = {
@@ -191,7 +208,7 @@ class HeatMapController:
         for measure_indicator in measure_indicators:
             station_coordinates = STATIONS_ID[measure_indicator.idStation]
             min_dist_index = self.__get_closer_point(area_discretization=area_discretization,
-                                            station_coordinates=station_coordinates)
+                                                     station_coordinates=station_coordinates)
             y[min_dist_index] = measure_indicator.value
         
         return y

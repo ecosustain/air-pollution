@@ -53,10 +53,10 @@ def heatmap(payload):
     response = make_response()
 
     if request.method == 'GET':
-        heatmap = HeatMapController(session=SESSION).get_heatmap(payload=payload)
+        heatmaps = HeatMapController(session=SESSION).get_heatmap(payload=payload)
         SESSION.close()
 
-        response = jsonify({"heatmap": heatmap})
+        response = jsonify(heatmaps)
         response.status = 200
 
     return response
