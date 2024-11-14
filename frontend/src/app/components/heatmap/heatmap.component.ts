@@ -2,7 +2,7 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 import * as L from 'leaflet';
 import shp from 'shpjs';
 import { Heatmaps, HeatmapResponse, Point } from '../../models/point.model'; // Assuming you have this model
-import { indicators } from '../../models/indicators.models'; // Assuming you have this model
+import { indicators} from '../../models/indicators.models'; // Assuming you have this model
 import { HttpClient } from '@angular/common/http';
 import { spGeoJson } from '../../models/spGeoJson.const';
 
@@ -13,11 +13,12 @@ import { spGeoJson } from '../../models/spGeoJson.const';
   styleUrls: ['./heatmap.component.css']
 })
 export class HeatmapComponent implements OnInit, OnChanges {
-  //@Input() points: Point[] = []; // Receiving points array from the parent
-  @Input() heatmaps: Heatmaps = {}; // Receiving points array from the parent
-  @Input() indicator: string = ''; // Receiving points array from the parent
+  @Input() heatmaps: Heatmaps = {};
+  @Input() indicator: string = ''; 
   
   private map: any;
+  private interval: number[] | undefined = [];
+  private measureUnit : string | undefined = "";
 
   constructor(private http: HttpClient) { }
 
@@ -28,12 +29,15 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if(changes['indicator']){
+        console.log('Updated indicator response:', changes['indicator'].currentValue); // Log updated indicator
+        this.updateIntervals(this.indicator);
+        this.updateUnitMeasure(this.indicator);
+        this.addLegend(this.indicator);
+      }
     if (changes['heatmaps']) {
       console.log('Updated heatmaps response:', changes['heatmaps'].currentValue); // Log updated points
-      if(changes['indicator']){
-        console.log('Updated indicator response:', changes['indicator'].currentValue); // Log updated indicator
-      }
-      this.addRectangles(); // Update rectangles when points change
+      this.addRectangles(this.heatmaps); // Update rectangles when points change
     }
   }
 
@@ -57,7 +61,17 @@ export class HeatmapComponent implements OnInit, OnChanges {
     this.addLegend(this.indicator);
   }
 
-  private addRectangles(): void {
+  private updateIntervals(indicatorName : string){
+    const selectedIndicator = indicators.find(indicator => indicator.name === indicatorName);
+    this.interval = selectedIndicator?.interval
+  }
+  private updateUnitMeasure(indicatorName : string){
+    const selectedIndicator = indicators.find(indicator => indicator.name === indicatorName);
+    this.measureUnit = selectedIndicator?.measureUnit
+  }
+
+  // Add rectangles to the map based on points array
+  private addRectangles(heatmaps : Heatmaps): void {
     if (!this.map) return;
 
     this.map.eachLayer((layer: any) => {
@@ -87,11 +101,11 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
     console.log("The heatmaps is now: ", this.heatmaps)
 
-    this.heatmaps["1"].forEach(point => {
+    heatmaps["1"].forEach(point => {
       L.rectangle([[point.lat - (latStepSize / 2), point.long - (latStepSize / 2)],
                     [point.lat + (longStepSize / 2), point.long + (longStepSize / 2)]], {
         color: 'transparent', // Can change color as needed
-        fillColor: this.chooseColor(point.value, this.indicator),
+        fillColor: this.chooseColor(point.value),
         fillOpacity: 0.4,
         weight: 1
       }).addTo(this.map);
@@ -99,8 +113,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
   // Choose color based on measure
-  private chooseColor(measure: number, indicator : string): string {
-    const intervals = indicators[indicator as keyof typeof indicators].interval;
+  private chooseColor(measure: number): string {
+    const intervals = this.interval as number[];
     const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
 
     for (let i = 1; i < intervals.length; i++) {
@@ -120,9 +134,10 @@ export class HeatmapComponent implements OnInit, OnChanges {
       
       onAdd: (map: any) => {
         const div = L.DomUtil.create('div', 'info legend');
-        const intervals = indicators[indicator as keyof typeof indicators].interval; // Intervals based on chooseColor function
+        const intervals = this.interval as number[]; 
         const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
-        const unitMeasure = indicators[indicator as keyof typeof indicators].measureUnit;
+        const unitMeasure = this.measureUnit;
+
         // Loop through intervals and generate a label with a color square and unit for each range
         for (let i = 0; i < intervals.length; i++) {
           div.innerHTML +=
@@ -134,9 +149,5 @@ export class HeatmapComponent implements OnInit, OnChanges {
     }))();
   
     legend.addTo(this.map);
-  }
-  
-  private calculateOpacity(max: number, min: number, value: number): number {
-    return Math.min(Math.max(value / max, 0.1), 1);
   }
 }
