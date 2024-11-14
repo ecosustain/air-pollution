@@ -26,9 +26,9 @@ import { DatePipe } from '@angular/common';
 export class HomeComponent implements OnInit{
   formChoice : FormGroup;
   chosenForm : string = "Mapa de Calor";
-
+  formData: any;  // To store the form data
   heatmapPoints : Point[] = [];
-  errorMessage : string = ''
+  errorMessage : string = '';
 
   constructor (
     private fb : FormBuilder, 
