@@ -81,7 +81,7 @@ export class HomeComponent implements OnInit{
       payload.day = this.formatDay(
         formValues.specificDate.year,
         formValues.specificDate.month, 
-        formValues.specificDate.day); 
+        formValues.specificDate.day) 
         delete payload["specificDate"];
     } else if (formValues.interval === "daily"){
       payload.month = this.formatMonth(
