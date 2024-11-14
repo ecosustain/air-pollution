@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 })
 export class GraphFormComponent implements OnInit {
   graphForm: FormGroup;
-  pollutants = ['MP2.5', 'MP2.10', 'O3'];
+  pollutants = ['MP2.5', 'MP10', 'O3'];
   timePeriodType: string = '';
   @Output() formSubmit = new EventEmitter<any>();
 

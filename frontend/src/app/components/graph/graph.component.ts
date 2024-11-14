@@ -36,10 +36,13 @@ export class GraphComponent implements AfterViewInit {
   }
 
   updateChart(data: any) {
-    this.removePreviousChart(data);
-    const timeLabel = this.findTimeLabel(data);    
-    if (!timeLabel)
+    if (!this.removePreviousChart(data))
       return;
+    const timeLabel = this.findTimeLabel(data);    
+    if (!timeLabel) {
+      this.chart = undefined;
+      return;
+    }
     const labels = this.getSortedTimePoints(data, timeLabel);
     const datasets = this.getDatasets(data, timeLabel, labels)
     const chartData = this.defineChartData(labels, datasets);
@@ -52,15 +55,25 @@ export class GraphComponent implements AfterViewInit {
       this.chart.destroy();
     if (data.line_graph.length == 0) {
       this.chart = undefined;
-      return;
+      return false;
     }
+    return true
   }
 
   private findTimeLabel(data: any) {
-    const timeLabel = Object.keys(data.line_graph[0][Object.keys(data.line_graph[0])[0]][0]).find(
-      key => key === 'year' || key === 'day' || key === 'hour'
-    );
-    return timeLabel;
+    for (const pollutantData of data.line_graph) {
+      const pollutantKey = Object.keys(pollutantData)[0];
+      const points = pollutantData[pollutantKey];
+      
+      if (Array.isArray(points) && points.length > 0) {
+        const timeLabel = Object.keys(points[0]).find(
+          key => key === 'year' || key === 'day' || key === 'hour'
+        );
+        if (timeLabel)
+          return timeLabel;
+      }
+    }
+    return null;
   }
 
   private getSortedTimePoints(data: any, timeLabel: string) {
