@@ -5,7 +5,7 @@ import { HeatmapFormComponent } from "../heatmap-form/heatmap-form.component";
 import { HeatmapComponent } from "../heatmap/heatmap.component";
 import { GraphFormComponent } from '../graph-form/graph-form.component';
 import { GraphComponent } from "../graph/graph.component";
-import { Point } from '../../models/point.model';
+import { HeatmapResponse, Heatmaps, Point } from '../../models/point.model';
 import { HeatmapService } from '../../services/heatmap/heatmap.service';
 import { DatePipe } from '@angular/common';
 
@@ -28,6 +28,8 @@ export class HomeComponent implements OnInit{
   chosenForm : string = "Mapa de Calor";
   formData: any;
   heatmapPoints : Point[] = [];
+  heatmaps : Heatmaps = {};
+  indicator : string = '';
   errorMessage : string = '';
 
   constructor (
@@ -50,14 +52,14 @@ export class HomeComponent implements OnInit{
     this.chosenForm = selectedValue;
   }
 
-  formatDate(day: number, month: number, year: number, hour: number): string {
-    const date = new Date(year, month - 1, day, hour);
+  formatDatetime(day: number, month: number, year: number, hour: number): string {
+    const date = new Date(year, month - 1, day, hour); // month is 0-indexed in Date object
     return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
   }
 
-  handleGraphFormSubmit(formData: any): void {
-    this.formData = formData;
-    console.log('Graph form submitted and data passed to graph:', formData);
+  formatDate(day: number, month: number, year: number): string {
+    const date = new Date(year, month - 1, day); // month is 0-indexed in Date object
+    return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
   }
 
   handleHeatmapFormSubmit(formValues: any) {
@@ -92,9 +94,10 @@ export class HomeComponent implements OnInit{
 
     this.heatmapService.getInterpolatedPoints(date, indicator, method, param)
       .subscribe({
-        next: (points) => {
-          console.log('Requisição deu certo')
-          this.heatmapPoints = points.heat_map;
+        next: (heatmapResponse) => {
+          console.log('Requisição deu certo');
+          this.heatmaps = heatmapResponse.heatmaps;
+          this.indicator = payload.indicator;
         },
         error: (err) => {
           this.errorMessage = 'Failed to retrieve points';

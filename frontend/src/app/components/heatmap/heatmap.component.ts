@@ -1,7 +1,8 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
 import shp from 'shpjs';
-import { Point } from '../../models/point.model';
+import { Heatmaps, HeatmapResponse, Point } from '../../models/point.model'; // Assuming you have this model
+import { indicators } from '../../models/indicators.models'; // Assuming you have this model
 import { HttpClient } from '@angular/common/http';
 import { spGeoJson } from '../../models/spGeoJson.const';
 
@@ -12,21 +13,27 @@ import { spGeoJson } from '../../models/spGeoJson.const';
   styleUrls: ['./heatmap.component.css']
 })
 export class HeatmapComponent implements OnInit, OnChanges {
-  @Input() points: Point[] = [];
-
+  //@Input() points: Point[] = []; // Receiving points array from the parent
+  @Input() heatmaps: Heatmaps = {}; // Receiving points array from the parent
+  @Input() indicator: string = ''; // Receiving points array from the parent
+  
   private map: any;
 
   constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.initializeMap();
-    console.log('Initial points:', this.points);
+    console.log('Initial Heatmap Intervals:', this.heatmaps); // Log initial points
+    //this.addRectangles(); // Call addRectangles if you want to draw rectangles on init
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['points']) {
-      console.log('Updated points:', changes['points'].currentValue);
-      this.addRectangles();
+    if (changes['heatmaps']) {
+      console.log('Updated heatmaps response:', changes['heatmaps'].currentValue); // Log updated points
+      if(changes['indicator']){
+        console.log('Updated indicator response:', changes['indicator'].currentValue); // Log updated indicator
+      }
+      this.addRectangles(); // Update rectangles when points change
     }
   }
 
@@ -45,7 +52,9 @@ export class HeatmapComponent implements OnInit, OnChanges {
         fillOpacity: 0.1,
       }
     }).addTo(this.map);
-    this.addLegend();
+
+    // Add legend after map is initialized
+    this.addLegend(this.indicator);
   }
 
   private addRectangles(): void {
@@ -76,46 +85,49 @@ export class HeatmapComponent implements OnInit, OnChanges {
     const latStepSize = (borders_coordinates.max_lat - borders_coordinates.min_lat) / number_of_lat_points;
     const longStepSize = (borders_coordinates.max_long - borders_coordinates.min_long) / number_of_long_points;
 
-    console.log("The points is now: ", this.points)
+    console.log("The heatmaps is now: ", this.heatmaps)
 
-    this.points.forEach(point => {
+    this.heatmaps["1"].forEach(point => {
       L.rectangle([[point.lat - (latStepSize / 2), point.long - (latStepSize / 2)],
                     [point.lat + (longStepSize / 2), point.long + (longStepSize / 2)]], {
-        color: 'transparent',
-        fillColor: this.chooseColor(point.value),
+        color: 'transparent', // Can change color as needed
+        fillColor: this.chooseColor(point.value, this.indicator),
         fillOpacity: 0.4,
         weight: 1
       }).addTo(this.map);
     });
   }
 
-  private chooseColor(measure: number): string {
-    if (measure < 25) {
-      return 'green';
-    } else if (measure < 50) {
-      return 'yellow';
-    } else if (measure < 75) {
-      return 'pink';
-    } else if (measure < 125) {
-      return 'red';
-    } else {
-      return 'purple';
+  // Choose color based on measure
+  private chooseColor(measure: number, indicator : string): string {
+    const intervals = indicators[indicator as keyof typeof indicators].interval;
+    const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
+
+    for (let i = 1; i < intervals.length; i++) {
+        if (measure <= intervals[i]) {
+            return colors[i-1];
+        }
     }
+    
+    // If the measure is above the last interval, return the last color
+    return colors[colors.length - 1];
   }
 
-  private addLegend(): void {
+  // Add a legend control to the map
+  private addLegend(indicator : string): void {
     const legend = new (L.Control.extend({
       options: { position: 'bottomright' },
       
       onAdd: (map: any) => {
         const div = L.DomUtil.create('div', 'info legend');
-        const intervals = [0, 25, 50, 75, 125];
+        const intervals = indicators[indicator as keyof typeof indicators].interval; // Intervals based on chooseColor function
         const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
-  
+        const unitMeasure = indicators[indicator as keyof typeof indicators].measureUnit;
+        // Loop through intervals and generate a label with a color square and unit for each range
         for (let i = 0; i < intervals.length; i++) {
           div.innerHTML +=
             '<i style="background:' + colors[i] + '; width: 18px; height: 18px; display: inline-block;"></i> ' +
-            intervals[i] + (intervals[i + 1] ? '&ndash;' + intervals[i + 1] : '+') + ' µg/m³<br>';
+            intervals[i] + (intervals[i + 1] ? '&ndash;' + intervals[i + 1] : '+') +' '+ unitMeasure +'<br>';
         }
         return div;
       }
