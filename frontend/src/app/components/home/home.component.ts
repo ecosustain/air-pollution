@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { HeatmapFormComponent } from "../heatmap-form/heatmap-form.component";
 import { HeatmapComponent } from "../heatmap/heatmap.component";
+import { GraphFormComponent } from '../graph-form/graph-form.component';
 import { GraphComponent } from "../graph/graph.component";
 import { Point } from '../../models/point.model';
 import { HeatmapService } from '../../services/heatmap/heatmap.service';
@@ -15,7 +16,8 @@ import { DatePipe } from '@angular/common';
     CommonModule, 
     ReactiveFormsModule, 
     HeatmapFormComponent, 
-    HeatmapComponent, 
+    HeatmapComponent,
+    GraphFormComponent,
     GraphComponent,
     DatePipe],
   templateUrl: './home.component.html',
