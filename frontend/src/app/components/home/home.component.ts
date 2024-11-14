@@ -26,7 +26,7 @@ import { DatePipe } from '@angular/common';
 export class HomeComponent implements OnInit{
   formChoice : FormGroup;
   chosenForm : string = "Mapa de Calor";
-  formData: any;  // To store the form data
+  formData: any;
   heatmapPoints : Point[] = [];
   errorMessage : string = '';
 
@@ -45,14 +45,19 @@ export class HomeComponent implements OnInit{
   }
 
   onChoiceChange (event : Event) {
-    const selectElement = event.target as HTMLSelectElement; // Cast to HTMLSelectElement
-    const selectedValue = selectElement.value; // Now we can safely access .value
+    const selectElement = event.target as HTMLSelectElement;
+    const selectedValue = selectElement.value;
     this.chosenForm = selectedValue;
   }
 
   formatDate(day: number, month: number, year: number, hour: number): string {
-    const date = new Date(year, month - 1, day, hour); // month is 0-indexed in Date object
+    const date = new Date(year, month - 1, day, hour);
     return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
+  }
+
+  handleGraphFormSubmit(formData: any): void {
+    this.formData = formData;
+    console.log('Graph form submitted and data passed to graph:', formData);
   }
 
   handleHeatmapFormSubmit(formValues: any) {

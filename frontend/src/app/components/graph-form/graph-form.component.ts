@@ -75,7 +75,6 @@ export class GraphFormComponent implements OnInit {
   onSubmit() {
     this.graphForm.markAllAsTouched();
     if (this.graphForm.valid) {
-      // Structure formData with timePeriod and specificDate, as well as additional fields based on interval
       const formData: any = {
         timePeriod: this.translateTimePeriod(this.graphForm.value.timePeriod.toLowerCase()),
         indicators: this.graphForm.value.indicators,
@@ -86,17 +85,13 @@ export class GraphFormComponent implements OnInit {
         month: this.graphForm.value.month || null
       };
   
-      // Adjust specificDate and month based on interval
-      if (formData.timePeriod === 'monthly' || formData.timePeriod === 'hourly') {
-        formData.specificDate = null;  // Clear specificDate for monthly/hourly intervals
-      } 
-      if (formData.timePeriod === 'daily') {
-        formData.month = null;  // Only specificDate should be populated for daily
-      } 
+      if (formData.timePeriod === 'monthly' || formData.timePeriod === 'hourly')
+        formData.specificDate = null;
+      if (formData.timePeriod === 'daily')
+        formData.month = null;
   
-      console.log('Form submitted:', formData); // Log the structured form data
-  
-      this.formSubmit.emit(formData);  // Emit the form data to the parent component (GraphComponent)
+      console.log('Form submitted:', formData);
+      this.formSubmit.emit(formData);
     } else {
       console.log('Form is invalid');
     }

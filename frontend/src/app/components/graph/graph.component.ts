@@ -56,37 +56,27 @@ export class GraphComponent implements AfterViewInit {
       return;
     }
 
-    // Step 1: Identify all unique time points across pollutants
     const allTimePoints = new Set<number>();
-
     data.line_graph.forEach((pollutantObj: any) => {
       const pollutantKey = Object.keys(pollutantObj)[0];
       pollutantObj[pollutantKey].forEach((point: any) => {
         allTimePoints.add(point[timeField]);
       });
     });
-
-    // Convert Set to a sorted array of time points to use as labels
     const labels = Array.from(allTimePoints).sort((a, b) => a - b);
 
-    // Step 2: Create datasets with dynamically generated colors
     const datasets = data.line_graph.map((pollutantObj: any, index: number) => {
-      const pollutantKey = Object.keys(pollutantObj)[0]; // e.g., "MP2.5", "O3"
+      const pollutantKey = Object.keys(pollutantObj)[0];
       const points = pollutantObj[pollutantKey];
-
-      // Create a map of time points to values for easy lookup
       const timeToValueMap = new Map<number, number>();
       points.forEach((point: any) => {
         timeToValueMap.set(point[timeField], point.average_value);
       });
-
-      // Generate data array aligned with the labels (null if time point is missing)
       const data = labels.map((label) => timeToValueMap.get(label) || null);
-
       return {
-        label: pollutantKey, // Use pollutant name as label
-        data: data, // Data array with nulls for missing values
-        borderColor: this.generateColor(index), // Use the dynamic color generation function
+        label: pollutantKey,
+        data: data,
+        borderColor: this.generateColor(index),
         fill: false,
         tension: 0.1,
       };
@@ -126,7 +116,7 @@ export class GraphComponent implements AfterViewInit {
   }
 
   private generateColor(index: number): string {
-    const hue = (index * 137) % 360;  // Use a large prime number to spread colors evenly
-    return `hsl(${hue}, 70%, 50%)`;   // Adjust saturation and lightness as desired
+    const hue = (index * 137) % 360;
+    return `hsl(${hue}, 70%, 50%)`;
   }
 }
