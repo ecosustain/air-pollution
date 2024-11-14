@@ -60,7 +60,7 @@ def update_data():
 
 
 @app.route('/heatmap/<string:payload>', methods=['GET'])
-def heat_map(payload):
+def heatmap(payload):
     print(payload)
     payload = json.loads(payload)
     response = make_response()

@@ -1,7 +1,6 @@
 from models import MeasureIndicator
 import datetime
-from sqlalchemy import extract, func
-
+from sqlalchemy import extract,func
 
 class MeasureIndicatorRepository:
     def __init__(self, session) -> None:
