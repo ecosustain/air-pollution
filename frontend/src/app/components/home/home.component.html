@@ -10,7 +10,7 @@
         <app-graph-form *ngIf="chosenForm === 'Gráfico'" (formSubmit)="handleGraphFormSubmit($event)"></app-graph-form>
     </div>
     <div class="container" id="image-container">
-        <app-heatmap *ngIf="chosenForm === 'Mapa de Calor'" [points]="heatmapPoints"></app-heatmap>
-        <app-graph *ngIf="chosenForm === 'Gráfico'" [formData]="formData"></app-graph>
+        <app-heatmap *ngIf="chosenForm === 'Mapa de Calor'" [heatmaps]="heatmaps" [indicator]="indicator"></app-heatmap>
+        <app-graph *ngIf="chosenForm === 'Gráfico'"></app-graph>
     </div>
 </div>
