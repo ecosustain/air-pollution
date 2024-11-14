@@ -27,7 +27,6 @@ export class HomeComponent implements OnInit{
   formChoice : FormGroup;
   chosenForm : string = "Mapa de Calor";
   formData: any;
-  heatmapPoints : Point[] = [];
   heatmaps : Heatmaps = {};
   indicator : string = '';
   errorMessage : string = '';
