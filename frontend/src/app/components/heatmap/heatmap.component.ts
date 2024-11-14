@@ -33,7 +33,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
         console.log('Updated indicator response:', changes['indicator'].currentValue); // Log updated indicator
         this.updateIntervals(this.indicator);
         this.updateUnitMeasure(this.indicator);
-        this.addLegend(this.indicator);
+        this.addLegend(this.indicator); 
       }
     if (changes['heatmaps']) {
       console.log('Updated heatmaps response:', changes['heatmaps'].currentValue); // Log updated points
