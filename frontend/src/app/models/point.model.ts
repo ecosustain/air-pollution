@@ -1,9 +1,13 @@
 export interface Point {
-    lat : number,
-    long : number,
-    value : number 
+    lat: number;
+    long: number;
+    value: number;
 }
 
-export interface Heatmap{
-    heat_map : Point[]
+export interface Heatmaps {
+    [key: string]: Point[];
+}
+
+export interface HeatmapResponse {
+    heatmaps: Heatmaps;
 }

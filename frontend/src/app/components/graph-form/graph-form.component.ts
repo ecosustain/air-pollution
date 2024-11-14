@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
 })
 export class GraphFormComponent implements OnInit {
   graphForm: FormGroup;
-  pollutants = ['MP2.5', 'MP2.10', 'O3'];
+  pollutants = ['MP2.5', 'MP10', 'O3'];
   timePeriodType: string = '';
   @Output() formSubmit = new EventEmitter<any>();
 
@@ -73,13 +73,38 @@ export class GraphFormComponent implements OnInit {
   }
 
   onSubmit() {
-    this.graphForm.markAllAsTouched(); 
+    this.graphForm.markAllAsTouched();
     if (this.graphForm.valid) {
-      console.log('Form submitted:', this.graphForm.value);
-      this.formSubmit.emit(this.graphForm.value);
+      const formData: any = {
+        timePeriod: this.translateTimePeriod(this.graphForm.value.timePeriod.toLowerCase()),
+        indicators: this.graphForm.value.indicators,
+        specificDate: {
+          year: this.graphForm.value.specificDate.year || null,
+          month: this.graphForm.value.specificDate.month || null
+        },
+        month: this.graphForm.value.month || null
+      };
+  
+      if (formData.timePeriod === 'monthly' || formData.timePeriod === 'hourly')
+        formData.specificDate = null;
+      if (formData.timePeriod === 'daily')
+        formData.month = null;
+  
+      console.log('Form submitted:', formData);
+      this.formSubmit.emit(formData);
     } else {
       console.log('Form is invalid');
     }
   }
 
+  private translateTimePeriod(originalTimePeriod: string) {
+    const translations = new Map<string, string>([
+      ["anual", "yearly"],
+      ["mensal", "monthly"],
+      ["mensal 2", "monthly"],
+      ["diária", "daily"],
+      ["horária", "hourly"]
+    ]);
+    return translations.get(originalTimePeriod);
+  }
 }
