@@ -57,11 +57,6 @@ export class HomeComponent implements OnInit{
     return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
   }
 
-  formatDate(day: number, month: number, year: number): string {
-    const date = new Date(year, month - 1, day); // month is 0-indexed in Date object
-    return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
-  }
-
   formatDay(year: number, month: number, day: number): string {
     const date = new Date(year, month - 1, day); // month is 0-indexed in Date object
     return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
