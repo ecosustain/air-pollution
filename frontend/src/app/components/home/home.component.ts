@@ -52,13 +52,18 @@ export class HomeComponent implements OnInit{
     this.chosenForm = selectedValue;
   }
 
-  formatDatetime(day: number, month: number, year: number, hour: number): string {
+  formatHour(year: number, month: number, day: number, hour: number): string {
     const date = new Date(year, month - 1, day, hour); // month is 0-indexed in Date object
     return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
   }
 
-  formatDate(day: number, month: number, year: number): string {
+  formatDay(year: number, month: number, day: number): string {
     const date = new Date(year, month - 1, day); // month is 0-indexed in Date object
+    return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
+  }
+
+  formatMonth(year: number, month: number){
+    const date = new Date(year, month - 1); // month is 0-indexed in Date object
     return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
   }
 
@@ -76,7 +81,7 @@ export class HomeComponent implements OnInit{
       payload.day = this.formatDay(
         formValues.specificDate.year,
         formValues.specificDate.month, 
-        formValues.specificDate.day) 
+        formValues.specificDate.day); 
         delete payload["specificDate"];
     } else if (formValues.interval === "daily"){
       payload.month = this.formatMonth(
@@ -92,10 +97,10 @@ export class HomeComponent implements OnInit{
       payload.last_year = formValues.lastYear;
     }
 
-    this.heatmapService.getInterpolatedPoints(date, indicator, method, param)
+    this.heatmapService.getInterpolatedHeatmap(payload)
       .subscribe({
         next: (heatmapResponse) => {
-          console.log('Requisição deu certo');
+          console.log('Query did okay');
           this.heatmaps = heatmapResponse.heatmaps;
           this.indicator = payload.indicator;
         },
