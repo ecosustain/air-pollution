@@ -8,45 +8,54 @@
           <option value="Indicator2">Indicador 2</option>
         </select>
       </div>
-      <div class="form-field-container">
+      <div class="form-field-container" formGroupName="interpolator">
         <!-- <label for="indicator">Indicator</label> -->
-        <select formControlName="method" id="method">
+        <select formControlName="method" id="method" (change)="onMethodChange($event)">
           <option value="">Método</option>
           <option value="KNN">KNN</option>
-          <option value="Krigingin">Krigingin</option>
+          <option value="Krigin">Krigin</option>
         </select>
       </div>
-      <div class="form-field-container">
-        <!-- <label for="year">Year</label> -->
-        <input type="number" placeholder="Parâmetro" formControlName="param" id="param" /> 
+      <div class="form-field-container" formGroupName="interpolator">
+        <div *ngIf="methodType === 'KNN'" formGroupName="params">
+          <input type="number" formControlName="k" placeholder="k value" />
+        </div>
+        <div *ngIf="methodType === 'Krigin'" formGroupName="params">
+          <input formControlName="method" placeholder="method" />
+          <input formControlName="variogram_model" placeholder="variogram model" />
+          <input formControlName="n_lags" type="number" placeholder="n_lags" />
+          <input formControlName="weight" type="checkbox" />
+        </div> 
       </div>
+      
+
       <div class="form-field-container">
-        <!-- <label for="timePeriod">Time Period</label> -->
-        <select formControlName="timePeriod" (change)="onTimePeriodChange($event)">
+        <select formControlName="interval" (change)="onIntervalChange($event)">
           <option value="">Período de tempo</option>
-          <option value="Anual">Anual</option>
-          <option value="Mensal">Mensal</option>
-          <option value="Diária">Diária</option>
-          <option value="Horária">Horária</option>
+          <option value="yearly">Anual</option>
+          <option value="monthly">Mensal</option>
+          <option value="daily">Diária</option>
+          <option value="hourly">Horária</option>
         </select>
       </div>
-      <div class="form-field-container" id="startYear-lastYear-container" *ngIf="timePeriodType === 'Anual'">
+
+      <div class="form-field-container" id="startYear-lastYear-container" *ngIf="intervalType === 'yearly'">
         <!-- <label for="startYear">Start Year</label> -->
         <input type="number" placeholder="Primeiro Ano" formControlName="startYear" id="startYear" />
         
         <!-- <label for="endYear">End Year</label> -->
         <input type="number" placeholder="Último Ano" formControlName="endYear" id="endYear" />
       </div>
-      <div class="form-field-container" *ngIf="timePeriodType === 'Mensal'">
+      <div class="form-field-container" *ngIf="intervalType === 'monthly'">
         <!-- <label for="year">Year</label> -->
         <input type="number" placeholder="Ano" formControlName="year" id="year" /> 
       </div>
-      <div class="form-field-container" id="specific-date-form" *ngIf="timePeriodType === 'Diária' || timePeriodType === 'Horária'" formGroupName="specificDate">
+      <div class="form-field-container" id="specific-date-form" *ngIf="intervalType === 'daily' || intervalType === 'hourly'" formGroupName="specificDate">
         <!-- <label>Specific Date</label> -->
         <input type="number" formControlName="day" placeholder="Dia" />
         <input type="number" formControlName="month" placeholder="Mês" />
         <input type="number" formControlName="year" placeholder="Ano" />
-        <input *ngIf="timePeriodType === 'Horária'" type="number" formControlName="hour" placeholder="Hora" />
+        <input *ngIf="intervalType === 'hourly'" type="number" formControlName="hour" placeholder="Hora" />
       </div>
       <button type="submit">Confirmar</button>
     </form>
