@@ -1,6 +1,8 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { indicators } from '../../models/indicators.models';
+import { interpolatorMethods } from '../../models/interpolator-methods.models';
 
 @Component({
   selector: 'app-heatmap-form',
@@ -13,6 +15,9 @@ export class HeatmapFormComponent implements OnInit {
   mapaDeCalorForm: FormGroup;
   intervalType: string = '';
   methodType: string = '';
+  indicators = indicators
+  interpolatorMethods = interpolatorMethods
+
   @Output() formSubmit = new EventEmitter<any>();
 
   constructor(private fb: FormBuilder) {
@@ -33,54 +38,76 @@ export class HeatmapFormComponent implements OnInit {
     this.intervalType = selectedValue;
     this.clearTimeDynamicControls();
 
-    if (this.intervalType === 'yearly') {
-      this.mapaDeCalorForm.addControl('startYear', this.fb.control('', Validators.required));
-      this.mapaDeCalorForm.addControl('endYear', this.fb.control('', Validators.required));
-    } else if (this.intervalType === 'monthly') {
-      this.mapaDeCalorForm.addControl('year', this.fb.control('', Validators.required));
-    } else if (this.intervalType === 'daily' || this.intervalType === 'hourly') {
-      this.mapaDeCalorForm.addControl('specificDate', this.fb.group({
-        day: ['', Validators.required],
-        month: ['', Validators.required],
-        year: ['', Validators.required],
-        hour: this.intervalType === 'hourly' ? this.fb.control('', Validators.required) : this.fb.control('')
-      }));
+    if(this.intervalType === 'yearly') {
+      this.mapaDeCalorForm.addControl('firstYear', this.fb.control('', Validators.required));
+      this.mapaDeCalorForm.addControl('lastYear', this.fb.control('', Validators.required));
+    } else {
+      const specificDateGroup = this.fb.group({});
+      specificDateGroup.addControl('year', this.fb.control('', Validators.required));
+
+      if(this.intervalType != 'monthly'){
+        specificDateGroup.addControl('month', this.fb.control('', Validators.required));
+        if (this.intervalType != 'daily') {
+          specificDateGroup.addControl('day', this.fb.control('', Validators.required));
+          if(this.intervalType != 'hourly') {
+            specificDateGroup.addControl('hour', this.fb.control('', Validators.required));
+          }
+        }
+      }
+      this.mapaDeCalorForm.addControl('specificDate', specificDateGroup);
     }
+
     this.mapaDeCalorForm.updateValueAndValidity();
   }
 
   onMethodChange(event: Event) {
     this.methodType = (event.target as HTMLSelectElement).value;
     const params = this.mapaDeCalorForm.get('interpolator')?.get('params') as FormGroup;
+    
+    // Clear existing controls before adding new ones
     this.clearParamsDynamicControls();
-
-    if (this.methodType === 'KNN') {
-      params.addControl('k', this.fb.control('', Validators.required));
-    } else if (this.methodType === 'Krigin') {
-      params.addControl('method', this.fb.control('', Validators.required));
-      params.addControl('variogram_model', this.fb.control('', Validators.required));
-      params.addControl('n_lags', this.fb.control('', Validators.required));
-      params.addControl('weight', this.fb.control(false, Validators.required));
+  
+    // Find the selected method in interpolatorMethods
+    const selectedMethod = this.interpolatorMethods.find(method => method.name === this.methodType);
+  
+    if (selectedMethod) {
+      // Loop through the params of the selected method and add controls dynamically
+      selectedMethod.params.forEach(param => {
+        // Initialize the control with an appropriate default based on type
+        const control = this.fb.control(param.type === 'checkbox' ? false : '', Validators.required);
+        params.addControl(param.name, control);
+      });
     }
+  
+    // Update the form validity
     params.updateValueAndValidity();
+  }
+  
+
+  get selectedMethodParams() {
+    const selectedMethod = this.interpolatorMethods.find(method => method.name === this.methodType);
+    return selectedMethod ? selectedMethod.params : [];
   }
 
   clearTimeDynamicControls() {
-    ['startYear', 'endYear', 'year', 'specificDate'].forEach(control => {
+    ['firstYear', 'lastYear', 'year', 'specificDate'].forEach(control => {
       this.mapaDeCalorForm.removeControl(control);
     });
   }
 
   clearParamsDynamicControls() {
     const params = this.mapaDeCalorForm.get('interpolator.params') as FormGroup;
-    ['k', 'method', 'variogram_model', 'n_lags', 'weight'].forEach(control => {
-      if (params.get(control)) {
-        params.removeControl(control);
-      }
+  
+    // Remove each control from the params FormGroup
+    Object.keys(params.controls).forEach(control => {
+      params.removeControl(control);
     });
+  
+    // Reset the params FormGroup state
     params.reset();
     params.clearValidators();
   }
+  
   
 
   onSubmit() {

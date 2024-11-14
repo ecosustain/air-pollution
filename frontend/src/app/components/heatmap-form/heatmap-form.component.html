@@ -1,31 +1,34 @@
 <div class="form-component-container" id="heatmap-form-container">
   <form [formGroup]="mapaDeCalorForm" (ngSubmit)="onSubmit()">
       <div class="form-field-container">
-        <!-- <label for="indicator">Indicator</label> -->
         <select formControlName="indicator" id="indicator">
           <option value="">Indicador</option>
-          <option value="MP2.5">MP 2.5</option>
-          <option value="Indicator2">Indicador 2</option>
+          <option *ngFor="let indicator of indicators" [value]="indicator.name">{{ indicator.name }}</option>
         </select>
       </div>
+
       <div class="form-field-container" formGroupName="interpolator">
-        <!-- <label for="indicator">Indicator</label> -->
         <select formControlName="method" id="method" (change)="onMethodChange($event)">
           <option value="">Método</option>
-          <option value="KNN">KNN</option>
-          <option value="Krigin">Krigin</option>
+          <option *ngFor="let method of interpolatorMethods" [value]="method.name">{{ method.name }}</option>
         </select>
       </div>
+      
       <div class="form-field-container" formGroupName="interpolator">
-        <div *ngIf="methodType === 'KNN'" formGroupName="params">
-          <input type="number" formControlName="k" placeholder="k value" />
+        <div formGroupName="params">
+          <ng-container *ngFor="let param of selectedMethodParams">
+            <div *ngIf="param.type === 'number'">
+              <input type="number" [formControlName]="param.name" [placeholder]="param.name" />
+            </div>
+            <div *ngIf="param.type === 'text'">
+              <input type="text" [formControlName]="param.name" [placeholder]="param.name" />
+            </div>
+            <div *ngIf="param.type === 'checkbox'">
+              <label>{{ param.name }} </label>
+              <input type="checkbox" [formControlName]="param.name" />
+            </div>
+          </ng-container>
         </div>
-        <div *ngIf="methodType === 'Krigin'" formGroupName="params">
-          <input formControlName="method" placeholder="method" />
-          <input formControlName="variogram_model" placeholder="variogram model" />
-          <input formControlName="n_lags" type="number" placeholder="n_lags" />
-          <input formControlName="weight" type="checkbox" />
-        </div> 
       </div>
       
 
@@ -36,27 +39,26 @@
           <option value="monthly">Mensal</option>
           <option value="daily">Diária</option>
           <option value="hourly">Horária</option>
+          <option value="instant">Instante</option>
         </select>
       </div>
 
       <div class="form-field-container" id="startYear-lastYear-container" *ngIf="intervalType === 'yearly'">
-        <!-- <label for="startYear">Start Year</label> -->
-        <input type="number" placeholder="Primeiro Ano" formControlName="startYear" id="startYear" />
-        
-        <!-- <label for="endYear">End Year</label> -->
-        <input type="number" placeholder="Último Ano" formControlName="endYear" id="endYear" />
+        <input type="number" placeholder="Primeiro Ano" formControlName="firstYear" id="firstYear" />
+        <input type="number" placeholder="Último Ano" formControlName="lastYear" id="lastYear" />
       </div>
-      <div class="form-field-container" *ngIf="intervalType === 'monthly'">
-        <!-- <label for="year">Year</label> -->
-        <input type="number" placeholder="Ano" formControlName="year" id="year" /> 
-      </div>
-      <div class="form-field-container" id="specific-date-form" *ngIf="intervalType === 'daily' || intervalType === 'hourly'" formGroupName="specificDate">
-        <!-- <label>Specific Date</label> -->
-        <input type="number" formControlName="day" placeholder="Dia" />
-        <input type="number" formControlName="month" placeholder="Mês" />
+
+      <div class="form-field-container" 
+           id="specific-date-form" 
+           *ngIf="intervalType != 'yearly' && intervalType != ''" 
+           formGroupName="specificDate">
+
+        <input *ngIf="intervalType === 'instant'" type="number" formControlName="hour" placeholder="Hora" />
+        <input *ngIf="intervalType === 'hourly' || intervalType === 'instant'" type="number" formControlName="day" placeholder="Dia" />
+        <input *ngIf="intervalType === 'daily' || intervalType === 'hourly' || intervalType === 'instant'" type="number" formControlName="month" placeholder="Mês" />
         <input type="number" formControlName="year" placeholder="Ano" />
-        <input *ngIf="intervalType === 'hourly'" type="number" formControlName="hour" placeholder="Hora" />
       </div>
+
       <button type="submit">Confirmar</button>
     </form>
 </div>
