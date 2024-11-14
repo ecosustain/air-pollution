@@ -70,7 +70,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
       "max_long": -46.36359807038185,
     };
 
-    const number_of_lat_points = 20;
+    const number_of_lat_points = 60;
 
     const lat_distance = borders_coordinates.max_lat - borders_coordinates.min_lat;
     const long_distance = borders_coordinates.max_long - borders_coordinates.min_long;
@@ -81,9 +81,6 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
     const latStepSize = (borders_coordinates.max_lat - borders_coordinates.min_lat) / number_of_lat_points;
     const longStepSize = (borders_coordinates.max_long - borders_coordinates.min_long) / number_of_long_points;
-
-
-    const rectangleSize = 0.4/20; // Define the size of the rectangles (latitude/longitude range)
 
     console.log("The points is now: ", this.points)
 
