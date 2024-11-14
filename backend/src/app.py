@@ -59,20 +59,20 @@ def update_data():
     return response
 
 
-@app.route('/heat_map/<string:payload>', methods=['GET'])
+@app.route('/heatmap/<string:payload>', methods=['GET'])
 def heat_map(payload):
+    print(payload)
     payload = json.loads(payload)
     response = make_response()
 
     if request.method == 'GET':
-        heatmap = HeatMapController(session=SESSION).get_heat_map(payload=payload)
+        heatmap = HeatMapController(session=SESSION).get_heatmap(payload=payload)
         SESSION.close()
 
-        response = jsonify({"heat_map": heatmap})
+        response = jsonify({"heatmap": heatmap})
         response.status = 200
 
     return response
-
 
 @app.route('/linegraph/<string:payload>', methods=['GET'])
 def linegraph(payload):
@@ -80,14 +80,13 @@ def linegraph(payload):
     response = make_response()
 
     if request.method == 'GET':
-        heatmap = LineGraphController(session=SESSION).get_line_graph(payload=payload)
+        linegraph = LineGraphController(session=SESSION).get_line_graph(payload=payload)
         SESSION.close()
 
-        response = jsonify({"line_graph": heatmap})
+        response = jsonify({"line_graph": linegraph})
         response.status = 200
 
     return response
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

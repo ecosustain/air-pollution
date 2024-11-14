@@ -26,25 +26,62 @@ class HeatMapController:
             "KNN": KNNInterpolator,
             "Kriging": KrigingInterpolator,
         }
+        self.TIME_REFERENCE_MAP = {
+            "hourly": {
+                "isPeriod": False,
+                "time_reference": "datetime",
+                "time_format": "%Y-%m-%d %H:%M:%S",
+            },
+            "daily": {
+                "isPeriod": False,
+                "time_reference": "date",
+                "time_format": "%Y-%m-%d",
+            },
+            "monthly": {
+                "isPeriod": False,
+                "time_reference": "year",
+                "time_format": "%Y-%m-%d %H:%M:%S",
+            },
+            "yearly": {
+                "isPeriod": True,
+                "first_time_reference": "first_year",
+                "last_time_reference": "last_year",
+                "time_format": "%Y-%m-%d %H:%M:%S",
+            },
 
-    def get_heat_map(
+        }
+
+    def get_heatmap(
         self,
         payload: dict
     ) -> list[dict]:
-        date_str = payload["datetime"]
         indicator = payload["indicator"]
         interpolator_dict = payload["interpolator"]
+        interval = payload["interval"]
 
         interpolator_method = interpolator_dict["method"]
         parameter = interpolator_dict["params"]
 
-        date = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
+        interval_map = self.TIME_REFERENCE_MAP[interval]
+        if interval_map["isPeriod"]:
+            first_time_reference_str = payload[interval_map["first_time_reference"]]
+            last_time_reference_str = payload[interval_map["last_time_reference"]]
+
+            time_format = interval_map["time_format"]
+            first_time_reference = datetime.strptime(first_time_reference_str, time_format)
+            last_time_reference = datetime.strptime(last_time_reference_str, time_format)
+
+        else:
+            time_reference_str = payload[interval_map["time_reference"]]
+
+            time_format = interval_map["time_format"]
+            time_reference = datetime.strptime(time_reference_str, time_format)
 
         indicator_id = INDICATORS[indicator]
 
         area_discretization = self.__get_rectangular_discretization()
 
-        measure_indicators = self.measure_indicator_repository.get_measure_indicators(date=date,
+        measure_indicators = self.measure_indicator_repository.get_measure_indicators(date=time_reference,
                                                                                       indicator_id=indicator_id)
         
         interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
@@ -57,6 +94,13 @@ class HeatMapController:
 
         response = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
         
+        response_structure = {
+            "heatmaps": {
+                "1": [],
+                "2": [],
+            }
+        }
+         
         return response
     
     top = [-23.5737757 + 0.4, -46.7369984 - 0.2]
