@@ -55,16 +55,35 @@ export class HomeComponent implements OnInit{
     return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
   }
 
-  handleFormSubmit(formValues: any) {
-    const date = this.formatDate(
-                            formValues.specificDate.day, 
-                            formValues.specificDate.month, 
-                            formValues.specificDate.year,
-                            formValues.specificDate.hour);
-    
-    const indicator = formValues.indicator;
-    const method = formValues.method;
-    const param = formValues.param;
+  handleHeatmapFormSubmit(formValues: any) {
+    let payload = formValues
+
+    if(formValues.interval === "instant") {
+      payload.hour = this.formatHour(
+        formValues.specificDate.year,
+        formValues.specificDate.month, 
+        formValues.specificDate.day, 
+        formValues.specificDate.hour);
+      delete payload["specificDate"];
+    } else if (formValues.interval === "hourly"){
+      payload.day = this.formatDay(
+        formValues.specificDate.year,
+        formValues.specificDate.month, 
+        formValues.specificDate.day) 
+        delete payload["specificDate"];
+    } else if (formValues.interval === "daily"){
+      payload.month = this.formatMonth(
+        formValues.specificDate.year,
+        formValues.specificDate.month
+      );
+      delete payload["specificDate"];
+    } else if (formValues.interval === "monthly"){
+      payload.year = formValues.specificDate.year;
+      delete payload["specificDate"];
+    } else if (formValues.interval === "yearly"){
+      payload.first_year = formValues.firstYear;
+      payload.last_year = formValues.lastYear;
+    }
 
     this.heatmapService.getInterpolatedPoints(date, indicator, method, param)
       .subscribe({
@@ -78,4 +97,11 @@ export class HomeComponent implements OnInit{
         }
       });
   }
+
+  handleGraphFormSubmit(formData: any): void {
+    this.formData = formData;
+    console.log('Graph form submitted and data passed to graph:', formData);
+  }
+
+
 }
