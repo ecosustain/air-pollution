@@ -38,16 +38,15 @@ export class GraphComponent implements AfterViewInit {
     });
   }
 
-  getXAxisLabel(timeField: string) {
-    const labels = new Map<string, string>([
-      ["year", "Ano"],
-      ["day", "Dia"],
-      ["hour", "Hora"]
-    ]);
-    return labels.get(timeField);
-  }
-
   updateChart(data: any) {
+    if (this.chart) {
+      this.chart.destroy();
+    }
+    if (data.line_graph.length == 0) {
+      this.chart = undefined;
+      return;
+    }
+
     const timeField = Object.keys(data.line_graph[0][Object.keys(data.line_graph[0])[0]][0]).find(
       key => key === 'year' || key === 'day' || key === 'hour'
     );
@@ -56,24 +55,38 @@ export class GraphComponent implements AfterViewInit {
       console.error('No valid time field found in the data.');
       return;
     }
-    
-    // Extract labels by sorting the points based on the identified time field
-    const labels = data.line_graph[0][Object.keys(data.line_graph[0])[0]]
-      .slice()
-      .sort((a: any, b: any) => a[timeField] - b[timeField])
-      .map((point: any) => point[timeField]);
-    
-    // Generate datasets, sorting by the time field and extracting values in the sorted order
-    const datasets = data.line_graph.map((pollutantObj: any) => {
-      const pollutantKey = Object.keys(pollutantObj)[0]; // Get pollutant key (e.g., "MP2.5", "O3")
-      const points = pollutantObj[pollutantKey]
-        .slice()
-        .sort((a: any, b: any) => a[timeField] - b[timeField]); // Sort by the dynamic time field
-    
+
+    // Step 1: Identify all unique time points across pollutants
+    const allTimePoints = new Set<number>();
+
+    data.line_graph.forEach((pollutantObj: any) => {
+      const pollutantKey = Object.keys(pollutantObj)[0];
+      pollutantObj[pollutantKey].forEach((point: any) => {
+        allTimePoints.add(point[timeField]);
+      });
+    });
+
+    // Convert Set to a sorted array of time points to use as labels
+    const labels = Array.from(allTimePoints).sort((a, b) => a - b);
+
+    // Step 2: Create datasets with dynamically generated colors
+    const datasets = data.line_graph.map((pollutantObj: any, index: number) => {
+      const pollutantKey = Object.keys(pollutantObj)[0]; // e.g., "MP2.5", "O3"
+      const points = pollutantObj[pollutantKey];
+
+      // Create a map of time points to values for easy lookup
+      const timeToValueMap = new Map<number, number>();
+      points.forEach((point: any) => {
+        timeToValueMap.set(point[timeField], point.average_value);
+      });
+
+      // Generate data array aligned with the labels (null if time point is missing)
+      const data = labels.map((label) => timeToValueMap.get(label) || null);
+
       return {
-        label: pollutantKey, // Pollutant name as label
-        data: points.map((point: any) => point.average_value), // Extract sorted average values
-        borderColor: 'rgb(75, 192, 192)', // Customize color
+        label: pollutantKey, // Use pollutant name as label
+        data: data, // Data array with nulls for missing values
+        borderColor: this.generateColor(index), // Use the dynamic color generation function
         fill: false,
         tension: 0.1,
       };
@@ -100,10 +113,20 @@ export class GraphComponent implements AfterViewInit {
         }
       }
     };
-
-    if (this.chart) {
-      this.chart.destroy();
-    }
     this.chart = new Chart('lineChartCanvas', config);
+  }
+
+  private getXAxisLabel(timeField: string) {
+    const labels = new Map<string, string>([
+      ["year", "Ano"],
+      ["day", "Dia"],
+      ["hour", "Hora"]
+    ]);
+    return labels.get(timeField);
+  }
+
+  private generateColor(index: number): string {
+    const hue = (index * 137) % 360;  // Use a large prime number to spread colors evenly
+    return `hsl(${hue}, 70%, 50%)`;   // Adjust saturation and lightness as desired
   }
 }

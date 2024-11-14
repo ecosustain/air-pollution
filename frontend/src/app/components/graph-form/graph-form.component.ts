@@ -72,17 +72,6 @@ export class GraphFormComponent implements OnInit {
     this.graphForm.get('specificDate')?.reset();
   }
 
-  translateTimePeriod(originalTimePeriod: string) {
-    const translations = new Map<string, string>([
-      ["anual", "yearly"],
-      ["mensal", "monthly"],
-      ["mensal 2", "monthly"],
-      ["diária", "daily"],
-      ["horária", "hourly"]
-    ]);
-    return translations.get(originalTimePeriod);
-  }
-
   onSubmit() {
     this.graphForm.markAllAsTouched();
     if (this.graphForm.valid) {
@@ -111,5 +100,16 @@ export class GraphFormComponent implements OnInit {
     } else {
       console.log('Form is invalid');
     }
-  }  
+  }
+
+  private translateTimePeriod(originalTimePeriod: string) {
+    const translations = new Map<string, string>([
+      ["anual", "yearly"],
+      ["mensal", "monthly"],
+      ["mensal 2", "monthly"],
+      ["diária", "daily"],
+      ["horária", "hourly"]
+    ]);
+    return translations.get(originalTimePeriod);
+  }
 }
