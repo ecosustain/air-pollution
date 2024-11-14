@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Input } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
 import { GraphService } from '../../services/graph/graph.service';
 import { CommonModule } from '@angular/common';
@@ -12,16 +12,11 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CommonModule]
 })
-export class GraphComponent implements AfterViewInit {
+export class GraphComponent implements OnChanges {
   @Input() formData: any;
   chart: Chart | undefined;
 
   constructor(private graphService: GraphService) {}
-
-  ngAfterViewInit() {
-    if (this.formData)
-      this.fetchChartData(this.formData);
-  }
 
   ngOnChanges() {
     if (this.formData)

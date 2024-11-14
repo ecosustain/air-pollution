@@ -11,6 +11,6 @@
     </div>
     <div class="container" id="image-container">
         <app-heatmap *ngIf="chosenForm === 'Mapa de Calor'" [heatmaps]="heatmaps" [indicator]="indicator"></app-heatmap>
-        <app-graph *ngIf="chosenForm === 'Gráfico'"></app-graph>
+        <app-graph *ngIf="chosenForm === 'Gráfico'" [formData]="formData"></app-graph>
     </div>
 </div>
