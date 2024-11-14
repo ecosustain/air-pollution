@@ -5,7 +5,7 @@ import { HeatmapFormComponent } from "../heatmap-form/heatmap-form.component";
 import { HeatmapComponent } from "../heatmap/heatmap.component";
 import { GraphFormComponent } from '../graph-form/graph-form.component';
 import { GraphComponent } from "../graph/graph.component";
-import { HeatmapResponse, Heatmaps, Point } from '../../models/point.model';
+import { Heatmaps, Point } from '../../models/point.model';
 import { HeatmapService } from '../../services/heatmap/heatmap.service';
 import { DatePipe } from '@angular/common';
 
