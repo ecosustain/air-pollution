@@ -108,20 +108,19 @@ class HeatMapController:
         for key in heatmaps_keys:
             incremented_time_reference_str = self.__increment_time_reference_str(time_reference_str, key)
 
-            print("incremented_time_reference_str: ", incremented_time_reference_str)
-
             mean_values = self.measure_indicator_repository.get_mean_measure_indicators(time_reference_str=incremented_time_reference_str,
-                                                                                        indicator_id=indicator_id)
-            print("mean_values: ", mean_values[:3])
-            
-            interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
-                                                                 measure_indicators=mean_values)
-            
-            interpolator = self.interpolators[interpolator_method](interpolator_input, parameters)
+                                                                                            indicator_id=indicator_id)
+            if len(mean_values) > 0:
+                interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
+                                                                    measure_indicators=mean_values)
+                
+                interpolator = self.interpolators[interpolator_method](interpolator_input, parameters)
 
-            y = interpolator.predict(X=area_discretization)
+                y = interpolator.predict(X=area_discretization)
 
-            heat_map = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
+                heat_map = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
+            else:
+                heat_map = {}
 
             key = str(key)
             response[key] = heat_map
