@@ -8,15 +8,28 @@ from flask_cors import CORS  # Import flask_cors
 from controllers import (
     HeatMapController,
     UpdateController,
+    LineGraphController
 )
 
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import sys, os
-
+from apscheduler.schedulers.background import BackgroundScheduler
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+import atexit
+
+
+def scheduled_update():
+    UpdateController().update_data()
+
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(scheduled_update, 'cron', hour=3, minute=0)
+scheduler.start()
+atexit.register(lambda: scheduler.shutdown())
+
 
 DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao'
 engine = create_engine(DATABASE_URI)
@@ -26,6 +39,7 @@ SESSION = Session()
 
 app = Flask(__name__)
 CORS(app)
+
 
 @app.route('/')
 def index():
@@ -49,7 +63,6 @@ def update_data():
 def heatmap(payload):
     print(payload)
     payload = json.loads(payload)
-    print(payload)
     response = make_response()
 
     if request.method == 'GET':
@@ -61,6 +74,19 @@ def heatmap(payload):
 
     return response
 
+@app.route('/linegraph/<string:payload>', methods=['GET'])
+def linegraph(payload):
+    payload = json.loads(payload)
+    response = make_response()
+
+    if request.method == 'GET':
+        linegraph = LineGraphController(session=SESSION).get_line_graph(payload=payload)
+        SESSION.close()
+
+        response = jsonify({"line_graph": linegraph})
+        response.status = 200
+
+    return response
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

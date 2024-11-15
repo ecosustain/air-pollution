@@ -1,2 +1,3 @@
 from controllers.heatmap_controller import HeatMapController
 from controllers.update_data_controller import UpdateController
+from controllers.line_graph_controller import LineGraphController

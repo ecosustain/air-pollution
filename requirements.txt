@@ -9,3 +9,5 @@ folium
 geopandas
 pykrige
 flask-cors
+cryptography
+apscheduler
