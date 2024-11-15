@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HeatmapResponse } from '../../models/point.model';
+import { HeatmapResponse, Heatmaps } from '../../models/point.model';
 import { environment } from '../../../environments/environment';
 
 
@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment';
 })
 export class HeatmapService {
 
-  private url = `${environment.api}/heat_map`;
+  private url = `${environment.api}/heatmap`;
 
   private headers = new HttpHeaders({
     'Content-Type': 'application/json',
@@ -21,12 +21,12 @@ export class HeatmapService {
   // Method to get interpolated points
   getInterpolatedHeatmap(
     payload : object
-  ): Observable<HeatmapResponse> {
+  ): Observable<Heatmaps> {
     
     let payload_encoded = JSON.stringify(payload)
     
     // Use get method with the constructed URL and query parameters
-    return this.httpClient.get<HeatmapResponse>(this.url+'/'+ payload_encoded, 
+    return this.httpClient.get<Heatmaps>(this.url+'/'+ payload_encoded, 
       {
         headers : this.headers
       }

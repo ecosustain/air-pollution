@@ -44,7 +44,6 @@ export class HeatmapFormComponent implements OnInit {
     } else {
       const specificDateGroup = this.fb.group({});
       specificDateGroup.addControl('year', this.fb.control('', Validators.required));
-
       if(this.intervalType != 'monthly'){
         specificDateGroup.addControl('month', this.fb.control('', Validators.required));
         if (this.intervalType != 'daily') {
@@ -90,7 +89,7 @@ export class HeatmapFormComponent implements OnInit {
   }
 
   clearTimeDynamicControls() {
-    ['firstYear', 'lastYear', 'year', 'specificDate'].forEach(control => {
+    ['firstYear', 'lastYear', 'specificDate'].forEach(control => {
       this.mapaDeCalorForm.removeControl(control);
     });
   }
@@ -112,8 +111,8 @@ export class HeatmapFormComponent implements OnInit {
 
   onSubmit() {
     if (this.mapaDeCalorForm.valid) {
-      const formValue = this.mapaDeCalorForm.value;
-      console.log(formValue)
+      const formValue = JSON.parse(JSON.stringify(this.mapaDeCalorForm.value))
+      console.log("Emmited form", this.mapaDeCalorForm.value)
       this.formSubmit.emit(formValue);
     } else {
       console.log('Form is invalid:', this.mapaDeCalorForm.value);

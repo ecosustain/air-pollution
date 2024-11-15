@@ -89,18 +89,20 @@ export class HomeComponent implements OnInit{
       );
       delete payload["specificDate"];
     } else if (formValues.interval === "monthly"){
-      payload.year = formValues.specificDate.year;
+      payload.year = formValues.specificDate.year.toString();
       delete payload["specificDate"];
     } else if (formValues.interval === "yearly"){
-      payload.first_year = formValues.firstYear;
-      payload.last_year = formValues.lastYear;
+      payload.first_year = formValues.firstYear.toString();
+      payload.last_year = formValues.lastYear.toString();
     }
+
+    console.log("Sent payload: ", payload)
 
     this.heatmapService.getInterpolatedHeatmap(payload)
       .subscribe({
         next: (heatmapResponse) => {
           console.log('Query did okay');
-          this.heatmaps = heatmapResponse.heatmaps;
+          this.heatmaps = heatmapResponse;
           this.indicator = payload.indicator;
         },
         error: (err) => {

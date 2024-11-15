@@ -13,31 +13,51 @@ import { spGeoJson } from '../../models/spGeoJson.const';
   styleUrls: ['./heatmap.component.css']
 })
 export class HeatmapComponent implements OnInit, OnChanges {
-  @Input() heatmaps: Heatmaps = {};
-  @Input() indicator: string = ''; 
+  @Input() heatmaps: Heatmaps;
+  @Input() indicator: string; 
   
   private map: any;
-  private interval: number[] | undefined = [];
-  private measureUnit : string | undefined = "";
+  private interval: number[];
+  private measureUnit : string;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { 
+    this.interval = [];
+    this.measureUnit = "";
+    this.heatmaps = {};
+    this.indicator = ''; 
+  }
 
   ngOnInit(): void {
     this.initializeMap();
-    console.log('Initial Heatmap Intervals:', this.heatmaps); // Log initial points
-    //this.addRectangles(); // Call addRectangles if you want to draw rectangles on init
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if(changes['indicator']){
         console.log('Updated indicator response:', changes['indicator'].currentValue); // Log updated indicator
-        this.updateIntervals(this.indicator);
-        this.updateUnitMeasure(this.indicator);
-        this.addLegend(this.indicator); 
+        this.updateIntervals();
+        this.updateUnitMeasure();
+        this.addLegend(); 
       }
     if (changes['heatmaps']) {
       console.log('Updated heatmaps response:', changes['heatmaps'].currentValue); // Log updated points
       this.addRectangles(this.heatmaps); // Update rectangles when points change
+    }
+  }
+  
+  private updateIntervals(){
+    const selectedIndicator = indicators.find(indicator => indicator.name === this.indicator);
+    if(selectedIndicator){
+    this.interval = selectedIndicator.interval;
+    } else {
+      this.interval = []
+    }
+  }
+  private updateUnitMeasure(){
+    const selectedIndicator = indicators.find(indicator => indicator.name === this.indicator);
+    if(selectedIndicator){
+      this.measureUnit = selectedIndicator.measureUnit;
+    } else {
+      this.measureUnit = "";
     }
   }
 
@@ -56,19 +76,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
         fillOpacity: 0.1,
       }
     }).addTo(this.map);
-
-    // Add legend after map is initialized
-    this.addLegend(this.indicator);
   }
 
-  private updateIntervals(indicatorName : string){
-    const selectedIndicator = indicators.find(indicator => indicator.name === indicatorName);
-    this.interval = selectedIndicator?.interval
-  }
-  private updateUnitMeasure(indicatorName : string){
-    const selectedIndicator = indicators.find(indicator => indicator.name === indicatorName);
-    this.measureUnit = selectedIndicator?.measureUnit
-  }
 
   // Add rectangles to the map based on points array
   private addRectangles(heatmaps : Heatmaps): void {
@@ -128,7 +137,9 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
   // Add a legend control to the map
-  private addLegend(indicator : string): void {
+  private addLegend(): void {
+    if (!this.map) return; // Ensure map is defined
+  
     const legend = new (L.Control.extend({
       options: { position: 'bottomright' },
       
@@ -137,7 +148,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
         const intervals = this.interval as number[]; 
         const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
         const unitMeasure = this.measureUnit;
-
+  
         // Loop through intervals and generate a label with a color square and unit for each range
         for (let i = 0; i < intervals.length; i++) {
           div.innerHTML +=
