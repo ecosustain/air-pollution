@@ -108,8 +108,11 @@ class HeatMapController:
         for key in heatmaps_keys:
             incremented_time_reference_str = self.__increment_time_reference_str(time_reference_str, key)
 
+            print("incremented_time_reference_str: ", incremented_time_reference_str)
+
             mean_values = self.measure_indicator_repository.get_mean_measure_indicators(time_reference_str=incremented_time_reference_str,
                                                                                         indicator_id=indicator_id)
+            print("mean_values: ", mean_values[:3])
             
             interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
                                                                  measure_indicators=mean_values)
@@ -137,7 +140,7 @@ class HeatMapController:
 
         date_list = datetime_list[0].split("-")
         if len(date_list) < 3:
-            return time_reference_str + str_key
+            return time_reference_str + "-" + str_key
         if len(date_list) == 3:
             return time_reference_str + " " + str_key
 
