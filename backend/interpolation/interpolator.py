@@ -1,7 +1,6 @@
 from sklearn.neighbors import KNeighborsRegressor
 import pyproj
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import LeaveOneOut, cross_val_score
+from sklearn.model_selection import  cross_val_score
 import numpy as np
 import math
 from pykrige.ok import OrdinaryKriging
@@ -10,10 +9,66 @@ import itertools
 import sys 
 import os
 
+def convex_hull_indices(points):
+    indexed_points = list(enumerate(points))
+    indexed_points.sort(key=lambda x: (x[1][0], x[1][1]))
+    sorted_indices, sorted_points = zip(*indexed_points)
+    
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    
+    lower = []
+    for i, p in zip(sorted_indices, sorted_points):
+        while len(lower) >= 2 and cross(points[lower[-2]], points[lower[-1]], p) <= 0:
+            lower.pop()
+        lower.append(i)
+    
+    upper = []
+    for i, p in zip(reversed(sorted_indices), reversed(sorted_points)):
+        while len(upper) >= 2 and cross(points[upper[-2]], points[upper[-1]], p) <= 0:
+            upper.pop()
+        upper.append(i)
+    
+    return list(dict.fromkeys(lower + upper))
+
+class ConvexLOOCV():
+
+    def split(self, X, y=None, groups=None):
+        hull_idx = convex_hull_indices(X)
+
+        folds = []
+
+        for i in range(len(X)):
+            if i in hull_idx: continue
+
+            train_index = [k for k in range(len(X)) if k != i]
+            test_index = [i]
+            folds.append((train_index, test_index))
+        
+        return folds
+    
+class Scaler():
+    def fit_transform(self, X):
+        self.x_0_max = np.max(X[:,0])
+        self.x_0_min = np.min(X[:,0])
+        self.x_1_max = np.max(X[:,1])
+        self.x_1_min =  np.min(X[:,1])
+        self.scale_factor = np.max([self.x_0_max - self.x_0_min, self.x_1_max - self.x_1_min])
+
+        return self.transform(X)
+
+    def transform(self, X):
+        _X = np.copy(X)
+        _X[:,0] = _X[:,0] - self.x_0_min
+        _X[:,1] = _X[:,1] - self.x_1_min
+        _X = _X / self.scale_factor
+
+        return _X
+
 class Interpolator():
     def __init__(self, data, verbose=False):
         self.P = pyproj.Proj(proj='utm', zone=23, south=True, ellps='WGS84') # Projeção para a zona de SP
-        self.scaler = MinMaxScaler()
+        self.scaler = Scaler()
         self.X, self.y = self.__preprocess_data__(data)
 
         self.verbose = verbose
@@ -22,7 +77,7 @@ class Interpolator():
 
         X = data.keys()
         y = [data[k] for k in X if not math.isnan(data[k])]
-        X = [self.P(c[1], c[0]) for c in X  if not math.isnan(data[c])] # input é long, lat
+        X = np.array([list(self.P(c[1], c[0])) for c in X  if not math.isnan(data[c])]) # input é long, lat
         X = self.scaler.fit_transform(X)
         return X,y
     
@@ -55,7 +110,7 @@ class KrigingInterpolator(Interpolator):
         combinations = [dict(zip(self.param_dict.keys(), valores)) for valores in itertools.product(*self.param_dict.values())]
 
         for c in combinations:
-            cv = LeaveOneOut()
+            cv = ConvexLOOCV()
             model = Krige(**c, verbose=False)
             scores = cross_val_score(model, self.X, self.y, scoring='neg_root_mean_squared_error', cv=cv, n_jobs=-1, verbose=0)
             score = np.mean(scores)
@@ -82,7 +137,7 @@ class KNNInterpolator(Interpolator):
         self.k = self.__find_k__() if k == 'auto' else k
 
         if verbose and k != 'auto':
-            cv = LeaveOneOut()
+            cv = ConvexLOOCV()
             model = KNeighborsRegressor(n_neighbors=self.k, weights = 'distance')
             scores = cross_val_score(model, self.X, self.y, scoring='neg_root_mean_squared_error', cv=cv, n_jobs=-1)
             score = np.mean(scores)
@@ -99,7 +154,7 @@ class KNNInterpolator(Interpolator):
         best_k = -1
 
         for k in range(1,len(self.y)):
-            cv = LeaveOneOut()
+            cv = ConvexLOOCV()
             model = KNeighborsRegressor(n_neighbors=k, weights = 'distance')
             scores = cross_val_score(model, self.X, self.y, scoring='neg_root_mean_squared_error', cv=cv, n_jobs=-1)
             score = np.mean(scores)
