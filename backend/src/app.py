@@ -35,7 +35,7 @@ DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluic
 engine = create_engine(DATABASE_URI)
 
 Session = sessionmaker(bind=engine)
-SESSION = Session()
+SESSION = Session() 
 
 app = Flask(__name__)
 CORS(app)
