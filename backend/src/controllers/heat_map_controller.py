@@ -12,7 +12,7 @@ import math
 import numpy as np
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from metadata.meta_data import INDICATORS, STATIONS_ID
+from metadata.meta_data import INDICATORS, STATIONS_ID, RADIUS
 from backend.interpolation.interpolator import (
     KNNInterpolator,
     KrigingInterpolator,
@@ -42,10 +42,10 @@ class HeatMapController:
 
         indicator_id = INDICATORS[indicator]
 
-        area_discretization = self.__get_rectangular_discretization()
-
         measure_indicators = self.measure_indicator_repository.get_measure_indicators(date=date,
                                                                                       indicator_id=indicator_id)
+        
+        area_discretization = self.__get_rectangular_discretization(measure_indicators, indicator)
         
         interpolator_input = self.__build_interpolator_input(area_discretization=area_discretization,
                                                              measure_indicators=measure_indicators)
@@ -62,7 +62,7 @@ class HeatMapController:
     top = [-23.5737757 + 0.4, -46.7369984 - 0.2]
     bottom = [-23.5737757 - 0.4, -46.7369984 + 0.6]
     
-    def __get_rectangular_discretization(self) -> list[tuple]:
+    def __get_rectangular_discretization(self, measure_indicators, indicator) -> list[tuple]:
         borders_coordinates = {
             "min_lat": -24.00736242788278,
             "max_lat": -23.35831688708724,
@@ -83,24 +83,31 @@ class HeatMapController:
         long_range = np.linspace(borders_coordinates['min_long'], borders_coordinates['max_long'], number_of_long_points)
 
         area_discretization = [(lat, lon) for lat in lat_range for lon in long_range]
-        area_discretization = self.__remove_distant_points(area_discretization=area_discretization)
+        area_discretization = self.__remove_distant_points(measure_indicators, indicator, area_discretization=area_discretization)
 
         return  area_discretization
     
     def __remove_distant_points(
         self,
+        measure_indicators,
+        indicator,
         area_discretization: list[tuple]
     ) -> list[tuple]:
         new_area_discretization = []
-        threshold = 7
+
+        # poluente, STATIONS_ID -> raio
+
         for point in area_discretization:
-            min_dist = float("inf")
-            for station_coordinates in STATIONS_ID.values():
+            for measure_indicator in measure_indicators:
+                if math.isnan(measure_indicator.value): continue
+
+                station_coordinates = STATIONS_ID[measure_indicator.idStation]
                 dist = self.__haversine_dist(point[0], point[1], station_coordinates[0], station_coordinates[1])
-                if dist < min_dist:
-                    min_dist = dist
-            if min_dist < threshold:
-                new_area_discretization.append(point)
+
+                if dist < RADIUS[indicator][measure_indicator.idStation]:
+                    new_area_discretization.append(point)
+                    break
+
         return new_area_discretization
 
     def __haversine_dist(self, lat1, lon1, lat2, lon2):
