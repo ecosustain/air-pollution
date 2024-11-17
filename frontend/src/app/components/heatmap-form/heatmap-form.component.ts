@@ -63,22 +63,17 @@ export class HeatmapFormComponent implements OnInit {
     this.methodType = (event.target as HTMLSelectElement).value;
     const params = this.mapaDeCalorForm.get('interpolator')?.get('params') as FormGroup;
     
-    // Clear existing controls before adding new ones
     this.clearParamsDynamicControls();
   
-    // Find the selected method in interpolatorMethods
     const selectedMethod = this.interpolatorMethods.find(method => method.name === this.methodType);
   
     if (selectedMethod) {
-      // Loop through the params of the selected method and add controls dynamically
       selectedMethod.params.forEach(param => {
-        // Initialize the control with an appropriate default based on type
         const control = this.fb.control(param.type === 'checkbox' ? false : '', Validators.required);
         params.addControl(param.name, control);
       });
     }
-  
-    // Update the form validity
+
     params.updateValueAndValidity();
   }
   
@@ -97,12 +92,10 @@ export class HeatmapFormComponent implements OnInit {
   clearParamsDynamicControls() {
     const params = this.mapaDeCalorForm.get('interpolator.params') as FormGroup;
   
-    // Remove each control from the params FormGroup
     Object.keys(params.controls).forEach(control => {
       params.removeControl(control);
     });
-  
-    // Reset the params FormGroup state
+    
     params.reset();
     params.clearValidators();
   }

@@ -15,17 +15,13 @@
       </div>
       
       <div class="form-field-container" formGroupName="interpolator">
-        <div formGroupName="params">
+        <div class="form-field-container" id="param-list" formGroupName="params">
           <ng-container *ngFor="let param of selectedMethodParams">
-            <div *ngIf="param.type === 'number'">
-              <input type="number" [formControlName]="param.name" [placeholder]="param.name" />
-            </div>
-            <div *ngIf="param.type === 'text'">
-              <input type="text" [formControlName]="param.name" [placeholder]="param.name" />
-            </div>
-            <div *ngIf="param.type === 'checkbox'">
-              <label>{{ param.name }} </label>
-              <input type="checkbox" [formControlName]="param.name" />
+            <div class="form-field-list-container">
+              <label>{{param.name}}: </label>
+              <input *ngIf="param.type === 'number'" type="number" [formControlName]="param.name" />
+              <input *ngIf="param.type === 'text'" type="text" [formControlName]="param.name" />
+              <input *ngIf="param.type === 'checkbox'" type="checkbox" [formControlName]="param.name" />
             </div>
           </ng-container>
         </div>
