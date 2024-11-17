@@ -74,12 +74,12 @@ class KrigingInterpolator(Interpolator):
 
 
 class KNNInterpolator(Interpolator):
-    def __init__(self, data, k='auto', verbose=False):
+    def __init__(self, data, param_dict='auto', verbose=False):
         """
         data -> dict com pares "coord" : "medida"
         """
         super().__init__(data, verbose=verbose)
-        self.k = self.__find_k__() if k == 'auto' else k
+        self.k = self.__find_k__() if param_dict == 'auto' else param_dict['k']
 
         if verbose and k != 'auto':
             cv = LeaveOneOut()

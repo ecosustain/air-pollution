@@ -62,3 +62,23 @@ input {
     min-width: 80px;
     text-align: center;
 }
+
+#param-list{
+    gap: 5px;
+}
+
+.form-field-list-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:space-between;
+    width: 85%;
+}
+
+.form-field-list-container label {
+    font-size: 15px;
+}
+.form-field-list-container input {
+    width: 50%;
+    height: 15px;
+}

@@ -1,0 +1,38 @@
+<div class="form-component-container">
+    <form [formGroup]="graphForm" (ngSubmit)="onSubmit()">
+        <div class="form-field-container">
+            <label>Selecione os Indicadores (pelo menos um):</label>
+            <div class="checkbox-container">
+              <div class="checkbox-item" *ngFor="let indicator of indicators">
+                  <input
+                    type="checkbox"
+                    [value]="indicator"
+                    (change)="onCheckboxChange($event)"
+                  /> {{ indicator }}
+              </div>
+            </div>
+        </div>
+        <div *ngIf="graphForm.controls['indicators'].invalid && graphForm.controls['indicators'].touched">
+            Selecione pelo menos um indicador.
+        </div>
+        <div class="form-field-container">
+          <select formControlName="timePeriod" (change)="onTimePeriodChange($event)">
+            <option value="">Período de tempo</option>
+            <option value="Anual">Anual</option>
+            <option value="Mensal">Mensal</option>
+            <option value="MensalTotal">Mensal Total</option>
+            <option value="Diária">Diária</option>
+            <option value="Horária">Horária</option>
+          </select>
+        </div>
+        <div class="form-field-container" *ngIf="timePeriodType === 'Mensal' || timePeriodType === 'Horária'">
+          <input type="number" placeholder="Mês" formControlName="month" id="month" /> 
+        </div>
+        <div class="form-field-container" id="specific-date-form" *ngIf="timePeriodType === 'Diária'" formGroupName="specificDate">
+          <input type="number" formControlName="month" placeholder="Mês" />
+          <input type="number" formControlName="year" placeholder="Ano" />
+        </div>
+        <button type="submit">Confirmar</button>
+      </form>
+  </div>
+    
