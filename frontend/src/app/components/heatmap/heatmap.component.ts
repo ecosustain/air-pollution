@@ -1,30 +1,48 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import * as L from 'leaflet';
-import shp from 'shpjs';
-import { Heatmaps, HeatmapResponse, Point } from '../../models/point.model'; // Assuming you have this model
-import { indicators} from '../../models/indicators.models'; // Assuming you have this model
+import { Heatmaps} from '../../models/point.model';
+import { indicators} from '../../models/indicators.models'; 
 import { HttpClient } from '@angular/common/http';
 import { spGeoJson } from '../../models/spGeoJson.const';
+import { FormsModule } from '@angular/forms'; // Add this for ngModel
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-heatmap',
   standalone: true,
   templateUrl: './heatmap.component.html',
-  styleUrls: ['./heatmap.component.css']
+  styleUrls: ['./heatmap.component.css'],
+  imports: [FormsModule, CommonModule] // Add this
 })
 export class HeatmapComponent implements OnInit, OnChanges {
   @Input() heatmaps: Heatmaps;
-  @Input() indicator: string; 
+  @Input() indicator: string;
+  @Input() period : string; 
+
   
   private map: any;
   private interval: number[];
   private measureUnit : string;
 
+  minHeatmapIndex: number;
+  maxHeatmapIndex: number;
+  currentHeatmapIndex: number;
+
+
+  month_names =  ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+
   constructor(private http: HttpClient) { 
     this.interval = [];
     this.measureUnit = "";
     this.heatmaps = {};
-    this.indicator = ''; 
+    this.indicator = '';
+    this.period = '';
+
+    this.minHeatmapIndex = 1;
+    this.maxHeatmapIndex = 1;
+    this.currentHeatmapIndex = 1;
   }
 
   ngOnInit(): void {
@@ -40,10 +58,22 @@ export class HeatmapComponent implements OnInit, OnChanges {
       }
     if (changes['heatmaps']) {
       console.log('Updated heatmaps response:', changes['heatmaps'].currentValue); // Log updated points
-      this.addRectangles(this.heatmaps); // Update rectangles when points change
+      const heatmapsKeys = Object.keys(this.heatmaps).map(key => parseInt(key, 10));
+      if (heatmapsKeys.length > 0) {
+        this.minHeatmapIndex = Math.min(...heatmapsKeys);
+        this.maxHeatmapIndex = Math.max(...heatmapsKeys);
+        this.currentHeatmapIndex = this.minHeatmapIndex; // Set to the first available heatmap index
+      }
+      this.addRectangles(this.currentHeatmapIndex); // Update rectangles when points change
     }
   }
   
+  onHeatmapIndexChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.currentHeatmapIndex = parseInt(target.value, 10);
+    this.addRectangles(this.currentHeatmapIndex);
+  }
+
   private updateIntervals(){
     const selectedIndicator = indicators.find(indicator => indicator.name === this.indicator);
     if(selectedIndicator){
@@ -80,8 +110,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
 
   // Add rectangles to the map based on points array
-  private addRectangles(heatmaps : Heatmaps): void {
-    if (!this.map) return;
+  private addRectangles(heatmapIndex : number): void {
+    if (!this.map || !this.heatmaps[heatmapIndex]) return;
 
     this.map.eachLayer((layer: any) => {
       if (layer instanceof L.Rectangle) {
@@ -108,9 +138,9 @@ export class HeatmapComponent implements OnInit, OnChanges {
     const latStepSize = (borders_coordinates.max_lat - borders_coordinates.min_lat) / number_of_lat_points;
     const longStepSize = (borders_coordinates.max_long - borders_coordinates.min_long) / number_of_long_points;
 
-    console.log("The heatmaps is now: ", this.heatmaps)
+    const heatmapData = this.heatmaps[heatmapIndex];
 
-    heatmaps["1"].forEach(point => {
+    heatmapData.forEach(point => {
       L.rectangle([[point.lat - (latStepSize / 2), point.long - (latStepSize / 2)],
                     [point.lat + (longStepSize / 2), point.long + (longStepSize / 2)]], {
         color: 'transparent', // Can change color as needed

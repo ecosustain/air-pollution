@@ -26,9 +26,13 @@ import { DatePipe } from '@angular/common';
 export class HomeComponent implements OnInit{
   formChoice : FormGroup;
   chosenForm : string = "Mapa de Calor";
+  
   formData: any;
+
   heatmaps : Heatmaps = {};
   indicator : string = '';
+  period : string = '';
+  
   errorMessage : string = '';
 
   constructor (
@@ -106,6 +110,7 @@ export class HomeComponent implements OnInit{
           console.log('Query did okay');
           this.heatmaps = heatmapResponse;
           this.indicator = payload.indicator;
+          this.period = payload.interval;
         },
         error: (err) => {
           this.errorMessage = 'Failed to retrieve points';
