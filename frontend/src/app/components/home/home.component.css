@@ -4,6 +4,7 @@
     justify-content: space-around;
     width: 100%;
     align-items: center;
+    gap: 30px;
 }
 
 #form-container {
@@ -12,11 +13,14 @@
     min-width: 300px;
     width: 30%;
     gap: 10px;
+    margin-left: 30px;
 }
 
 #image-container {
+    flex: 1;
     width: 500px;
     height: 500px;
+    margin-top: 30px;
 }
 
 select{

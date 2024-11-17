@@ -1,0 +1,132 @@
+.form-component-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+form {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-field-container {
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    box-sizing: border-box; 
+    flex-direction: column;
+    align-items: center;
+}
+
+input {
+    text-align: center;
+    width: 100%;
+    height: 20px;
+    border-radius: 30px;
+    cursor: text;
+}
+
+.form-field-container div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+input[type="number"],
+select {
+  width: 100%; 
+  max-width: 300px; 
+  padding: 10px; 
+  margin: 0.5rem 0; 
+  border: 1px solid #ccc; 
+  border-radius: 8px; 
+  background-color: #f9f9f9; 
+  font-size: 14px; 
+  color: #333; 
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1); 
+  transition: border-color 0.3s, box-shadow 0.3s; 
+}
+
+select {
+  cursor: pointer; 
+}
+
+input[type="number"]:hover,
+select:hover {
+  border-color: #0362c8;
+}
+
+input[type="number"]:focus,
+select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  outline: none;
+}
+  
+input[type="number"]:disabled,
+select:disabled {
+    background-color: #e9ecef; 
+    color: #6c757d; 
+    border-color: #dee2e6; 
+    cursor: not-allowed; 
+}
+
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+  
+.checkbox-item {
+    flex: 1 1 calc(33.33% - 15px);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.checkbox-item:hover {
+    background-color: #9fd7f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+  
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #218a9c;
+    border-radius: 4px;
+    cursor: pointer;
+}
+  
+.checkbox-item label {
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+}
+
+#specific-date-form {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+#specific-date-form input {
+    width: 10%;
+    min-width: 80px;
+    text-align: center;
+}

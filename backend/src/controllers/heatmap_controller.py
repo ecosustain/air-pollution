@@ -140,7 +140,7 @@ class HeatMapController:
             "max_long": -46.36359807038185,
         }
 
-        number_of_lat_points = 20 
+        number_of_lat_points = 60  # Number of divisions in latitude
         
         lat_range = np.linspace(borders_coordinates['min_lat'], borders_coordinates['max_lat'], number_of_lat_points)
         
