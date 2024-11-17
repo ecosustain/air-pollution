@@ -5,6 +5,7 @@ from models import Stations, Indicators
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
+
 class StationIndicators(Base):
     __tablename__ = "station_indicators"
     id = Column(Integer, primary_key=True)

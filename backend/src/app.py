@@ -14,10 +14,8 @@ from controllers import (
 import json
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import sys, os
 from apscheduler.schedulers.background import BackgroundScheduler
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 import atexit
 
 
@@ -74,19 +72,21 @@ def heatmap(payload):
 
     return response
 
+
 @app.route('/linegraph/<string:payload>', methods=['GET'])
 def linegraph(payload):
     payload = json.loads(payload)
     response = make_response()
 
     if request.method == 'GET':
-        linegraph = LineGraphController(session=SESSION).get_line_graph(payload=payload)
+        linegraph_ = LineGraphController(session=SESSION).get_line_graph(payload=payload)
         SESSION.close()
 
-        response = jsonify({"line_graph": linegraph})
+        response = jsonify({"line_graph": linegraph_})
         response.status = 200
 
     return response
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)

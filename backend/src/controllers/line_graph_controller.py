@@ -1,14 +1,4 @@
-from repositories import (
-    MeasureIndicatorRepository
-)
-
-from models import (
-    MeasureIndicator
-)
-
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+from repositories import MeasureIndicatorRepository
 from metadata.meta_data import INDICATORS, STATIONS_ID
 
 

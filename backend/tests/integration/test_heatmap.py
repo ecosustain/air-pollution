@@ -1,5 +1,4 @@
 from requests import request
-from datetime import datetime
 import sys, os
 import json
 
@@ -8,6 +7,7 @@ from constants_test import (
     BASE_URL,
     HEADERS,
 )
+
 
 class TestRequest:
     def test_instant_heatmap(self):
@@ -53,7 +53,6 @@ class TestRequest:
         assert "lat" in item
         assert "long" in item
         assert "value" in item
-
 
     def test_hourly_heatmaps(self):
         method = "GET"

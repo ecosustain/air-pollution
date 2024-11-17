@@ -1,10 +1,9 @@
-import os, sys
+import os
 import pandas as pd
 from sqlalchemy import create_engine
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from metadata.meta_data import STATIONS, INDICATORS
+
 
 def populate_tables():
     CSV_DIRECTORY = './backend/data/collected_csvs'
@@ -18,6 +17,7 @@ def populate_tables():
             insert_data_from_station(file_path, station_name, db_connection)
     print("All files processed successfully.")
 
+
 def insert_stations_data(db_connection):
     stations_data = {
         "id": [STATIONS[station][0] for station in STATIONS],
@@ -29,6 +29,7 @@ def insert_stations_data(db_connection):
     stations_df = pd.DataFrame(stations_data)
     stations_df.to_sql('stations', con=db_connection, if_exists='append', index=False)
 
+
 def insert_indicators_data(db_connection):
     indicator_data = {
         "id": [INDICATORS[indicator] for indicator in INDICATORS],
@@ -39,6 +40,7 @@ def insert_indicators_data(db_connection):
     }
     indicators_df = pd.DataFrame(indicator_data)
     indicators_df.to_sql('indicators', con=db_connection, if_exists='append', index=False)
+
 
 def insert_data_from_station(file_path, station_name, db_connection):
     df = pd.read_csv(file_path)
@@ -57,11 +59,13 @@ def insert_data_from_station(file_path, station_name, db_connection):
                 print(f"{file_path} - {col} inserted into measure_indicator")
     append_to_station_indicators_table(station_indicators, db_connection)
 
+
 def append_to_station_indicators_dict(station_indicators, station_name, column):
     station_indicators['idStation'].append(STATIONS[station_name][0])
     station_indicators['idIndicator'].append(INDICATORS[column.upper()])
     station_indicators['description'].append("")
     return station_indicators
+
 
 def append_to_measure_indicator_table(df, station_name, column, db_connection):
     df_indicator = df[['datetime', column]].copy()
@@ -76,9 +80,11 @@ def append_to_measure_indicator_table(df, station_name, column, db_connection):
     except:
         return False
 
+
 def append_to_station_indicators_table(station_indicators, db_connection):
     station_indicators_df = pd.DataFrame(station_indicators)
     station_indicators_df.to_sql('station_indicators', con=db_connection, if_exists='append', index=False)
+
 
 def adjust_time_string(datetime_str):
     """Adjust '24:00' to '00:00' of the next day in datetime strings."""
@@ -87,6 +93,7 @@ def adjust_time_string(datetime_str):
         new_date = pd.to_datetime(date_part) + pd.DateOffset(days=1)
         return new_date.strftime('%Y/%m/%d') + ' 00:00'
     return datetime_str
+
 
 if __name__ == "__main__":
     populate_tables()

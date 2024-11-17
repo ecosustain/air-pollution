@@ -1,14 +1,14 @@
-import os, sys
+import os
 import pandas as pd
 import tempfile
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from backend.data.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from metadata.meta_data import STATIONS, INDICATORS
-from backend.data.utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
-                                      get_request_response, get_session_id)
+from utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
+                         get_request_response, get_session_id)
+
 
 class UpdateData:
     def __init__(self) -> None:
@@ -45,7 +45,8 @@ class UpdateData:
             self.update_station_indicators_table(station, indicator, db_connection)
         return df_to_update_csv
 
-    def get_dates_to_update(self, df):
+    @staticmethod
+    def get_dates_to_update(df):
         df['datetime'] = pd.to_datetime(df['datetime'], errors='coerce')
         max_date = df['datetime'].dt.date.max()
         count_max_date = (df['datetime'].dt.date == max_date).sum()
@@ -56,7 +57,8 @@ class UpdateData:
         end_date = (datetime.now().date() - timedelta(days=1)).strftime("%d/%m/%Y")
         return start_date, end_date
 
-    def get_df_from_csv(self, directory, file_name):
+    @staticmethod
+    def get_df_from_csv(directory, file_name):
         if not file_name.endswith(".csv"):
             return None
         file_path = os.path.join(directory, file_name)
@@ -75,7 +77,8 @@ class UpdateData:
                     index=False, chunksize=1000)
         return df_to_update_csv
 
-    def update_station_indicators_table(self, station, indicator, db_connection):
+    @staticmethod
+    def update_station_indicators_table(station, indicator, db_connection):
         id_station = STATIONS[station][0]
         id_indicator = INDICATORS[indicator]
         with db_connection.connect() as connection:
@@ -94,7 +97,8 @@ class UpdateData:
             except Exception as e:
                 print(f"Error: {e}")
 
-    def update_csv_file(self, original_df, dfs_to_update_csv, directory, file_name):
+    @staticmethod
+    def update_csv_file(original_df, dfs_to_update_csv, directory, file_name):
         for indicator, new_data in dfs_to_update_csv.items():
             original_df = pd.merge(original_df, new_data, on='datetime', how='outer', suffixes=('', '_new'))
             if f"{indicator}_new" in original_df.columns:
@@ -121,7 +125,8 @@ class UpdateData:
         df_to_update_csv.rename(columns={'value': indicator.lower()}, inplace=True)
         return df.dropna(), df_to_update_csv.dropna()
 
-    def adjust_datetime_column(self, df):
+    @staticmethod
+    def adjust_datetime_column(df):
         df['original_datetime'] = df['date'].values + " " + df['time'].values
         df.drop(['date', 'time'], axis=1, inplace=True)
         df['original_datetime'] = df['original_datetime'].map(ddmmyyyyhhmm_yyyymmddhhmm)
@@ -132,6 +137,7 @@ class UpdateData:
                                     + timedelta(days=1)
         df.drop(['original_datetime'], axis=1, inplace=True)
         return df
+
 
 if __name__ == "__main__":
     UpdateData().update_data()

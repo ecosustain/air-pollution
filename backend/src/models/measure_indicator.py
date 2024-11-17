@@ -1,6 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Float, DateTime, Integer
-from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+
+
 Base = declarative_base()
 
 

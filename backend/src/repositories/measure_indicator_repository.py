@@ -1,6 +1,6 @@
 from models import MeasureIndicator
-import datetime
-from sqlalchemy import extract,func
+from sqlalchemy import extract, func
+
 
 class MeasureIndicatorRepository:
     def __init__(self, session) -> None:
@@ -30,8 +30,9 @@ class MeasureIndicatorRepository:
         )   
 
         return result
-    
-    def __process_date_filters(self, query, time_reference: str):
+
+    @staticmethod
+    def __process_date_filters(query, time_reference: str):
         year, month, day, hour = None, None, None, None
         datetime_list = time_reference.split(" ")
 
@@ -47,13 +48,13 @@ class MeasureIndicatorRepository:
             hour = time_list[0]
 
         if year:
-           query = query.filter(extract("year", MeasureIndicator.datetime) == year)
+            query = query.filter(extract("year", MeasureIndicator.datetime) == year)
         if month:
-           query = query.filter(extract("month", MeasureIndicator.datetime) == month)
+            query = query.filter(extract("month", MeasureIndicator.datetime) == month)
         if day:
-           query = query.filter(extract("day", MeasureIndicator.datetime) == day)
+            query = query.filter(extract("day", MeasureIndicator.datetime) == day)
         if hour:
-           query = query.filter(extract("hour", MeasureIndicator.datetime) == hour)
+            query = query.filter(extract("hour", MeasureIndicator.datetime) == hour)
 
         return query
 

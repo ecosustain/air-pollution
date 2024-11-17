@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, Numeric, Boolean
-
 from sqlalchemy.ext.declarative import declarative_base
+
+
 Base = declarative_base()
+
 
 class Stations(Base):
     __tablename__ = "stations"

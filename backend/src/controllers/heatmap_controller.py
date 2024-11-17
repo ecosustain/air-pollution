@@ -1,22 +1,10 @@
-from repositories import (
-    MeasureIndicatorRepository
-)
-
-from models import(
-    MeasureIndicator
-)
-
-from datetime import datetime
-import sys, os
+from repositories import MeasureIndicatorRepository
+from models import MeasureIndicator
 import math
 import numpy as np
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 from metadata.meta_data import INDICATORS, STATIONS_ID, RADIUS
-from backend.interpolation.interpolator import (
-    KNNInterpolator,
-    KrigingInterpolator,
-)
+from services.interpolation_service import KNNInterpolator, KrigingInterpolator
+
 
 class HeatMapController:
     def __init__(self, session) -> None:
