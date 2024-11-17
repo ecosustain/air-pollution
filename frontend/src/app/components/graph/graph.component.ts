@@ -56,9 +56,9 @@ export class GraphComponent implements OnChanges {
   }
 
   private findTimeLabel(data: any) {
-    for (const pollutantData of data.line_graph) {
-      const pollutantKey = Object.keys(pollutantData)[0];
-      const points = pollutantData[pollutantKey];
+    for (const indicatorData of data.line_graph) {
+      const indicatorKey = Object.keys(indicatorData)[0];
+      const points = indicatorData[indicatorKey];
       
       if (Array.isArray(points) && points.length > 0) {
         const timeLabel = Object.keys(points[0]).find(
@@ -73,9 +73,9 @@ export class GraphComponent implements OnChanges {
 
   private getSortedTimePoints(data: any, timeLabel: string) {
     const allTimePoints = new Set<number>();
-    data.line_graph.forEach((pollutantObj: any) => {
-      const pollutantKey = Object.keys(pollutantObj)[0];
-      pollutantObj[pollutantKey].forEach((point: any) => {
+    data.line_graph.forEach((indicatorObj: any) => {
+      const indicatorKey = Object.keys(indicatorObj)[0];
+      indicatorObj[indicatorKey].forEach((point: any) => {
         allTimePoints.add(point[timeLabel]);
       });
     });
@@ -84,16 +84,16 @@ export class GraphComponent implements OnChanges {
   }
 
   private getDatasets(data: any, timeLabel: string, labels: any) {
-    const datasets = data.line_graph.map((pollutantObj: any, index: number) => {
-      const pollutantKey = Object.keys(pollutantObj)[0];
-      const points = pollutantObj[pollutantKey];
+    const datasets = data.line_graph.map((indicatorObj: any, index: number) => {
+      const indicatorKey = Object.keys(indicatorObj)[0];
+      const points = indicatorObj[indicatorKey];
       const timeToValueMap = new Map<number, number>();
       points.forEach((point: any) => {
         timeToValueMap.set(point[timeLabel], point.average_value);
       });
       const data = labels.map((label: any) => timeToValueMap.get(label) || null);
       return {
-        label: pollutantKey,
+        label: indicatorKey,
         data: data,
         borderColor: this.generateColor(index),
         fill: false,
@@ -115,7 +115,7 @@ export class GraphComponent implements OnChanges {
           },
           y: {
             type: 'linear',
-            title: { display: true, text: 'Concentração' }
+            title: { display: true, text: 'Valor' }
           }
         }
       }

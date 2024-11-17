@@ -1,24 +1,26 @@
 <div class="form-component-container">
     <form [formGroup]="graphForm" (ngSubmit)="onSubmit()">
         <div class="form-field-container">
-            <label>Selecione os Poluentes (pelo menos um):</label>
-            <div *ngFor="let pollutant of pollutants">
-                <input
-                  type="checkbox"
-                  [value]="pollutant"
-                  (change)="onCheckboxChange($event)"
-                /> {{ pollutant }}
+            <label>Selecione os Indicadores (pelo menos um):</label>
+            <div class="checkbox-container">
+              <div class="checkbox-item" *ngFor="let indicator of indicators">
+                  <input
+                    type="checkbox"
+                    [value]="indicator"
+                    (change)="onCheckboxChange($event)"
+                  /> {{ indicator }}
+              </div>
             </div>
         </div>
         <div *ngIf="graphForm.controls['indicators'].invalid && graphForm.controls['indicators'].touched">
-            Selecione pelo menos um poluente.
+            Selecione pelo menos um indicador.
         </div>
         <div class="form-field-container">
           <select formControlName="timePeriod" (change)="onTimePeriodChange($event)">
             <option value="">Período de tempo</option>
             <option value="Anual">Anual</option>
             <option value="Mensal">Mensal</option>
-            <option value="Mensal2">Mensal 2</option>
+            <option value="MensalTotal">Mensal Total</option>
             <option value="Diária">Diária</option>
             <option value="Horária">Horária</option>
           </select>

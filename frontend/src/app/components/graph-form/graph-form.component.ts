@@ -11,7 +11,11 @@ import { CommonModule } from '@angular/common';
 })
 export class GraphFormComponent implements OnInit {
   graphForm: FormGroup;
-  pollutants = ['MP2.5', 'MP10', 'O3'];
+  indicators = [
+    'MP2.5', 'MP10', 'O3', "BEN", "CO", "DV", "DVG", "ERT", "NO", 
+    "NO2", "NOX", "PRESS", "RADG", "RADUV", "SO2", "TEMP", "TOL",
+    "UR", "VV"
+  ];
   timePeriodType: string = '';
   @Output() formSubmit = new EventEmitter<any>();
 
@@ -101,7 +105,7 @@ export class GraphFormComponent implements OnInit {
     const translations = new Map<string, string>([
       ["anual", "yearly"],
       ["mensal", "monthly"],
-      ["mensal 2", "monthly"],
+      ["mensaltotal", "monthly"],
       ["diária", "daily"],
       ["horária", "hourly"]
     ]);
