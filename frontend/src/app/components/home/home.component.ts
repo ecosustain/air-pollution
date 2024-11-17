@@ -94,6 +94,8 @@ export class HomeComponent implements OnInit{
     } else if (formValues.interval === "yearly"){
       payload.first_year = formValues.firstYear.toString();
       payload.last_year = formValues.lastYear.toString();
+      delete payload["firstYear"]
+      delete payload["lastYear"]
     }
 
     console.log("Sent payload: ", payload)
