@@ -14,7 +14,7 @@
         </select>
       </div>
       
-      <div class="form-field-container" formGroupName="interpolator">
+      <div *ngIf="methodType !== ''" class="form-field-container" formGroupName="interpolator">
         <div class="form-field-container" id="param-list" formGroupName="params">
           <ng-container *ngFor="let param of selectedMethodParams">
             <div class="form-field-list-container">
