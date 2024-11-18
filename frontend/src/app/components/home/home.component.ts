@@ -67,7 +67,7 @@ export class HomeComponent implements OnInit{
 
   formatMonth(year: number, month: number){
     const date = new Date(year, month - 1); // month is 0-indexed in Date object
-    return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
+    return this.datePipe.transform(date, 'yyyy-MM') || '';
   }
 
   handleHeatmapFormSubmit(formValues: any) {
