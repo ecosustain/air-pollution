@@ -33,7 +33,7 @@ export class GraphComponent implements OnChanges {
   updateChart(data: any) {
     if (!this.removePreviousChart(data))
       return;
-    const timeLabel = this.findTimeLabel(data);    
+    const timeLabel = this.findTimeLabel(data);
     if (!timeLabel) {
       this.chart = undefined;
       return;
@@ -62,7 +62,7 @@ export class GraphComponent implements OnChanges {
       
       if (Array.isArray(points) && points.length > 0) {
         const timeLabel = Object.keys(points[0]).find(
-          key => key === 'year' || key === 'day' || key === 'hour'
+          key => key === 'year' || key === 'day' || key === 'hour' || key === 'month'
         );
         if (timeLabel)
           return timeLabel;
@@ -135,7 +135,8 @@ export class GraphComponent implements OnChanges {
     const labels = new Map<string, string>([
       ["year", "Ano"],
       ["day", "Dia"],
-      ["hour", "Hora"]
+      ["hour", "Hora"],
+      ["month", "Mês"]
     ]);
     return labels.get(timeField);
   }
