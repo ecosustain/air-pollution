@@ -43,7 +43,7 @@ class KrigingInterpolator(Interpolator):
         data -> dict com pares "coord" : "medida"
         """
         super().__init__(data, verbose=verbose)
-        self.param_dict = param_dict
+        self.param_dict = {key: value if isinstance(value, list) else [value] for key, value in param_dict.items()}
         params = self.__find_params__()
 
         self.interpolator = Krige(**params)
