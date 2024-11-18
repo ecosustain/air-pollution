@@ -19,8 +19,11 @@
           <ng-container *ngFor="let param of selectedMethodParams">
             <div class="form-field-list-container">
               <label>{{param.name}}: </label>
+              <select *ngIf="param.type === 'text' && param.options" [formControlName]="param.name">
+                <option *ngFor="let option of param.options" [value]="option">{{ option }}</option>
+              </select>
+              <input *ngIf="param.type === 'text' && !param.options" type="text" [formControlName]="param.name" />
               <input *ngIf="param.type === 'number'" type="number" [formControlName]="param.name" />
-              <input *ngIf="param.type === 'text'" type="text" [formControlName]="param.name" />
               <input *ngIf="param.type === 'checkbox'" type="checkbox" [formControlName]="param.name" />
             </div>
           </ng-container>

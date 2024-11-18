@@ -79,6 +79,11 @@ input {
     font-size: 15px;
 }
 .form-field-list-container input {
-    width: 50%;
+    width: 47.3%;
     height: 15px;
+}
+.form-field-list-container select {
+    width: 50%;
+    height: 22px;
+    border-width: 1.6px;
 }

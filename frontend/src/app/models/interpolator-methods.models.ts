@@ -8,8 +8,8 @@ export const interpolatorMethods = [
     {
         name : "Kriging",
         params : [
-            { name : "method", type: "text" },
-            { name : "variogram_model", type : "text" },
+            { name : "method", type : "text", options : ['ordinary', 'universal'] },
+            { name : "variogram_model", type : "text", options : ['linear', 'power', 'gaussian', 'spherical'] },
             { name : "nlags", type : "number" },
             { name : "weight", type : "checkbox"}
         ]
