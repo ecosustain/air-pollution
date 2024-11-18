@@ -6,11 +6,11 @@ export const interpolatorMethods = [
         ]
     },
     {
-        name : "Krigin",
+        name : "Kriging",
         params : [
             { name : "method", type: "text" },
             { name : "variogram_model", type : "text" },
-            { name : "n_lags", type : "number" },
+            { name : "nlags", type : "number" },
             { name : "weight", type : "checkbox"}
         ]
     }
