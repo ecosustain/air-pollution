@@ -38,7 +38,7 @@ class Interpolator:
 
 
 class KrigingInterpolator(Interpolator):
-    def __init__(self, data, param_dict, verbose=False,):
+    def __init__(self, data, param_dict, verbose=False):
         """
         data -> dict com pares "coord" : "medida"
         """
@@ -75,14 +75,14 @@ class KrigingInterpolator(Interpolator):
 
 
 class KNNInterpolator(Interpolator):
-    def __init__(self, data, k='auto', verbose=False):
+    def __init__(self, data, param_dict='auto', verbose=False):
         """
         data -> dict com pares "coord" : "medida"
         """
         super().__init__(data, verbose=verbose)
-        self.k = self.__find_k__() if k == 'auto' else k
+        self.k = self.__find_k__() if param_dict == 'auto' else param_dict['k']
 
-        if verbose and k != 'auto':
+        if verbose and param_dict != 'auto':
             cv = LeaveOneOut()
             model = KNeighborsRegressor(n_neighbors=self.k, weights = 'distance')
             scores = cross_val_score(model, self.X, self.y, scoring='neg_root_mean_squared_error', cv=cv, n_jobs=-1)
@@ -166,13 +166,13 @@ def main():
     
     data = {tuple(a):b for a,b in zip(X,y)}
 
-    interpolator = KNNInterpolator(data, verbose=True, k=1)
+    interpolator = KNNInterpolator(data, verbose=True, param_dict={"k": 1})
     print(interpolator.predict(X))
     print(100*"#")
-    interpolator = KNNInterpolator(data, verbose=True, k=5)
+    interpolator = KNNInterpolator(data, verbose=True, param_dict={"k": 5})
     print(interpolator.predict(X))
     print(100*"#")
-    interpolator = KNNInterpolator(data, verbose=True, k='auto')
+    interpolator = KNNInterpolator(data, verbose=True, param_dict='auto')
     print(interpolator.predict(X))
     print(100*"#")
 
