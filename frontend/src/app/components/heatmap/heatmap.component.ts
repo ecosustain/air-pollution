@@ -24,6 +24,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
   private map: any;
   private interval: number[];
   private measureUnit : string;
+  private legendControl: L.Control | null = null;
 
   minHeatmapIndex: number;
   maxHeatmapIndex: number;
@@ -170,7 +171,13 @@ export class HeatmapComponent implements OnInit, OnChanges {
   private addLegend(): void {
     if (!this.map) return; // Ensure map is defined
   
-    const legend = new (L.Control.extend({
+    // Remove the existing legend if it exists
+    if (this.legendControl) {
+      this.map.removeControl(this.legendControl);
+    }
+  
+    // Create a new legend control
+    this.legendControl = new (L.Control.extend({
       options: { position: 'bottomright' },
       
       onAdd: (map: any) => {
@@ -189,6 +196,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
       }
     }))();
   
-    legend.addTo(this.map);
+    // Add the new legend to the map
+    this.legendControl.addTo(this.map);
   }
 }
