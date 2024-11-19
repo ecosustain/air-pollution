@@ -26,13 +26,13 @@ brew services start mysql
 
 ## 2. Create Tables
 ```bash
-python3 backend/data/database/create_tables.py
+python -m backend.src.database.create_tables
 ```
 *This command creates the necessary tables in the database. Make sure you're executing this from the root directory of the repository.*
 
 ## 3. Populate Tables
 ```bash
-python3 backend/data/database/populate_tables.py
+python -m backend.src.database.populate_tables
 ```
 *Populate the newly created tables with the initial data by running this script.*
 

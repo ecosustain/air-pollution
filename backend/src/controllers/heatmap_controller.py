@@ -28,7 +28,6 @@ class HeatMapController:
             "daily": {
                 "isPeriod": False,
                 "payload_field": "month",
-                "heatmaps_keys": range(1,31),
             },
             "monthly": {
                 "isPeriod": False,
@@ -40,6 +39,9 @@ class HeatMapController:
                 "first_time_reference": "first_year",
                 "last_time_reference": "last_year",
             },
+        }
+        self.MONTHS_HEATMAPS_KEYS = {
+            "01": 31, "02": 29, "03": 31, "04": 30, "05": 31, "06": 30, "07": 31, "08": 31, "09": 30, "10": 31, "11": 30, "12": 31
         }
 
     def get_heatmap(
@@ -67,7 +69,11 @@ class HeatMapController:
             payload_field = interval_map["payload_field"]
             time_reference_str = payload[payload_field]
 
-            heatmaps_keys = interval_map["heatmaps_keys"]
+            if payload_field == "month":
+                month = time_reference_str.split("-")[1]
+                heatmaps_keys = range(1, self.MONTHS_HEATMAPS_KEYS[month] + 1)
+            else:
+                heatmaps_keys = interval_map["heatmaps_keys"]
         
         response = self.__get_heatmaps(heatmaps_keys=heatmaps_keys,
                                        time_reference_str=time_reference_str,
