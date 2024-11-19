@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean
+from sqlalchemy import Column, Integer, String, Numeric
 from sqlalchemy.ext.declarative import declarative_base
 
 
@@ -12,4 +12,4 @@ class Stations(Base):
     name = Column(String)
     longitude = Column(Numeric)
     latitude = Column(Numeric)
-    is_pollutant = Column(Boolean)
+    description = Column(String)

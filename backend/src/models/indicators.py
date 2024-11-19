@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric
+from sqlalchemy import Column, Integer, String, Numeric, Boolean
 
 from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
@@ -11,3 +11,4 @@ class Indicators(Base):
     name = Column(String)
     description = Column(String)
     measure_unit = Column(Numeric)
+    is_pollutant = Column(Boolean)
