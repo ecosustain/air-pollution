@@ -1,8 +1,8 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine
-from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
-from metadata.meta_data import STATIONS, INDICATORS
+from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from backend.src.metadata.meta_data import STATIONS, INDICATORS, INDICATORS_DATA
 
 
 def populate_tables():
@@ -34,9 +34,9 @@ def insert_indicators_data(db_connection):
     indicator_data = {
         "id": [INDICATORS[indicator] for indicator in INDICATORS],
         "name": [indicator.lower() for indicator in INDICATORS],
-        "description": ["" for _ in INDICATORS],  # Placeholder for description
-        "measure_unit": ["" for _ in INDICATORS],  # Placeholder for measure unit
-        "is_pollutant": [True for _ in INDICATORS]  # Assume all are pollutants
+        "description": [INDICATORS_DATA[indicator_data][1] for indicator_data in INDICATORS_DATA],
+        "measure_unit": [INDICATORS_DATA[indicator_data][2] for indicator_data in INDICATORS_DATA],
+        "is_pollutant": [INDICATORS_DATA[indicator_data][0] for indicator_data in INDICATORS_DATA]
     }
     indicators_df = pd.DataFrame(indicator_data)
     indicators_df.to_sql('indicators', con=db_connection, if_exists='append', index=False)

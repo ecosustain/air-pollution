@@ -1,6 +1,6 @@
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey, Index)
-from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
 
 def create_tables():

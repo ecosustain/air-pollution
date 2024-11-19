@@ -1,7 +1,4 @@
-# Please, add the bollean that states if the indicator is a pollutant, and add the string description,
-# and add the measure unit string.
-# After that, change the populate_tables.py file.
-
+# Indicator name --> Indicator Id 
 INDICATORS = {
     "BEN": 61,
     "CO": 16,
@@ -24,8 +21,30 @@ INDICATORS = {
     "VV": 24
 }
 
-# Please, add the description and change the populate_tables.py file
+# Indicator name --> (is_pollutant, description, measure_unit)
+INDICATORS_DATA = {
+    "BEN": (True, "Benzeno", "µg/m3"),
+    "CO": (True, "Monóxido de Carbono", "ppm"),
+    "DV": (False, "Direção do Vento", "°"),
+    "DVG": (False, "Direção do Vento Global", "°"),
+    "ERT": (True, "Enxofre Reduzido Total", "ppb"),
+    "MP10": (True, "Partículas Inaláveis", "µg/m3"),
+    "MP2.5": (True, "Partículas Inaláveis Finas", "µg/m3"),
+    "NO": (True, "Monóxido de Nitrogênio", "µg/m3"),
+    "NO2": (True, "Dióxido de Nitrogênio", "µg/m3"),
+    "NOX": (True, "Óxidos de Nitrogênio", "ppb"),
+    "O3": (True, "Ozônio", "µg/m3"),
+    "PRESS": (False, "Pressão Atmosférica", "hPa"),
+    "RADG": (False, "Radiação Solar Global", "W/m2"),
+    "RADUV": (False, "Radiação Ultra-violeta", "W/m2"),
+    "SO2": (True, "Dióxido de Enxofre", "µg/m3"),
+    "TEMP": (False, "Temperatura do Ar", "°C"),
+    "TOL": (True, "Tolueno", "µg/m3"),
+    "UR": (False, "Umidade Relativa do Ar", "%"),
+    "VV": (False, "Velocidade do Vento", "m/s")
+}
 
+# Station name --> (station_id, latitude, longitude)
 STATIONS = {
     "Cambuci": (90, -23.566208579985688, -46.612390087515855),
     "CapaoRedondo": (269, -23.666256213135124, -46.77757667402106),
