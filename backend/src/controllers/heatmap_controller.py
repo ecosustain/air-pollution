@@ -7,7 +7,18 @@ from services.interpolation_service import KNNInterpolator, KrigingInterpolator
 
 
 class HeatMapController:
+    """
+    Controller to manage the generation of heatmaps based on indicators data and interpolation methods.
+    """
+
     def __init__(self, session) -> None:
+        """
+        Initialize the HeatMapController with a database session and set up repositories, interpolators, and mappings.
+        
+        Args:
+            session: The database session used to query data.
+        """
+
         self.measure_indicator_repository = MeasureIndicatorRepository(session)
         self.session = session
         self.interpolators = {
@@ -47,7 +58,21 @@ class HeatMapController:
     def get_heatmap(
         self,
         payload: dict
-    ) -> list[dict]:
+    ) -> dict[dict]:
+        """
+        Generate heatmaps for a specified indicator, interval, and interpolator method.
+        
+        Args:
+            payload (dict): A dictionary containing:
+                - "indicator": The name of the indicator.
+                - "interpolator": A dictionary with "method" (interpolation type) and "params" (parameters for the method).
+                - "interval": The time interval for the heatmap (e.g., "daily", "monthly").
+                - Additional time references based on the interval.
+
+        Returns:
+            dict[dict]: A dict of dictionaries representing the heatmap data for each time period.
+        """
+
         indicator = payload["indicator"]
         interpolator_dict = payload["interpolator"]
         indicator_id = INDICATORS[indicator]
@@ -96,6 +121,20 @@ class HeatMapController:
         parameters,
         indicator: str,
     ):
+        """
+        Generate heatmaps for each time key in the interval.
+
+        Args:
+            heatmaps_keys (list): Keys representing specific time periods within the interval.
+            time_reference_str (str): The base time reference string for the interval.
+            indicator_id (int): The ID of the indicator.
+            interpolator_method (str): The interpolation method to use.
+            parameters: Parameters for the interpolation method.
+            indicator (str): The name of the indicator.
+
+        Returns:
+            dict: A dictionary mapping time keys to heatmap data.
+        """
         response = {}
         for key in heatmaps_keys:
             incremented_time_reference_str = self.__increment_time_reference_str(time_reference_str, key)
@@ -122,6 +161,16 @@ class HeatMapController:
         return response
     
     def __increment_time_reference_str(self, time_reference_str, key):
+        """
+        Increment the time reference string by the given key.
+
+        Args:
+            time_reference_str (str): The base time reference string.
+            key: The increment value.
+
+        Returns:
+            str: The updated time reference string.
+        """
         str_key = str(key)
         if len(str_key) == 1:
             str_key = "0" + str_key
@@ -139,6 +188,17 @@ class HeatMapController:
 
     
     def __get_rectangular_discretization(self, mean_values: list, indicator: str) -> list[tuple]:
+        """
+        Create a rectangular grid of coordinates within a specified area.
+
+        Args:
+            mean_values (list): List of mean values from the database.
+            indicator (str): The name of the indicator.
+
+        Returns:
+            list[tuple]: A list of tuples representing the discretized area.
+        """
+
         borders_coordinates = {
             "min_lat": -24.00736242788278,
             "max_lat": -23.35831688708724,
@@ -171,9 +231,19 @@ class HeatMapController:
         indicator,
         area_discretization: list[tuple]
     ) -> list[tuple]:
-        new_area_discretization = []
+        """
+        Remove points from the discretized area that are farther than a specified radius from any useful station.
 
-        # poluente, STATIONS_ID -> raio
+        Args:
+            mean_values (list): List of indicator measures.
+            indicator (str): The indicator.
+            area_discretization (list[tuple]): The list of discretized coordinates.
+
+        Returns:
+            list[tuple]: A filtered list of coordinates.
+        """
+
+        new_area_discretization = []
 
         for point in area_discretization:
             for measure_indicator in mean_values:
@@ -189,6 +259,19 @@ class HeatMapController:
         return new_area_discretization
 
     def __haversine_dist(self, lat1, lon1, lat2, lon2):
+        """
+        Calculate the Haversine distance between two geographic coordinates.
+
+        Args:
+            lat1 (float): Latitude of the first point.
+            lon1 (float): Longitude of the first point.
+            lat2 (float): Latitude of the second point.
+            lon2 (float): Longitude of the second point.
+
+        Returns:
+            float: The distance in kilometers.
+        """
+
         R = 6371.0
 
         lat1_rad = math.radians(lat1)
@@ -209,8 +292,19 @@ class HeatMapController:
     def __build_interpolator_input(
         self,
         area_discretization: list[list],
-        measure_indicators: list[MeasureIndicator]
+        measure_indicators
     ) -> dict[tuple,float]:
+        """
+        Build the input for the interpolator by mapping coordinates to values.
+
+        Args:
+            area_discretization (list[list]): The discretized area coordinates.
+            measure_indicators: The list of indicator measures.
+
+        Returns:
+            dict[tuple, float]: A mapping of coordinates to values.
+        """
+
         y = []
         for _ in area_discretization:
             y.append(math.nan)
@@ -227,8 +321,20 @@ class HeatMapController:
         self,
         area_discretization: list,
         y: list,
-        measure_indicators: list[MeasureIndicator]
+        measure_indicators
     ) -> list:
+        """
+        Fill known points in the interpolator input with their measured values.
+
+        Args:
+            area_discretization (list): The list of discretized coordinates.
+            y (list): The list which should be filled with values.
+            measure_indicators: The list of indicator measures.
+
+        Returns:
+            list: The updated list of values.
+        """
+
         for measure_indicator in measure_indicators:
             station_coordinates = STATIONS_ID[measure_indicator.idStation]
             min_dist_index = self.__get_closer_point(area_discretization=area_discretization,
@@ -242,6 +348,17 @@ class HeatMapController:
         area_discretization: list[tuple],
         station_coordinates: tuple
     ) -> int:
+        """
+        Find the closest point in the discretized area to a station's coordinates.
+
+        Args:
+            area_discretization (list[tuple]): The list of discretized coordinates.
+            station_coordinates (tuple): The coordinates of the station.
+
+        Returns:
+            int: The index of the closest point.
+        """
+        
         min_dist = float("inf")
         min_dist_index = None
 

@@ -59,7 +59,19 @@ def update_data():
 
 @app.route('/heatmap/<string:payload>', methods=['GET'])
 def heatmap(payload):
-    print(payload)
+    """
+    API endpoint to generate heatmaps based on the provided payload.
+
+    Args:
+        payload (str): A JSON string containing the request data, which should include:
+            - "indicator": The name of the environmental indicator.
+            - "interpolator": A dictionary with "method" (interpolation type) and "params" (parameters for the method).
+            - "interval": The time interval for the heatmap (e.g., "daily", "monthly").
+            - Additional time references based on the interval.
+
+    Returns:
+        Response: A JSON response containing the generated heatmaps with HTTP status 200.
+    """
     payload = json.loads(payload)
     response = make_response()
 

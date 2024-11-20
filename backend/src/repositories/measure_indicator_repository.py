@@ -3,7 +3,18 @@ from sqlalchemy import extract, func
 
 
 class MeasureIndicatorRepository:
+    """
+    Repository for interacting with the MeasureIndicator table in the database.
+    Provides methods to retrieve aggregated indicator data based on specified filters.
+    """
+
     def __init__(self, session) -> None:
+        """
+        Initialize the repository with a database session.
+        
+        Args:
+            session: The database session used to execute queries.
+        """
         self.session = session
     
     def get_mean_measure_indicators(
@@ -11,7 +22,19 @@ class MeasureIndicatorRepository:
         indicator_id: int,
         time_reference_str: str
     ) -> list[tuple]:
-        
+        """
+        Retrieve the mean values of measure indicators grouped by station for a specific indicator and time period.
+
+        Args:
+            indicator_id (int): The ID of the indicator to filter by.
+            time_reference_str (str): A string representing the time reference (e.g., "2024", "2024-11", "2024-11-19 14").
+
+        Returns:
+            list[tuple]: A list of tuples, where each tuple contains:
+                - idStation (int): The ID of the station.
+                - value (float): The average value of the indicator at the station.
+        """
+
         query = (
             self.session.query(
                 MeasureIndicator.idStation,
@@ -33,6 +56,17 @@ class MeasureIndicatorRepository:
 
     @staticmethod
     def __process_date_filters(query, time_reference: str):
+        """
+        Apply date and time filters to a query based on the provided time reference string.
+
+        Args:
+            query: The SQLAlchemy query object to filter.
+            time_reference (str): A string representing the time reference (e.g., "2024", "2024-11", "2024-11-19 14").
+
+        Returns:
+            The query object with applied filters for year, month, day, and/or hour.
+        """
+        
         year, month, day, hour = None, None, None, None
         datetime_list = time_reference.split(" ")
 
