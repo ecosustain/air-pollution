@@ -5,7 +5,7 @@ import { HeatmapFormComponent } from "../heatmap-form/heatmap-form.component";
 import { HeatmapComponent } from "../heatmap/heatmap.component";
 import { GraphFormComponent } from '../graph-form/graph-form.component';
 import { GraphComponent } from "../graph/graph.component";
-import { Heatmaps, Point } from '../../models/point.model';
+import { Heatmaps } from '../../models/point.model';
 import { HeatmapService } from '../../services/heatmap/heatmap.service';
 import { DatePipe } from '@angular/common';
 
@@ -56,17 +56,17 @@ export class HomeComponent implements OnInit{
   }
 
   formatHour(year: number, month: number, day: number, hour: number): string {
-    const date = new Date(year, month - 1, day, hour); // month is 0-indexed in Date object
+    const date = new Date(year, month - 1, day, hour); 
     return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
   }
 
   formatDay(year: number, month: number, day: number): string {
-    const date = new Date(year, month - 1, day); // month is 0-indexed in Date object
+    const date = new Date(year, month - 1, day);
     return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
   }
 
   formatMonth(year: number, month: number){
-    const date = new Date(year, month - 1); // month is 0-indexed in Date object
+    const date = new Date(year, month - 1); 
     return this.datePipe.transform(date, 'yyyy-MM') || '';
   }
 
