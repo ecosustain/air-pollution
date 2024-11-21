@@ -1,0 +1,27 @@
+# Use a Python base image
+FROM python:3.10
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy backend source files, including src, interpolation, and tests
+COPY src /app/src
+COPY interpolation /app/interpolation
+COPY tests /app/tests
+
+# Copy data folder (CSV and SQL scripts)
+COPY data /app/data
+
+# Install Python dependencies
+RUN pip install -r /app/src/requirements.txt
+
+# Set environment variables for Flask
+ENV FLASK_APP=src/app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Expose Flask port
+EXPOSE 5000
+
+# Run Flask
+CMD ["flask", "run"]
+
