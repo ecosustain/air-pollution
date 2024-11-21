@@ -4,7 +4,7 @@ import { Heatmaps} from '../../models/point.model';
 import { indicators} from '../../models/indicators.models'; 
 import { HttpClient } from '@angular/common/http';
 import { spGeoJson } from '../../models/spGeoJson.const';
-import { FormsModule } from '@angular/forms'; // Add this for ngModel
+import { FormsModule } from '@angular/forms'; 
 import { CommonModule } from '@angular/common';
 
 
@@ -13,7 +13,7 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   templateUrl: './heatmap.component.html',
   styleUrls: ['./heatmap.component.css'],
-  imports: [FormsModule, CommonModule] // Add this
+  imports: [FormsModule, CommonModule]
 })
 export class HeatmapComponent implements OnInit, OnChanges {
   @Input() heatmaps: Heatmaps;
@@ -52,20 +52,20 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if(changes['indicator']){
-        console.log('Updated indicator response:', changes['indicator'].currentValue); // Log updated indicator
+        console.log('Updated indicator response:', changes['indicator'].currentValue); 
         this.updateIntervals();
         this.updateUnitMeasure();
         this.addLegend(); 
       }
     if (changes['heatmaps']) {
-      console.log('Updated heatmaps response:', changes['heatmaps'].currentValue); // Log updated points
+      console.log('Updated heatmaps response:', changes['heatmaps'].currentValue);
       const heatmapsKeys = Object.keys(this.heatmaps).map(key => parseInt(key, 10));
       if (heatmapsKeys.length > 0) {
         this.minHeatmapIndex = Math.min(...heatmapsKeys);
         this.maxHeatmapIndex = Math.max(...heatmapsKeys);
-        this.currentHeatmapIndex = this.minHeatmapIndex; // Set to the first available heatmap index
+        this.currentHeatmapIndex = this.minHeatmapIndex; 
       }
-      this.addRectangles(this.currentHeatmapIndex); // Update rectangles when points change
+      this.addRectangles(this.currentHeatmapIndex); 
     }
   }
   
@@ -110,49 +110,40 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
 
-  // Add rectangles to the map based on points array
-  private addRectangles(heatmapIndex : number): void {
-    if (!this.map || !this.heatmaps[heatmapIndex]) return;
+  private addRectangles(index: number): void {
+    if (!this.map || !this.heatmaps[index]) return;
 
     this.map.eachLayer((layer: any) => {
-      if (layer instanceof L.Rectangle) {
-        this.map.removeLayer(layer);
-      }
+      if (layer instanceof L.Rectangle) this.map.removeLayer(layer);
     });
 
-    const borders_coordinates = {
-      "min_lat": -24.00736242788278,
-      "max_lat": -23.35831688708724,
-      "min_long": -46.83459631388834,
-      "max_long": -46.36359807038185,
+    const { min_lat, max_lat, min_long, max_long } = {
+      min_lat: -24.00736242788278,
+      max_lat: -23.35831688708724,
+      min_long: -46.83459631388834,
+      max_long: -46.36359807038185,
     };
 
-    const number_of_lat_points = 60;
+    const latPoints = 60;
+    const latStep = (max_lat - min_lat) / latPoints;
+    const longStep = (max_long - min_long) / (latPoints / ((max_lat - min_lat) / (max_long - min_long)));
 
-    const lat_distance = borders_coordinates.max_lat - borders_coordinates.min_lat;
-    const long_distance = borders_coordinates.max_long - borders_coordinates.min_long;
-
-    const aspect_ratio = lat_distance / long_distance
-
-    const number_of_long_points = number_of_lat_points / aspect_ratio
-
-    const latStepSize = (borders_coordinates.max_lat - borders_coordinates.min_lat) / number_of_lat_points;
-    const longStepSize = (borders_coordinates.max_long - borders_coordinates.min_long) / number_of_long_points;
-
-    const heatmapData = this.heatmaps[heatmapIndex];
-
-    heatmapData.forEach(point => {
-      L.rectangle([[point.lat - (latStepSize / 2), point.long - (latStepSize / 2)],
-                    [point.lat + (longStepSize / 2), point.long + (longStepSize / 2)]], {
-        color: 'transparent', // Can change color as needed
-        fillColor: this.chooseColor(point.value),
-        fillOpacity: 0.4,
-        weight: 1
-      }).addTo(this.map);
+    this.heatmaps[index].forEach(point => {
+      L.rectangle(
+        [
+          [point.lat - latStep / 2, point.long - longStep / 2],
+          [point.lat + latStep / 2, point.long + longStep / 2]
+        ],
+        {
+          color: 'transparent',
+          fillColor: this.chooseColor(point.value),
+          fillOpacity: 0.4,
+          weight: 1,
+        }
+      ).addTo(this.map);
     });
   }
 
-  // Choose color based on measure
   private chooseColor(measure: number): string {
     const intervals = this.interval as number[];
     const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
@@ -163,40 +154,26 @@ export class HeatmapComponent implements OnInit, OnChanges {
         }
     }
     
-    // If the measure is above the last interval, return the last color
     return colors[colors.length - 1];
   }
 
-  // Add a legend control to the map
   private addLegend(): void {
-    if (!this.map) return; // Ensure map is defined
-  
-    // Remove the existing legend if it exists
-    if (this.legendControl) {
-      this.map.removeControl(this.legendControl);
-    }
-  
-    // Create a new legend control
+    if (!this.map) return;
+    if (this.legendControl) this.map.removeControl(this.legendControl);
+
     this.legendControl = new (L.Control.extend({
       options: { position: 'bottomright' },
-      
-      onAdd: (map: any) => {
+      onAdd: () => {
         const div = L.DomUtil.create('div', 'info legend');
-        const intervals = this.interval as number[]; 
-        const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
-        const unitMeasure = this.measureUnit;
-  
-        // Loop through intervals and generate a label with a color square and unit for each range
-        for (let i = 0; i < intervals.length; i++) {
-          div.innerHTML +=
-            '<i style="background:' + colors[i] + '; width: 18px; height: 18px; display: inline-block;"></i> ' +
-            intervals[i] + (intervals[i + 1] ? '&ndash;' + intervals[i + 1] : '+') +' '+ unitMeasure +'<br>';
-        }
+        this.interval.forEach((val, i) => {
+          const label = this.interval[i + 1] ? `${val}–${this.interval[i + 1]}` : `${val}+`;
+          div.innerHTML += `<i style="background:${['green', 'yellow', 'pink', 'red', 'purple'][i]}"></i> ${label} ${this.measureUnit}<br>`;
+        });
         return div;
       }
     }))();
-  
-    // Add the new legend to the map
+
     this.legendControl.addTo(this.map);
   }
+
 }
