@@ -93,7 +93,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
   private initializeMap(): void {
-    this.map = L.map('map').setView([-23.5489, -46.6388], 13);
+    this.map = L.map('map').setView([-23.5489, -46.6388], 10);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       maxZoom: 20,
