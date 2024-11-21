@@ -7,7 +7,7 @@ import { GraphFormComponent } from './components/graph-form/graph-form.component
 export const routes: Routes = [
     { path: 'heatmap-form', component: HeatmapFormComponent },
     { path: 'heatmap', component : HeatmapComponent },
-    { path: 'home', component : HomeComponent },
+    { path: '', component : HomeComponent },
     { path: 'linegraph-form', component: GraphFormComponent},
     { path: 'linegraph', component: GraphComponent}
 ];
