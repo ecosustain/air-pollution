@@ -4,6 +4,20 @@ from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
 
 def create_tables():
+    """
+    Creates all tables and indexes defined in the `tables_and_columns` dictionary 
+    within the 'poluicao' schema in the MySQL database.
+
+    Workflow:
+    - Initializes the database connection.
+    - Defines the tables and columns through the `define_tables_and_columns()` method.
+    - Creates each table along with its columns and any necessary foreign key constraints.
+    - Adds specific indexes to the 'measure_indicator' table for optimization.
+    - Calls `metadata.create_all(engine)` to create the tables in the database.
+
+    Returns:
+        None
+    """
     engine = create_database()
     tables_and_columns = define_tables_and_columns()
     metadata = MetaData(schema='poluicao')
@@ -20,6 +34,17 @@ def create_tables():
 
 
 def create_database():
+    """
+    Creates a MySQL database named `poluicao` if it does not already exist.
+
+    Workflow:
+        1. Constructs a MySQL connection URL using `LOGIN_MYSQL` and `PASSWORD_MYSQL`.
+        2. Creates a SQLAlchemy engine to connect to the MySQL server.
+        3. Executes a SQL statement to create the `poluicao` database if it doesn't exist.
+
+    Returns:
+        sqlalchemy.engine.Engine: A SQLAlchemy engine connected to the MySQL server.
+    """
     DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost"
     engine = create_engine(DATABASE_URL)
     with engine.connect() as connection:
@@ -28,6 +53,13 @@ def create_database():
 
 
 def define_tables_and_columns():
+    """
+    Defines the schema for the database tables and their respective columns, including their 
+    data types and whether they are primary keys or foreign keys.
+
+    Returns:
+        dict: A dictionary mapping table names to lists of columns and their properties.
+    """
     tables_and_columns = {
         "stations": [
             ("id", Integer, True),
@@ -59,6 +91,19 @@ def define_tables_and_columns():
 
 
 def create_column(column_name, column_type, is_primary_key, *fk):
+    """
+    Creates a column for a table, including handling primary key and foreign key constraints.
+
+    Parameters:
+        column_name (str): The name of the column.
+        column_type (SQLAlchemy type): The SQLAlchemy data type of the column.
+        is_primary_key (bool): Whether this column is a primary key.
+        *fk (tuple): Optional; foreign key relationship, specifying the referenced column (e.g., 
+                     "table_name.column_name").
+
+    Returns:
+        sqlalchemy.Column: The SQLAlchemy `Column` object representing the column in the table.
+    """
     if fk:
         column = Column(column_name, column_type, ForeignKey(fk[0]), primary_key=is_primary_key)
     else:
@@ -67,6 +112,22 @@ def create_column(column_name, column_type, is_primary_key, *fk):
 
 
 def create_table(table_name, metadata, *table_columns):
+    """
+    Creates a table using SQLAlchemy, including its columns and associated indexes.
+
+    Parameters:
+        table_name (str): The name of the table to create.
+        metadata (sqlalchemy.MetaData): The metadata object that holds the table definition.
+        *table_columns (sqlalchemy.Column): A variable number of `sqlalchemy.Column` objects 
+                                             representing the columns in the table.
+
+    Returns:
+        None
+
+    Notes:
+        - For the `measure_indicator` table, additional indexes are created on the `datetime`, 
+          `idStation`, and `idIndicator` columns to optimize queries involving these fields.
+    """
     table = Table(table_name, metadata, *table_columns)
     if table_name == 'measure_indicator':
         Index('idx_datetime', table.c.datetime) # B+ Tree index
