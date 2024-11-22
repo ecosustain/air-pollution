@@ -18,11 +18,20 @@ export class GraphComponent implements OnChanges {
 
   constructor(private graphService: GraphService) {}
 
+  /**
+   * Detects changes in the input data and triggers the process
+   * to fetch and update the chart if new form data is provided.
+   */
   ngOnChanges() {
     if (this.formData)
       this.fetchChartData(this.formData);
   }
 
+  /**
+   * Fetches chart data from the backend service based on the provided form data.
+   * 
+   * @param {any} formData - The input form data containing parameters for the backend API call.
+   */
   fetchChartData(formData: any) {
     this.graphService.fetchGraphData(formData).subscribe((data: any) => {
       console.log('Received data:', data);
@@ -30,6 +39,11 @@ export class GraphComponent implements OnChanges {
     });
   }
 
+  /**
+   * Updates the chart with new data by processing the response and rendering a new chart.
+   * 
+   * @param {any} data - The data received from the backend for rendering the chart.
+   */
   updateChart(data: any) {
     if (!this.removePreviousChart(data))
       return;
@@ -45,6 +59,12 @@ export class GraphComponent implements OnChanges {
     this.chart = new Chart('lineChartCanvas', config);
   }
 
+  /**
+   * Removes the previous chart instance, if it exists, to prepare for rendering a new one.
+   * 
+   * @param {any} data - The data to check for valid chart rendering.
+   * @returns {boolean} `true` if a new chart can be created; otherwise, `false`.
+   */
   private removePreviousChart(data: any) {
     if (this.chart)
       this.chart.destroy();
@@ -55,6 +75,12 @@ export class GraphComponent implements OnChanges {
     return true
   }
 
+  /**
+   * Identifies the appropriate time label (e.g., 'year', 'day') from the data structure.
+   * 
+   * @param {any} data - The data received from the backend.
+   * @returns {string | null} The identified time label, or `null` if none is found.
+   */
   private findTimeLabel(data: any) {
     for (const indicatorData of data.line_graph) {
       const indicatorKey = Object.keys(indicatorData)[0];
@@ -71,6 +97,13 @@ export class GraphComponent implements OnChanges {
     return null;
   }
 
+  /**
+   * Retrieves and sorts all unique time points from the backend data.
+   * 
+   * @param {any} data - The data received from the backend.
+   * @param {string} timeLabel - The key representing the time field (e.g., 'year').
+   * @returns {number[]} A sorted array of unique time points.
+   */
   private getSortedTimePoints(data: any, timeLabel: string) {
     const allTimePoints = new Set<number>();
     data.line_graph.forEach((indicatorObj: any) => {
@@ -83,6 +116,14 @@ export class GraphComponent implements OnChanges {
     return sortedTimePoints;
   }
 
+  /**
+   * Generates datasets for the chart using the provided backend data and time labels.
+   * 
+   * @param {any} data - The backend data containing points for each indicator.
+   * @param {string} timeLabel - The key representing the time field (e.g., 'year').
+   * @param {any[]} labels - The sorted time labels to align data points.
+   * @returns {any[]} An array of datasets formatted for the chart library.
+   */
   private getDatasets(data: any, timeLabel: string, labels: any) {
     const datasets = data.line_graph.map((indicatorObj: any, index: number) => {
       const indicatorKey = Object.keys(indicatorObj)[0];
@@ -103,6 +144,13 @@ export class GraphComponent implements OnChanges {
     return datasets;
   }
 
+  /**
+   * Defines the chart configuration object for rendering.
+   * 
+   * @param {any} chartData - The processed chart data containing labels and datasets.
+   * @param {string} timeLabel - The key representing the time field (e.g., 'year').
+   * @returns {ChartConfiguration<'line'>} The chart configuration for the library.
+   */
   private defineChartConfiguration(chartData: any, timeLabel: string) {
     const config: ChartConfiguration<'line'> = {
       type: 'line',
@@ -123,6 +171,13 @@ export class GraphComponent implements OnChanges {
     return config
   }
 
+  /**
+   * Defines the data structure for the chart.
+   * 
+   * @param {any[]} labels - The chart labels representing time points.
+   * @param {any[]} datasets - The datasets containing data points for each indicator.
+   * @returns {ChartData<'line'>} The formatted chart data.
+   */
   private defineChartData(labels: any, datasets: any) {
     const chartData: ChartData<'line'> = {
       labels: labels,
@@ -131,6 +186,12 @@ export class GraphComponent implements OnChanges {
     return chartData;
   }
 
+  /**
+   * Returns the display label for the X-axis based on the time field.
+   * 
+   * @param {string} timeField - The key representing the time field (e.g., 'year').
+   * @returns {string | undefined} The localized X-axis label.
+   */
   private getXAxisLabel(timeField: string) {
     const labels = new Map<string, string>([
       ["year", "Ano"],
@@ -141,6 +202,12 @@ export class GraphComponent implements OnChanges {
     return labels.get(timeField);
   }
 
+  /**
+   * Generates a unique color for a dataset based on its index.
+   * 
+   * @param {number} index - The index of the dataset.
+   * @returns {string} A color in HSL format.
+   */
   private generateColor(index: number): string {
     const hue = (index * 137) % 360;
     return `hsl(${hue}, 70%, 50%)`;

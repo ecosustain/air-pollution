@@ -35,6 +35,12 @@ export class GraphFormComponent implements OnInit {
     return this.graphForm.get('indicators') as FormArray;
   }
 
+  /**
+   * Handles the checkbox selection for indicators.
+   * Adds the selected indicator to the `indicators` FormArray when checked and removes it when unchecked.
+   * 
+   * @param event - The change event triggered by the checkbox input.
+   */
   onCheckboxChange(event: any) {
     const indicatorsArray = this.indicatorsArray;
     if (event.target.checked) {
@@ -49,8 +55,19 @@ export class GraphFormComponent implements OnInit {
     }
   }
 
+  /**
+   * Lifecycle hook that initializes the component.
+   * Currently, no initialization logic is implemented.
+   */
   ngOnInit(): void {}
 
+  /**
+   * Handles changes to the time period selection.
+   * Updates the `timePeriodType` and dynamically adjusts form validators 
+   * based on the selected time period.
+   * 
+   * @param event - The change event triggered by the time period select input.
+   */
   onTimePeriodChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     const selectedValue = selectElement.value;
@@ -67,6 +84,10 @@ export class GraphFormComponent implements OnInit {
     this.graphForm.updateValueAndValidity();
   }
 
+  /**
+   * Clears validators from the form controls associated with time periods.
+   * Also resets the values of the `month` and `specificDate` fields.
+   */
   clearValidators() {
     this.graphForm.get('month')?.clearValidators();
     this.graphForm.get('specificDate.month')?.clearValidators();
@@ -76,6 +97,11 @@ export class GraphFormComponent implements OnInit {
     this.graphForm.get('specificDate')?.reset();
   }
 
+  /**
+   * Handles form submission.
+   * Validates the form, transforms the form data to the required format, 
+   * and emits it through the `formSubmit` EventEmitter.
+   */
   onSubmit() {
     this.graphForm.markAllAsTouched();
     if (this.graphForm.valid) {
@@ -101,6 +127,12 @@ export class GraphFormComponent implements OnInit {
     }
   }
 
+  /**
+   * Translates a user-friendly time period string into an API-compatible format.
+   * 
+   * @param originalTimePeriod - The time period string provided in Portuguese (e.g., "anual", "diária").
+   * @returns The translated time period string in English (e.g., "yearly", "daily").
+   */
   private translateTimePeriod(originalTimePeriod: string) {
     const translations = new Map<string, string>([
       ["anual", "yearly"],
