@@ -1,13 +1,14 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { indicators } from '../../models/indicators.models';
 import { interpolatorMethods } from '../../models/interpolator-methods.models';
+
 
 @Component({
   selector: 'app-heatmap-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DatePipe],
   templateUrl: './heatmap-form.component.html',
   styleUrls: ['./heatmap-form.component.css']
 })
@@ -20,7 +21,10 @@ export class HeatmapFormComponent implements OnInit {
 
   @Output() formSubmit = new EventEmitter<any>();
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private datePipe: DatePipe
+  ) {
     this.mapaDeCalorForm = this.fb.group({
       indicator: ['', Validators.required],
       interpolator : this.fb.group({
@@ -42,18 +46,16 @@ export class HeatmapFormComponent implements OnInit {
       this.mapaDeCalorForm.addControl('firstYear', this.fb.control('', Validators.required));
       this.mapaDeCalorForm.addControl('lastYear', this.fb.control('', Validators.required));
     } else {
-      const specificDateGroup = this.fb.group({});
-      specificDateGroup.addControl('year', this.fb.control('', Validators.required));
+      this.mapaDeCalorForm.addControl('year', this.fb.control('', Validators.required));
       if(this.intervalType != 'monthly'){
-        specificDateGroup.addControl('month', this.fb.control('', Validators.required));
+        this.mapaDeCalorForm.addControl('month', this.fb.control('', Validators.required));
         if (this.intervalType != 'daily') {
-          specificDateGroup.addControl('day', this.fb.control('', Validators.required));
+          this.mapaDeCalorForm.addControl('day', this.fb.control('', Validators.required));
           if(this.intervalType != 'hourly') {
-            specificDateGroup.addControl('hour', this.fb.control('', Validators.required));
+            this.mapaDeCalorForm.addControl('hour', this.fb.control('', Validators.required));
           }
         }
       }
-      this.mapaDeCalorForm.addControl('specificDate', specificDateGroup);
     }
 
     this.mapaDeCalorForm.updateValueAndValidity();
@@ -84,7 +86,7 @@ export class HeatmapFormComponent implements OnInit {
   }
 
   clearTimeDynamicControls() {
-    ['firstYear', 'lastYear', 'specificDate'].forEach(control => {
+    ['firstYear', 'lastYear', 'year', 'month', 'day', 'hour'].forEach(control => {
       this.mapaDeCalorForm.removeControl(control);
     });
   }
@@ -100,13 +102,89 @@ export class HeatmapFormComponent implements OnInit {
     params.clearValidators();
   }
   
+  formatDatePart(
+    format: string,
+    year: number, 
+    month?: number, 
+    day?: number, 
+    hour?: number, 
+  ): string {
+    const date = new Date(
+      year, 
+      (month || 1) - 1, 
+      day || 1, 
+      hour || 0
+    );
+    return this.datePipe.transform(date, format) || '';
+  }
   
+  formatDate(heatmapForm: any): any {
+    const newFormValue = { ...heatmapForm };
+  
+    switch (newFormValue.interval) {
+      case 'instant':
+        newFormValue.hour = this.formatDatePart(
+          'yyyy-MM-dd HH:mm:ss',          
+          newFormValue.year, 
+          newFormValue.month, 
+          newFormValue.day, 
+          newFormValue.hour
+        );
+        this.removeKeys(newFormValue, ['year', 'month', 'day']);
+        break;
+  
+      case 'hourly':
+        newFormValue.day = this.formatDatePart(
+          'yyyy-MM-dd',
+          newFormValue.year, 
+          newFormValue.month, 
+          newFormValue.day, 
+          undefined
+        );
+        this.removeKeys(newFormValue, ['year', 'month']);
+        break;
+  
+      case 'daily':
+        newFormValue.month = this.formatDatePart(
+          'yyyy-MM',
+          newFormValue.year, 
+          newFormValue.month, 
+          undefined, 
+          undefined
+        );
+        this.removeKeys(newFormValue, ['year']);
+        break;
+  
+      case 'monthly':
+        newFormValue.year = newFormValue.year.toString();
+        break;
+  
+      case 'yearly':
+        newFormValue.first_year = newFormValue.firstYear.toString();
+        newFormValue.last_year = newFormValue.lastYear.toString();
+        this.removeKeys(newFormValue, ['firstYear', 'lastYear']);
+        break;
+  
+      default:
+        console.error('Unknown interval:', newFormValue.interval);
+        break;
+    }
+  
+    return newFormValue;
+  }
+  
+  private removeKeys(object: any, keys: string[]): void {
+    keys.forEach((key) => delete object[key]);
+  }
+   
 
   onSubmit() {
     if (this.mapaDeCalorForm.valid) {
-      const formValue = JSON.parse(JSON.stringify(this.mapaDeCalorForm.value))
-      console.log("Emmited form", this.mapaDeCalorForm.value)
-      this.formSubmit.emit(formValue);
+      const formValue = this.mapaDeCalorForm.value;
+      const newFormValue = this.formatDate(formValue);
+      console.log("Completed form", this.mapaDeCalorForm.value);
+      console.log("Emmited form", newFormValue);
+      this.formSubmit.emit(newFormValue);
     } else {
       console.log('Form is invalid:', this.mapaDeCalorForm.value);
     }

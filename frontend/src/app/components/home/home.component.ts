@@ -5,8 +5,6 @@ import { HeatmapFormComponent } from "../heatmap-form/heatmap-form.component";
 import { HeatmapComponent } from "../heatmap/heatmap.component";
 import { GraphFormComponent } from '../graph-form/graph-form.component';
 import { GraphComponent } from "../graph/graph.component";
-import { Heatmaps } from '../../models/point.model';
-import { HeatmapService } from '../../services/heatmap/heatmap.service';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -28,21 +26,17 @@ export class HomeComponent implements OnInit{
   chosenForm : string = "Mapa de Calor";
   
   formData: any;
-
-  heatmaps : Heatmaps = {};
-  indicator : string = '';
-  period : string = '';
+  heatmapFormData : any;
+  
   
   errorMessage : string = '';
 
   constructor (
-    private fb : FormBuilder, 
-    private heatmapService: HeatmapService,
-    private datePipe: DatePipe) 
+    private fb : FormBuilder) 
     {
     this.formChoice = this.fb.group({
       formKind : ["Mapa de Calor", Validators.required]
-    })
+    });
   }
 
   ngOnInit(): void {
@@ -55,68 +49,9 @@ export class HomeComponent implements OnInit{
     this.chosenForm = selectedValue;
   }
 
-  formatHour(year: number, month: number, day: number, hour: number): string {
-    const date = new Date(year, month - 1, day, hour); 
-    return this.datePipe.transform(date, 'yyyy-MM-dd HH:mm:ss') || '';
-  }
-
-  formatDay(year: number, month: number, day: number): string {
-    const date = new Date(year, month - 1, day);
-    return this.datePipe.transform(date, 'yyyy-MM-dd') || '';
-  }
-
-  formatMonth(year: number, month: number){
-    const date = new Date(year, month - 1); 
-    return this.datePipe.transform(date, 'yyyy-MM') || '';
-  }
-
-  handleHeatmapFormSubmit(formValues: any) {
-    let payload = formValues
-
-    if(formValues.interval === "instant") {
-      payload.hour = this.formatHour(
-        formValues.specificDate.year,
-        formValues.specificDate.month, 
-        formValues.specificDate.day, 
-        formValues.specificDate.hour);
-      delete payload["specificDate"];
-    } else if (formValues.interval === "hourly"){
-      payload.day = this.formatDay(
-        formValues.specificDate.year,
-        formValues.specificDate.month, 
-        formValues.specificDate.day) 
-        delete payload["specificDate"];
-    } else if (formValues.interval === "daily"){
-      payload.month = this.formatMonth(
-        formValues.specificDate.year,
-        formValues.specificDate.month
-      );
-      delete payload["specificDate"];
-    } else if (formValues.interval === "monthly"){
-      payload.year = formValues.specificDate.year.toString();
-      delete payload["specificDate"];
-    } else if (formValues.interval === "yearly"){
-      payload.first_year = formValues.firstYear.toString();
-      payload.last_year = formValues.lastYear.toString();
-      delete payload["firstYear"]
-      delete payload["lastYear"]
-    }
-
-    console.log("Sent payload: ", payload)
-
-    this.heatmapService.getInterpolatedHeatmap(payload)
-      .subscribe({
-        next: (heatmapResponse) => {
-          console.log('Query did okay');
-          this.heatmaps = heatmapResponse;
-          this.indicator = payload.indicator;
-          this.period = payload.interval;
-        },
-        error: (err) => {
-          this.errorMessage = 'Failed to retrieve points';
-          console.error(err);
-        }
-      });
+  handleHeatmapFormSubmit(formData: any) {
+    this.heatmapFormData = formData;
+    console.log('Heatmap form submitted and data passed to heatmap:', formData);
   }
 
   handleGraphFormSubmit(formData: any): void {

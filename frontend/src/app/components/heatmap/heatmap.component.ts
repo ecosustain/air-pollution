@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { spGeoJson } from '../../models/spGeoJson.const';
 import { FormsModule } from '@angular/forms'; 
 import { CommonModule } from '@angular/common';
+import { HeatmapService } from '../../services/heatmap/heatmap.service';
 
 
 @Component({
@@ -16,14 +17,12 @@ import { CommonModule } from '@angular/common';
   imports: [FormsModule, CommonModule]
 })
 export class HeatmapComponent implements OnInit, OnChanges {
-  @Input() heatmaps: Heatmaps;
-  @Input() indicator: string;
-  @Input() period : string; 
+  @Input() formData : any; 
 
-  
+  heatmaps : Heatmaps;
+  timeInterval : string = '';
+
   private map: any;
-  private interval: number[];
-  private measureUnit : string;
   private legendControl: L.Control | null = null;
 
   minHeatmapIndex: number;
@@ -34,13 +33,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
   month_names =  ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
 
-  constructor(private http: HttpClient) { 
-    this.interval = [];
-    this.measureUnit = "";
+  constructor(private http: HttpClient, private heatmapService : HeatmapService) { 
     this.heatmaps = {};
-    this.indicator = '';
-    this.period = '';
-
     this.minHeatmapIndex = 1;
     this.maxHeatmapIndex = 1;
     this.currentHeatmapIndex = 1;
@@ -51,44 +45,66 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes['indicator']){
-        console.log('Updated indicator response:', changes['indicator'].currentValue); 
-        this.updateIntervals();
-        this.updateUnitMeasure();
-        this.addLegend(); 
-      }
-    if (changes['heatmaps']) {
-      console.log('Updated heatmaps response:', changes['heatmaps'].currentValue);
-      const heatmapsKeys = Object.keys(this.heatmaps).map(key => parseInt(key, 10));
+    if(this.formData){
+      this.getHeatmapData(this.formData);
+    }
+  }
+  
+  getHeatmapData(formData : any) {
+    this.heatmapService.getInterpolatedHeatmap(formData)
+      .subscribe({
+        next: (data) => {
+          console.log('Received data:', data);
+          this.heatmaps = data;
+          this.timeInterval = formData.interval;
+          this.updateSlider(data);
+          this.updateMap(data, formData, this.currentHeatmapIndex);
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+  }
+
+  updateSlider(data : any) {
+    const heatmapsKeys = Object.keys(data).map(key => parseInt(key, 10));
       if (heatmapsKeys.length > 0) {
         this.minHeatmapIndex = Math.min(...heatmapsKeys);
         this.maxHeatmapIndex = Math.max(...heatmapsKeys);
         this.currentHeatmapIndex = this.minHeatmapIndex; 
       }
-      this.addRectangles(this.currentHeatmapIndex); 
-    }
   }
-  
+
   onHeatmapIndexChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.currentHeatmapIndex = parseInt(target.value, 10);
-    this.addRectangles(this.currentHeatmapIndex);
+    const indicatorQualityIntervals = this.getIndicatorQualityIntervals(this.formData.indicator);
+    this.addRectangles(this.currentHeatmapIndex, this.heatmaps, indicatorQualityIntervals);
   }
 
-  private updateIntervals(){
-    const selectedIndicator = indicators.find(indicator => indicator.name === this.indicator);
+  updateMap(data : any, formData : any, heatmapIndex : number){
+    const indicatorQualityIntervals = this.getIndicatorQualityIntervals(formData.indicator);
+    const indicatorMeasureUnit = this.getIndicatorMeasureUnit(formData.indicator);
+
+    this.addRectangles(heatmapIndex, data, indicatorQualityIntervals);
+    this.addLegend(indicatorQualityIntervals, indicatorMeasureUnit);
+  }
+
+  getIndicatorQualityIntervals(indicatorName : string){
+    const selectedIndicator = indicators.find(indicator => indicator.name === indicatorName);
     if(selectedIndicator){
-    this.interval = selectedIndicator.interval;
+    return selectedIndicator.interval;
     } else {
-      this.interval = []
+      return [];
     }
   }
-  private updateUnitMeasure(){
-    const selectedIndicator = indicators.find(indicator => indicator.name === this.indicator);
+
+  private getIndicatorMeasureUnit(indicatorName : string) : string {
+    const selectedIndicator = indicators.find(indicator => indicator.name === indicatorName);
     if(selectedIndicator){
-      this.measureUnit = selectedIndicator.measureUnit;
+      return selectedIndicator.measureUnit;
     } else {
-      this.measureUnit = "";
+      return "";
     }
   }
 
@@ -110,8 +126,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
   }
 
 
-  private addRectangles(index: number): void {
-    if (!this.map || !this.heatmaps[index]) return;
+  private addRectangles(index: number, heatmaps : Heatmaps, getIndicatorQualityIntervals : number[]): void {
+    if (!this.map || !heatmaps[index]) return;
 
     this.map.eachLayer((layer: any) => {
       if (layer instanceof L.Rectangle) this.map.removeLayer(layer);
@@ -128,7 +144,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
     const latStep = (max_lat - min_lat) / latPoints;
     const longStep = (max_long - min_long) / (latPoints / ((max_lat - min_lat) / (max_long - min_long)));
 
-    this.heatmaps[index].forEach(point => {
+    heatmaps[index].forEach(point => {
       L.rectangle(
         [
           [point.lat - latStep / 2, point.long - longStep / 2],
@@ -136,7 +152,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
         ],
         {
           color: 'transparent',
-          fillColor: this.chooseColor(point.value),
+          fillColor: this.chooseColor(point.value, getIndicatorQualityIntervals),
           fillOpacity: 0.4,
           weight: 1,
         }
@@ -144,12 +160,11 @@ export class HeatmapComponent implements OnInit, OnChanges {
     });
   }
 
-  private chooseColor(measure: number): string {
-    const intervals = this.interval as number[];
+  private chooseColor(indicatorMeasure: number, indicatorQualityIntervals : number[]): string {
     const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
 
-    for (let i = 1; i < intervals.length; i++) {
-        if (measure <= intervals[i]) {
+    for (let i = 1; i < indicatorQualityIntervals.length; i++) {
+        if (indicatorMeasure <= indicatorQualityIntervals[i]) {
             return colors[i-1];
         }
     }
@@ -157,7 +172,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
     return colors[colors.length - 1];
   }
 
-  private addLegend(): void {
+  private addLegend(indicatorQualityIntervals : number[], indicatorMeasureUnit : string): void {
     if (!this.map) return;
     if (this.legendControl) this.map.removeControl(this.legendControl);
 
@@ -165,9 +180,9 @@ export class HeatmapComponent implements OnInit, OnChanges {
       options: { position: 'bottomright' },
       onAdd: () => {
         const div = L.DomUtil.create('div', 'info legend');
-        this.interval.forEach((val, i) => {
-          const label = this.interval[i + 1] ? `${val}–${this.interval[i + 1]}` : `${val}+`;
-          div.innerHTML += `<i style="background:${['green', 'yellow', 'pink', 'red', 'purple'][i]}"></i> ${label} ${this.measureUnit}<br>`;
+        indicatorQualityIntervals.forEach((val, i) => {
+          const label = indicatorQualityIntervals[i + 1] ? `${val}–${indicatorQualityIntervals[i + 1]}` : `${val}+`;
+          div.innerHTML += `<i style="background:${['green', 'yellow', 'pink', 'red', 'purple'][i]}"></i> ${label} ${indicatorMeasureUnit}<br>`;
         });
         return div;
       }
