@@ -14,7 +14,7 @@ class UpdateData:
     def __init__(self) -> None:
         self.qualar_session_id = get_session_id()
 
-    def update_data(self, data_directory="./backend/data/collected_csvs"):
+    def update_data(self, data_directory="/app/data/collected_csvs"):
         session_id = self.qualar_session_id
 
         for file in os.listdir(data_directory):
@@ -35,7 +35,7 @@ class UpdateData:
             self.update_csv_file(df, dfs_to_update_csv, data_directory, file)
 
     def update_database(self, data, station, indicator):
-        db_url = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao"
+        db_url = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao"
         db_connection = create_engine(db_url)
         with tempfile.NamedTemporaryFile(mode='w+', delete=True) as file:
             file.write(data)
