@@ -1,13 +1,13 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine
-from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
-from backend.src.metadata.meta_data import STATIONS, INDICATORS, INDICATORS_DATA
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from metadata.meta_data import STATIONS, INDICATORS, INDICATORS_DATA
 
 
 def populate_tables():
-    CSV_DIRECTORY = './backend/data/collected_csvs'
-    db_connection = create_engine(f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao")
+    CSV_DIRECTORY = '/app/data/collected_csvs'
+    db_connection = create_engine(f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao")
     insert_stations_data(db_connection)
     insert_indicators_data(db_connection)
     for file_name in os.listdir(CSV_DIRECTORY):

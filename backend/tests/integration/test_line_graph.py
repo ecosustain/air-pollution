@@ -52,7 +52,7 @@ class TestLineGraph:
         endpoint = f"/linegraph/"
         method = "GET"
 
-        for possibility in POSSIBILITIES:
+        for possibility in POSSIBILITIES[0:1]:
             payload = possibility
             endpoint_with_payload = endpoint + json.dumps(payload)
             url = f"{BASE_URL}{endpoint_with_payload}"

@@ -27,17 +27,16 @@ services:
     restart: unless-stopped
 
   db:
-    image: mysql:8
+    image: mysql:latest
+    container_name: mysql
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: mydatabase
-    volumes:
-      - db_data:/var/lib/mysql
-      - ./backend/data/database:/docker-entrypoint-initdb.d
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: poluicao
     ports:
       - "3306:3306"
-    restart: unless-stopped
+    restart: always
+    volumes:
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  db_data:
-
+  mysql_data:

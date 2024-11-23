@@ -1,6 +1,6 @@
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey, Index)
-from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
 
 def create_tables():
@@ -20,7 +20,7 @@ def create_tables():
 
 
 def create_database():
-    DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost"
+    DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db"
     engine = create_engine(DATABASE_URL)
     with engine.connect() as connection:
         connection.execute(text("CREATE DATABASE IF NOT EXISTS poluicao"))
