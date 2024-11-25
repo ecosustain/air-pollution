@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import * as L from 'leaflet';
 import { Heatmaps } from '../../models/point.model';
 import { indicators } from '../../models/indicators.models';
@@ -17,9 +17,12 @@ import { HeatmapService } from '../../services/heatmap/heatmap.service';
 })
 export class HeatmapComponent implements OnInit, OnChanges {
   @Input() formData: any; // Input from parent component containing heatmap configuration.
+  @Output() isLoading = new EventEmitter<boolean>();
 
   heatmaps: Heatmaps = {};
   timeInterval: string = '';
+
+  loadingState: boolean = false; 
 
   private map: L.Map | null = null;
   private legendControl: L.Control | null = null;
@@ -33,7 +36,9 @@ export class HeatmapComponent implements OnInit, OnChanges {
     'jul', 'ago', 'set', 'out', 'nov', 'dez',
   ];
 
-  constructor(private http: HttpClient, private heatmapService: HeatmapService) {}
+  constructor(private http: HttpClient, private heatmapService: HeatmapService) {
+    this.isLoading.emit(false);
+  }
 
   ngOnInit(): void {
     this.initializeMap();
@@ -49,18 +54,28 @@ export class HeatmapComponent implements OnInit, OnChanges {
    * Fetches heatmap data based on formData.
   */
   private fetchHeatmapData(formData: any): void {
-    this.heatmapService.getInterpolatedHeatmap(formData).subscribe({
-      next: (data) => {
-        console.log('Received heatmap data:', data);
-        this.heatmaps = data;
-        this.timeInterval = formData.interval;
-        this.updateSlider(data);
-        this.updateMap(data, formData, this.currentHeatmapIndex);
-      },
-      error: (err) => {
-        console.error('Error fetching heatmap data:', err);
-      },
-    });
+    if(this.loadingState){
+     console.log("Application is running on loading mode. Can't fetch heatmap data now.") 
+    }
+    else{
+      this.loadingState = true;
+      this.isLoading.emit(true); // Start loading
+      this.heatmapService.getInterpolatedHeatmap(formData).subscribe({
+        next: (data) => {
+          console.log('Received heatmap data:', data);
+          this.heatmaps = data;
+          this.timeInterval = formData.interval;
+          this.updateSlider(data);
+          this.updateMap(data, formData, this.currentHeatmapIndex);
+          this.loadingState = false;
+          this.isLoading.emit(false); // Stop loading
+        },
+        error: (err) => {
+          console.error('Error fetching heatmap data:', err);
+          this.isLoading.emit(false); // Stop loading in case of error
+        },
+      });
+    }
   }
 
   /**

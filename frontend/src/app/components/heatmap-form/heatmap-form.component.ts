@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule, DatePipe } from '@angular/common';
 import { indicators } from '../../models/indicators.models';
@@ -20,6 +20,7 @@ export class HeatmapFormComponent implements OnInit {
   selectedMethodParams: any[] = [];
 
   @Output() formSubmit = new EventEmitter<any>();
+  @Input() isLoading : boolean = false;
 
   constructor(private fb: FormBuilder, private datePipe: DatePipe) {
     this.mapaDeCalorForm = this.createForm();
@@ -191,14 +192,19 @@ export class HeatmapFormComponent implements OnInit {
     * Handles form submission
   */
   onSubmit(): void {
-    if (this.mapaDeCalorForm.valid) {
-      const formValue = this.mapaDeCalorForm.value;
-      const formattedValue = this.formatDate(formValue);
-      console.log('Completed form', formValue);
-      console.log('Emitted form', formattedValue);
-      this.formSubmit.emit(formattedValue);
-    } else {
-      console.error('Form is invalid:', this.mapaDeCalorForm.value);
+    if(this.isLoading){
+      console.log("Application is loading: can't submit heatmap form now.")
+    }
+    else{
+      if (this.mapaDeCalorForm.valid) {
+        const formValue = this.mapaDeCalorForm.value;
+        const formattedValue = this.formatDate(formValue);
+        console.log('Completed form', formValue);
+        console.log('Emitted form', formattedValue);
+        this.formSubmit.emit(formattedValue);
+      } else {
+        console.error('Form is invalid:', this.mapaDeCalorForm.value);
+      }
     }
   }
 }

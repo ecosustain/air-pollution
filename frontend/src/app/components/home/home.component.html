@@ -6,11 +6,11 @@
                 <option>Gráfico</option>
             </select>
         </form>
-        <app-heatmap-form *ngIf="chosenForm === 'Mapa de Calor'" (formSubmit)="handleHeatmapFormSubmit($event)"></app-heatmap-form>
+        <app-heatmap-form *ngIf="chosenForm === 'Mapa de Calor'" [isLoading]="isLoading" (formSubmit)="handleHeatmapFormSubmit($event)"></app-heatmap-form>
         <app-graph-form *ngIf="chosenForm === 'Gráfico'" (formSubmit)="handleGraphFormSubmit($event)"></app-graph-form>
     </div>
     <div class="container" id="image-container">
-        <app-heatmap *ngIf="chosenForm === 'Mapa de Calor'" [formData]="heatmapFormData"></app-heatmap>
+        <app-heatmap *ngIf="chosenForm === 'Mapa de Calor'" (isLoading)="handleLoading($event)" [formData]="heatmapFormData"></app-heatmap>
         <app-graph *ngIf="chosenForm === 'Gráfico'" [formData]="formData"></app-graph>
     </div>
 </div>

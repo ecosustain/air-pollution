@@ -6,6 +6,10 @@ crossorigin=""/>
      crossorigin=""></script>
      
 <div id="map"></div>
+<div *ngIf="loadingState" class="loading-overlay">
+     <div class="spinner"></div>
+     <p>Carregando dados do mapa de calor...</p>
+</div>
 <div *ngIf="timeInterval !== '' && timeInterval !== 'instant'" class="slider-container">
      <label *ngIf="timeInterval=== 'hourly'" for="heatmapSlider">Hora: {{currentHeatmapIndex}}h</label>
      <label *ngIf="timeInterval === 'daily'" for="heatmapSlider">Dia: {{currentHeatmapIndex}}</label>

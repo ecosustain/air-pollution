@@ -28,6 +28,7 @@ export class HomeComponent implements OnInit{
   formData: any;
   heatmapFormData : any;
   
+  isLoading : boolean = false;
   
   errorMessage : string = '';
 
@@ -50,8 +51,12 @@ export class HomeComponent implements OnInit{
   }
 
   handleHeatmapFormSubmit(formData: any) {
-    this.heatmapFormData = formData;
-    console.log('Heatmap form submitted and data passed to heatmap:', formData);
+    if(this.isLoading){
+      console.log("Applcation is running in loading mode. Can't handle form submit now.");
+    } else{
+      this.heatmapFormData = formData;
+      console.log('Heatmap form submitted and data passed to heatmap:', formData);
+    }
   }
 
   handleGraphFormSubmit(formData: any): void {
@@ -59,5 +64,13 @@ export class HomeComponent implements OnInit{
     console.log('Graph form submitted and data passed to graph:', formData);
   }
 
-
+  handleLoading(isLoading : boolean) : void {
+    this.isLoading = isLoading;
+    if(isLoading){
+      console.log('Application starts running in loading mode.');
+    }
+    else {
+      console.log('Application ends running in loading mode.');
+    }
+  }
 }
