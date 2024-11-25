@@ -72,6 +72,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
         },
         error: (err) => {
           console.error('Error fetching heatmap data:', err);
+          this.loadingState = false;
           this.isLoading.emit(false); // Stop loading in case of error
         },
       });
