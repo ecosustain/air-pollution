@@ -101,6 +101,18 @@ def heatmap(payload):
 
 @app.route('/linegraph/<string:payload>', methods=['GET'])
 def linegraph(payload):
+    """
+    API endpoint to generate line plots based on the provided payload.
+
+    Args:
+        payload (str): A JSON string containing the request data, which should include:
+            - "indicators": List with the name of each environmental indicator.
+            - "interval": The time interval for the lineplot (e.g., "daily", "monthly", "yearly", "hourly").
+            - Additional time references based on the interval.
+
+    Returns:
+        Response: A JSON response containing the data necessary to plot the lines with HTTP status 200.
+    """
     payload = json.loads(payload)
     response = make_response()
 
