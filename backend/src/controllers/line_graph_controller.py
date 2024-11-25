@@ -7,7 +7,16 @@ INTERVAL_POSSIBILITIES = ["yearly",  "monthly", "daily", "hourly"]
 
 
 class LineGraphController:
+    """
+    Controller class responsible for fetching and formatting data for line graph visualizations.
+    """
     def __init__(self, session) -> None:
+        """
+        Initializes the controller with a database session and repository for querying data.
+
+        Args:
+            session: Database session object used to interact with the database.
+        """
         self.measure_indicator_repository = MeasureIndicatorRepository(session)
         self.session = session
 
@@ -15,6 +24,20 @@ class LineGraphController:
             self,
             payload: dict
     ) -> list[dict]:
+        """
+        Fetches line graph data based on the input payload.
+
+        Args:
+            payload (dict): A dictionary containing the following keys:
+                - "indicators" (list[str]): List of indicators to query.
+                - "interval" (str): The interval of aggregation ("yearly", "monthly", "daily", or "hourly").
+                - Optional keys depending on the interval:
+                  - "month" (int): The month for data filtering (1-12).
+                  - "year" (int): The year for data filtering (e.g., 2024).
+
+        Returns:
+            list[dict]: A list of dictionaries containing the requested data for each indicator.
+        """
         if self.validate_payload_format(payload):
             indicators = payload["indicators"]
             indicator_ids = []
@@ -78,7 +101,15 @@ class LineGraphController:
         return response
 
     def validate_payload_format(self, payload: dict) -> bool:
-        """Checks if payload format is correct returning true or false"""
+        """
+        Validates the format of the input payload.
+
+        Args:
+            payload (dict): Payload dictionary to validate.
+
+        Returns:
+            bool: True if the payload format is valid, False otherwise.
+        """
         try:
             # Validate indicators
             indicators = payload["indicators"]
