@@ -7,6 +7,29 @@ from metadata.meta_data import STATIONS
 
 
 def join_files(path="./backend/data/collected_csvs"):
+    """
+    Combines and processes CSV files for each station, generates a complete 
+    time-series dataset, and saves the results to new station-specific CSV files.
+
+    Parameters:
+        path (str, optional): The directory path containing the collected CSV files. 
+                              Defaults to "./backend/data/collected_csvs".
+
+    Workflow:
+        1. Iterates over all stations defined in `STATIONS`.
+        2. Reads and processes all files associated with a station:
+           - Extracts the indicator and loads the file into a DataFrame.
+           - Creates a unified `datetime` column.
+           - Cleans and adjusts incorrect rows.
+           - Combines data from multiple files for the same indicator.
+        3. Deletes processed files after merging their data.
+        4. Generates a complete time-series DataFrame for the station.
+        5. Merges all indicator data into the time-series DataFrame.
+        6. Saves the resulting station-level dataset as a new CSV file.
+
+    Returns:
+        None
+    """
     files = os.listdir(path)
     for station in STATIONS:
         station_indicators = {}
@@ -32,18 +55,53 @@ def join_files(path="./backend/data/collected_csvs"):
 
 
 def get_maximum_date(station_indicators):
+    """
+    Retrieves the maximum datetime value across multiple DataFrames.
+
+    Parameters:
+        station_indicators (dict): A dictionary where keys are indicator names, and values are
+                                   Pandas DataFrames containing a 'datetime' column.
+
+    Returns:
+        datetime: The maximum datetime value across all DataFrames.
+    """
     max_dates = [df['datetime'].max() for df in station_indicators.values()]
     overall_max_date = max(max_dates)
     return overall_max_date
 
 
 def get_indicator_and_df(path, file):
+    """
+    Extracts the indicator name and loads a DataFrame from a CSV file.
+
+    Parameters:
+        path (str): The directory path where the file is located.
+        file (str): The file name, expected to follow a naming convention 
+                    where the second part of the name (split by '_') corresponds to the indicator.
+
+    Returns:
+        tuple: A tuple containing:
+               - indicator (str): The indicator name in lowercase.
+               - df (pandas.DataFrame): The loaded DataFrame from the CSV file.
+    """
     indicator = file.split("_")[1].lower()
     df = pd.read_csv(f"{path}/{file}", sep=";", skiprows=7, encoding="latin1")
     return indicator, df
 
 
 def create_datetime_column(df, indicator):
+    """
+    Creates a `datetime` column in the DataFrame by combining `date` and `time` columns.
+
+    Parameters:
+        df (pandas.DataFrame): The input DataFrame with 'date' and 'time' columns.
+        indicator (str): The name of the indicator, used as a column name in lowercase.
+
+    Returns:
+        pandas.DataFrame: The modified DataFrame with:
+                          - A combined `datetime` column.
+                          - Dropped `date` and `time` columns.
+    """
     df.columns = ["date", "time", indicator.lower()]
     df['datetime'] = df['date'].values + " " + df['time'].values
     df.drop(['date', 'time'], axis=1, inplace=True)
@@ -52,6 +110,21 @@ def create_datetime_column(df, indicator):
 
 
 def adjust_incorrect_rows(df, indicator):
+    """
+    Adjusts incorrect rows in a DataFrame, handles invalid datetimes, 
+    and converts indicator values to float format.
+
+    Parameters:
+        df (pandas.DataFrame): The input DataFrame with a `datetime` column and 
+                               an indicator column.
+        indicator (str): The name of the indicator, used as a column name in lowercase.
+
+    Returns:
+        pandas.DataFrame: The cleaned DataFrame with:
+                          - Fixed invalid datetimes ending in "24:00" (shifted to the next day at "00:00").
+                          - Converted indicator values to float format.
+                          - Dropped duplicate and NaN rows.
+    """
     df = df.rename(columns={'datetime': 'original_datetime'})
     df['datetime'] = pd.to_datetime(df['original_datetime'], format='%Y/%m/%d %H:%M', errors='coerce')
     mask = df['datetime'].isna() & df['original_datetime'].str.endswith('24:00')
