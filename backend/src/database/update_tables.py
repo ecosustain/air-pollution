@@ -28,20 +28,7 @@ class UpdateData:
     def __init__(self) -> None:
         self.qualar_session_id = get_session_id()
 
-    def update_data(self, data_directory="./backend/data/collected_csvs"):
-        """
-        Updates the database and CSV files with new data from the CETESB Qualar platform.
-
-        This method iterates over all CSV files in the specified directory, retrieves the required data from 
-        the CETESB Qualar API, and updates both the database and the CSV files for each station and indicator.
-
-        Parameters:
-            data_directory (str): The directory where the CSV files are located. Default is
-                                  `./backend/data/collected_csvs`.
-        
-        Returns:
-            None
-        """
+    def update_data(self, data_directory="/app/data/collected_csvs"):
         session_id = self.qualar_session_id
 
         for file in os.listdir(data_directory):
@@ -62,23 +49,7 @@ class UpdateData:
             self.update_csv_file(df, dfs_to_update_csv, data_directory, file)
 
     def update_database(self, data, station, indicator):
-        """
-        Updates the database with new data by processing the provided CSV data and inserting it into the database.
-
-        This method takes raw CSV data as input, writes it to a temporary file, processes the data by adjusting columns 
-        and inserting it into the 'measure_indicator' table in the database. It also updates the 'station_indicators' table 
-        if the data for the given station and indicator does not already exist.
-
-        Parameters:
-            data (str): The raw CSV data to be written and processed.
-            station (str): The name of the station associated with the data.
-            indicator (str): The name of the indicator for which data is being updated.
-
-        Returns:
-            pandas.DataFrame: A DataFrame containing the adjusted data for the specified indicator, used for updating the
-                              CSV file of the corresponding station.
-        """
-        db_url = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao"
+        db_url = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao"
         db_connection = create_engine(db_url)
         with tempfile.NamedTemporaryFile(mode='w+', delete=True) as file:
             file.write(data)

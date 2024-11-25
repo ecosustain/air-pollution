@@ -1,0 +1,17 @@
+FROM python:3.10
+
+WORKDIR /app
+
+COPY src /app/src
+COPY tests /app/tests
+COPY data /app/data
+
+RUN pip install -r /app/src/requirements.txt
+
+ENV FLASK_APP=src/app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+EXPOSE 5000
+
+CMD ["flask", "run"]
+

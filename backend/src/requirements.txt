@@ -1,0 +1,13 @@
+numpy
+pandas
+requests
+scikit-learn
+pyproj
+pymysql
+sqlalchemy
+folium
+geopandas
+pykrige
+flask-cors
+cryptography
+apscheduler
