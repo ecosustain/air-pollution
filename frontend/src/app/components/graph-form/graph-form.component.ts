@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter} from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input} from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -18,6 +18,7 @@ export class GraphFormComponent implements OnInit {
   ];
   timePeriodType: string = '';
   @Output() formSubmit = new EventEmitter<any>();
+  @Input() isLoading : boolean = false;
 
   constructor(private fb: FormBuilder) {
     this.graphForm = this.fb.group({
@@ -103,27 +104,32 @@ export class GraphFormComponent implements OnInit {
    * and emits it through the `formSubmit` EventEmitter.
    */
   onSubmit() {
-    this.graphForm.markAllAsTouched();
-    if (this.graphForm.valid) {
-      const formData: any = {
-        timePeriod: this.translateTimePeriod(this.graphForm.value.timePeriod.toLowerCase()),
-        indicators: this.graphForm.value.indicators,
-        specificDate: {
-          year: this.graphForm.value.specificDate.year || null,
-          month: this.graphForm.value.specificDate.month || null
-        },
-        month: this.graphForm.value.month || null
-      };
-  
-      if (formData.timePeriod === 'monthly' || formData.timePeriod === 'hourly')
-        formData.specificDate = null;
-      if (formData.timePeriod === 'daily')
-        formData.month = null;
-  
-      console.log('Form submitted:', formData);
-      this.formSubmit.emit(formData);
-    } else {
-      console.log('Form is invalid');
+    if(this.isLoading){
+      console.log("Application is loading: can't submit graph form now.");
+    }
+    else{
+      this.graphForm.markAllAsTouched();
+      if (this.graphForm.valid) {
+        const formData: any = {
+          timePeriod: this.translateTimePeriod(this.graphForm.value.timePeriod.toLowerCase()),
+          indicators: this.graphForm.value.indicators,
+          specificDate: {
+            year: this.graphForm.value.specificDate.year || null,
+            month: this.graphForm.value.specificDate.month || null
+          },
+          month: this.graphForm.value.month || null
+        };
+    
+        if (formData.timePeriod === 'monthly' || formData.timePeriod === 'hourly')
+          formData.specificDate = null;
+        if (formData.timePeriod === 'daily')
+          formData.month = null;
+    
+        console.log('Form submitted:', formData);
+        this.formSubmit.emit(formData);
+      } else {
+        console.log('Form is invalid');
+      }
     }
   }
 
