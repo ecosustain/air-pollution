@@ -193,7 +193,7 @@ export class HeatmapFormComponent implements OnInit {
   */
   onSubmit(): void {
     if(this.isLoading){
-      console.log("Application is loading: can't submit heatmap form now.")
+      console.log("Application is loading: can't submit heatmap form now.");
     }
     else{
       if (this.mapaDeCalorForm.valid) {

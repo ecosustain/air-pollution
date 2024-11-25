@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { Chart, ChartConfiguration, ChartData, registerables } from 'chart.js';
 import { GraphService } from '../../services/graph/graph.service';
 import { CommonModule } from '@angular/common';
@@ -14,6 +14,10 @@ Chart.register(...registerables);
 })
 export class GraphComponent implements OnChanges {
   @Input() formData: any;
+  @Output() isLoading = new EventEmitter<boolean>();
+
+  loadingState: boolean = false; 
+
   chart: Chart | undefined;
 
   constructor(private graphService: GraphService) {}
@@ -24,10 +28,26 @@ export class GraphComponent implements OnChanges {
   }
 
   fetchChartData(formData: any) {
-    this.graphService.fetchGraphData(formData).subscribe((data: any) => {
-      console.log('Received data:', data);
-      this.updateChart(data);
-    });
+    if(this.loadingState){
+      console.log("Application is running on loading mode. Can't fetch graph data now.") 
+    }
+    else{
+      this.loadingState = true;
+      this.isLoading.emit(true); // Start loading
+      this.graphService.fetchGraphData(formData).subscribe({
+        next : (data) => {
+          console.log('Received data:', data);
+          this.updateChart(data);
+          this.loadingState = false;
+          this.isLoading.emit(false); // Stop loading
+        },
+        error : (err) => {
+          console.error('Error fetching graph data:', err);
+          this.loadingState = false;
+          this.isLoading.emit(false);
+        } 
+      });
+    }
   }
 
   updateChart(data: any) {
