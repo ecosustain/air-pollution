@@ -65,12 +65,13 @@ export class HomeComponent implements OnInit{
   }
 
   handleLoading(isLoading : boolean) : void {
-    this.isLoading = isLoading;
-    if(isLoading){
-      console.log('Application starts running in loading mode.');
-    }
-    else {
-      console.log('Application ends running in loading mode.');
-    }
+    setTimeout(() => {
+      this.isLoading = isLoading;
+      if (isLoading) {
+        console.log("Application starts running in loading mode.");
+      } else {
+        console.log("Application ends running in loading mode.");
+      }
+    });
   }
 }
