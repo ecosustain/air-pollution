@@ -1,27 +1,13 @@
 import os
 import pandas as pd
 from sqlalchemy import create_engine
-from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
-from backend.src.metadata.meta_data import STATIONS, INDICATORS, INDICATORS_DATA
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from metadata.meta_data import STATIONS, INDICATORS, INDICATORS_DATA
 
 
 def populate_tables():
-    """
-    Populates the 'stations', 'indicators', 'measure_indicator', and 'station_indicators' tables from CSV files.
-
-    This function performs the following steps:
-    1. Inserts data into the 'stations' and 'indicators' tables by calling the respective insert functions.
-    2. Iterates over all CSV files in the specified directory (`CSV_DIRECTORY`), processes each file, 
-       and inserts the data into the 'measure_indicator' and 'station_indicators' tables.
-
-    Parameters:
-        None
-
-    Returns:
-        None
-    """
-    CSV_DIRECTORY = './backend/data/collected_csvs'
-    db_connection = create_engine(f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao")
+    CSV_DIRECTORY = '/app/data/collected_csvs'
+    db_connection = create_engine(f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao")
     insert_stations_data(db_connection)
     insert_indicators_data(db_connection)
     for file_name in os.listdir(CSV_DIRECTORY):

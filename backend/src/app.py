@@ -12,10 +12,12 @@ from controllers import (
 )
 
 import json
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, Table, MetaData
 from sqlalchemy.orm import sessionmaker
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from database.create_tables import create_tables
+from database.populate_tables import populate_tables
 import atexit
 
 
@@ -29,11 +31,23 @@ scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 
-DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost/poluicao'
+DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao'
 engine = create_engine(DATABASE_URI)
 
 Session = sessionmaker(bind=engine)
-SESSION = Session() 
+SESSION = Session()
+
+
+try:
+    measure_indicator = Table('measure_indicator', MetaData(), autoload_with=engine, schema='poluicao')
+    row_count = SESSION.query(measure_indicator).count()
+    if row_count == 0:
+        populate_tables()
+except Exception as e:
+    print(e)
+    create_tables()
+    populate_tables()
+
 
 app = Flask(__name__)
 CORS(app)
@@ -41,7 +55,7 @@ CORS(app)
 
 @app.route('/')
 def index():
-    return "<h1>MAC 0476<h1/>"
+    return f"<h1>MAC 0476<h1/>"
 
 
 @app.route('/update_data', methods=['PUT'])

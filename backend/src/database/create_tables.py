@@ -1,6 +1,6 @@
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey, Index)
-from backend.src.utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
 
 def create_tables():
@@ -34,18 +34,7 @@ def create_tables():
 
 
 def create_database():
-    """
-    Creates a MySQL database named `poluicao` if it does not already exist.
-
-    Workflow:
-        1. Constructs a MySQL connection URL using `LOGIN_MYSQL` and `PASSWORD_MYSQL`.
-        2. Creates a SQLAlchemy engine to connect to the MySQL server.
-        3. Executes a SQL statement to create the `poluicao` database if it doesn't exist.
-
-    Returns:
-        sqlalchemy.engine.Engine: A SQLAlchemy engine connected to the MySQL server.
-    """
-    DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@localhost"
+    DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db"
     engine = create_engine(DATABASE_URL)
     with engine.connect() as connection:
         connection.execute(text("CREATE DATABASE IF NOT EXISTS poluicao"))
