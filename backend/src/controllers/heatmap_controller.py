@@ -153,7 +153,7 @@ class HeatMapController:
 
                 heat_map = [{"lat": coordinates[0], "long": coordinates[1], "value": value} for coordinates, value in zip(area_discretization,y)]
             else:
-                heat_map = {}
+                heat_map = []
 
             key = str(key)
             response[key] = heat_map

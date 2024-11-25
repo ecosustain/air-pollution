@@ -1,7 +1,10 @@
 <div style="width: 75%; margin: auto;">
+    <div *ngIf="loadingState" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Carregando dados do gráfico...</p>
+    </div>
     <div *ngIf="!chart">
         <p>Sem dados disponíveis. Por favor, selecione novas opções para gerar o gráfico.</p>
     </div>
     <canvas id="lineChartCanvas"></canvas>
 </div>
-  

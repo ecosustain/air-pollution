@@ -47,11 +47,7 @@
         <input type="number" placeholder="Último Ano" formControlName="lastYear" id="lastYear" />
       </div>
 
-      <div class="form-field-container" 
-           id="specific-date-form" 
-           *ngIf="intervalType != 'yearly' && intervalType != ''" 
-           formGroupName="specificDate">
-
+      <div class="form-field-container" id="specific-date-form" *ngIf="intervalType != 'yearly' && intervalType != ''" >
         <input *ngIf="intervalType === 'instant'" type="number" formControlName="hour" placeholder="Hora" />
         <input *ngIf="intervalType === 'hourly' || intervalType === 'instant'" type="number" formControlName="day" placeholder="Dia" />
         <input *ngIf="intervalType === 'daily' || intervalType === 'hourly' || intervalType === 'instant'" type="number" formControlName="month" placeholder="Mês" />
