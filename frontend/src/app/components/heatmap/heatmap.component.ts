@@ -47,7 +47,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   /**
    * Fetches heatmap data based on formData.
-   */
+  */
   private fetchHeatmapData(formData: any): void {
     this.heatmapService.getInterpolatedHeatmap(formData).subscribe({
       next: (data) => {
@@ -65,7 +65,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   /**
    * Updates slider bounds based on the heatmap data.
-   */
+  */
   private updateSlider(data: Heatmaps): void {
     const heatmapIndices = Object.keys(data).map((key) => parseInt(key, 10));
     if (heatmapIndices.length > 0) {
@@ -77,43 +77,52 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   /**
    * Handles changes in heatmap index from the slider.
-   */
+  */
   onHeatmapIndexChange(event: Event): void {
     const target = event.target as HTMLInputElement;
     this.currentHeatmapIndex = parseInt(target.value, 10);
 
     const qualityIntervals = this.getIndicatorQualityIntervals(this.formData.indicator);
-    this.addRectangles(this.currentHeatmapIndex, this.heatmaps, qualityIntervals);
+    const qualityColors = this.getIndicatorQualityColors(this.formData.indicator);
+    this.addRectangles(this.currentHeatmapIndex, this.heatmaps, qualityIntervals, qualityColors);
   }
 
   /**
    * Updates the heatmap and legend.
-   */
+  */
   private updateMap(data: Heatmaps, formData: any, heatmapIndex: number): void {
     const qualityIntervals = this.getIndicatorQualityIntervals(formData.indicator);
+    const qualityColors = this.getIndicatorQualityColors(formData.indicator);
     const measureUnit = this.getIndicatorMeasureUnit(formData.indicator);
 
-    this.addRectangles(heatmapIndex, data, qualityIntervals);
-    this.addLegend(qualityIntervals, ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit, formData.indicator);
+    this.addRectangles(heatmapIndex, data, qualityIntervals, qualityColors);
+    this.addLegend(qualityIntervals, qualityColors, measureUnit, formData.indicator);
   }
 
   /**
    * Retrieves quality intervals for the given indicator.
-   */
+  */
   private getIndicatorQualityIntervals(indicatorName: string): number[] {
-    return indicators.find((indicator) => indicator.name === indicatorName)?.interval || [];
+    return indicators.find((indicator) => indicator.name === indicatorName)?.qualityIntervals || [];
+  }
+
+  /**
+   * Retrieves quality colors for the given indicator.
+  */
+  private getIndicatorQualityColors(indicatorName: string): string[] {
+    return indicators.find((indicator) => indicator.name === indicatorName)?.qualityColors || [];
   }
 
   /**
    * Retrieves the measure unit for the given indicator.
-   */
+  */
   private getIndicatorMeasureUnit(indicatorName: string): string {
     return indicators.find((indicator) => indicator.name === indicatorName)?.measureUnit || '';
   }
 
   /**
    * Initializes the Leaflet map.
-   */
+  */
   private initializeMap(): void {
     this.map = L.map('map').setView([-23.5489, -46.6388], 10);
 
@@ -130,8 +139,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   /**
    * Adds rectangles to the map representing heatmap data.
-   */
-  private addRectangles(index: number, heatmaps: Heatmaps, qualityIntervals: number[]): void {
+  */
+  private addRectangles(index: number, heatmaps: Heatmaps, qualityIntervals: number[], qualityColors: string[]): void {
     if (!this.map || !heatmaps[index]) return;
 
     this.map.eachLayer((layer) => {
@@ -157,7 +166,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
         ],
         {
           color: 'transparent',
-          fillColor: this.chooseColor(point.value, qualityIntervals),
+          fillColor: this.chooseColor(point.value, qualityIntervals, qualityColors),
           fillOpacity: 0.4,
           weight: 1,
         }
@@ -167,18 +176,17 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   /**
    * Determines rectangle color based on value and intervals.
-   */
-  private chooseColor(value: number, qualityIntervals: number[]): string {
-    const colors = ['green', 'yellow', 'pink', 'red', 'purple'];
-    for (let i = 1; i < qualityIntervals.length; i++) {
-      if (value <= qualityIntervals[i]) return colors[i - 1];
+  */
+  private chooseColor(value: number, qualityIntervals: number[], qualityColors: string[]): string {
+    for (let i = 0; i < qualityIntervals.length; i++) {
+      if (value <= qualityIntervals[i]) return qualityColors[i];
     }
-    return colors[colors.length - 1];
+    return qualityColors[qualityColors.length - 1];
   }
 
   /**
    * Adds a legend to the map.
-   */
+  */
   private addLegend(qualityIntervals: number[], qualityIntervalsColors: string[], measureUnit: string, indicatorName: string): void {
     if (!this.map) return;
     if (this.legendControl) this.map.removeControl(this.legendControl);
@@ -194,11 +202,20 @@ export class HeatmapComponent implements OnInit, OnChanges {
                         ">${indicatorName}</h4>`;
   
         // Add the color intervals and labels
+        let label : string = '';
         qualityIntervals.forEach((val, i) => {
-          const label = qualityIntervals[i + 1] ? `${val}–${qualityIntervals[i + 1]}` : `${val}+`;
+          if(!qualityIntervals[i-1]){
+            label = `≤ ${val}`;
+          }
+          else{
+            label = `> ${qualityIntervals[i - 1]} – ${val}`;
+          }
           div.innerHTML += `<i style="background:${qualityIntervalsColors[i]}"></i> ${label} ${measureUnit}<br>`;
         });
-  
+        
+        let val = qualityIntervals[qualityIntervals.length - 1];
+        label = ` > ${val}`;
+        div.innerHTML += `<i style="background:${qualityIntervalsColors[qualityIntervalsColors.length - 1]}"></i> ${label} ${measureUnit}<br>`;
         return div;
       },
     }))();

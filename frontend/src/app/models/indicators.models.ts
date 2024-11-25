@@ -1,8 +1,9 @@
 export const indicators = [
-    {name : "MP2.5", interval : [0, 25, 50, 75, 125], measureUnit : "µg/m³"},
-    {name : "MP10", interval : [0, 50, 100, 150, 250], measureUnit : "µg/m³"},
-    {name : "O3", interval: [0, 100, 130, 160, 200], measureUnit : "µg/m³"},
-    {name : "CO", interval : [0, 9, 11, 13, 15], measureUnit : "ppm"},
-    {name : "NO2", interval : [0, 200, 240, 320, 1130], measureUnit : "µg/m³"},
-    {name : "SO2", interval : [0, 20, 40, 365, 800], measureUnit : "µg/m³"}
+    {name : "MP2.5", qualityIntervals : [25, 50, 75, 125], qualityColors : ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit : "µg/m³"},
+    {name : "MP10", qualityIntervals : [50, 100, 150, 250], qualityColors : ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit : "µg/m³"},
+    {name : "O3", qualityIntervals: [100, 130, 160, 200], qualityColors : ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit : "µg/m³"},
+    {name : "CO", qualityIntervals : [9, 11, 13, 15], qualityColors : ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit : "ppm"},
+    {name : "NO2", qualityIntervals : [200, 240, 320, 1130], qualityColors : ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit : "µg/m³"},
+    {name : "SO2", qualityIntervals : [20, 40, 365, 800], qualityColors : ['green', 'yellow', 'pink', 'red', 'purple'], measureUnit : "µg/m³"},
+    {name : "TEMP", qualityIntervals : [0, 15, 20, 25, 30, 35, 40], qualityColors : ['blue', 'cyan', 'green', 'yellow', 'orange', 'red', 'darkred'], measureUnit : "°C"}
 ]
