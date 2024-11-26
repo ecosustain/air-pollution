@@ -96,7 +96,11 @@ Mostra a média geral de cada horário (0h, 1h, 2h, etc.) para todos os dias de 
 > **Nota**: Os gráficos de linha permitem a exibição das concentrações de **mais de um indicador ao mesmo tempo**. No entanto, é importante destacar que nem todo indicador é mensurado em uma mesma **unidade de medida**, de tal forma que é indicado apenas exibir ao mesmo tempo indicadores que estão na mesma unidade de medida.
 
 ### Mapa de Calor
-Os mapas de calor representam visualmente as concentrações dos poluentes em uma determinada região e período. Quando há mais de um mapa para um conjunto de dados, o usuário pode navegar entre eles utilizando uma barra interativa ("navegador de mapas"). As opções incluem:
+Os mapas de calor representam visualmente as concentrações dos poluentes em uma determinada região e período. Essas concentrações são obtidas por meio da **interpolação espacial** dos valores coletados pelas 37 estações na Região Metropolitana de São Paulo. 
+
+Quando há mais de um mapa para um conjunto de dados, o usuário pode navegar entre eles utilizando uma barra interativa (**"navegador de mapas"**).
+
+As opções de escalas temporais incluem:
 
 1. **Anual**  
 Gera um mapa de calor para cada ano (médias anuais) dentro de um intervalo definido pelo usuário.  
@@ -118,7 +122,31 @@ Gera mapas de calor por hora (médias horárias) para todas as 24 horas de um di
 Cria um único mapa de calor para uma hora específica em um dia específico (média horária).  
 **Parâmetros:** Hora, dia, mês e ano.
 
-> **Nota**: Os mapas de calor permitem a exibição de **apenas um indicador por vez**. Além disso, percebe-se que há regiões do mapa onde nenhuma informação é exibida. Isso ocorre em pontos distantes das estações de coleta de dados, de tal forma que apenas sejam exibidas informações que tenham um grau maior de confiabilidade.
+> **Nota**: Os mapas de calor permitem a exibição de **apenas um indicador por vez**.
+
+#### Sobre a interpolação
+Para que seja feita a interpolação dos pontos da Região Metropolitana de São Paulo para exibição do mapa de calor, **dois métodos** foram implementados:
+
+1. **k-Nearest Neighbors (kNN)**  
+Calcula a média ponderada das k estações mais próximas ao ponto de interpolação. O peso de uma estação é inversamente proporcional à sua distância para o ponto.
+
+> **Parâmetros do kNN**:  
+> - ***k*** = número de vizinhos a considerar
+
+2. **Krigagem**  
+Considera não só a proximidade (médias ponderadas), mas também a correlação espacial entre os pontos (modela a variabilidade espacial).
+
+> **Parâmetros da Krigagem**:  
+> - ***method*** = define o tipo de krigagem (*ordinary* ou *universal*)   
+> - ***variogram_model*** = especifica o modelo de variograma usado para representar a variabilidade espacial (*linear*, *power*, *gaussian* ou *spherical*)  
+> - ***nlags*** = número de intervalos usados para calcular o variograma experimental
+> - ***weight*** = aplica pesos aos pares no variograma, geralmente com base na contagem de pontos (*true* ou *false*).
+
+Nem todos os pontos no mapa são interpolados. Pontos **distantes das estações de coleta de dados** não são interpolados para garantir que apenas informações com maior grau de confiabilidade sejam exibidas. Por isso, é comum haver áreas no mapa sem informações.
+
+Um ponto é considerado **distante** (e, portanto, não interpolado) se estiver fora do **raio de confiança** de todas as estações de coleta. O **raio de confiança** é o limite ao redor de uma estação dentro do qual os dados fornecidos por ela são considerados confiáveis. Esses raios variam conforme a estação e o indicador, podendo ir de 1 quilômetro a dezenas de quilômetros.
+
+Em resumo, todos os pontos interpolados estão dentro do raio de pelo menos uma estação. Para esses pontos, a interpolação considera não apenas as estações cujos raios incluem o ponto, mas também todas as que o método selecionado determinar como relevantes, ponderadas pela distância.
 
 ## Autores do Projeto
 - Matheus Sanches Jurgensen [![LinkedIn](https://img.shields.io/badge/LinkedIn-Profile-blue)](https://www.linkedin.com/in/matheusjurgensen/)
