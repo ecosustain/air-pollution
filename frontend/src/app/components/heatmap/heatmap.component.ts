@@ -224,7 +224,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
             label = `≤ ${val}`;
           }
           else{
-            label = `> ${qualityIntervals[i - 1]} – ${val}`;
+            label = `>${qualityIntervals[i - 1]} – ${val}`;
           }
           div.innerHTML += `<i style="background:${qualityIntervalsColors[i]}"></i> ${label} ${measureUnit}<br>`;
         });
