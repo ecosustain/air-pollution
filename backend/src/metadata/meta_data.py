@@ -124,14 +124,14 @@ STATIONS_ID = {
     86: (-23.61840136721358, -46.556341859314045),
     103: (-23.60911197805361, -46.75589374693721)
 }
+# Raio das estações (km)
+H = 1 # Histórica
+B = 1 # Bairro
+Mi = 1 # Micro
+Me = 4 # Média
+U = 5 # Urbana
 
-
-H = 1
-B = 1
-Mi = 1
-Me = 4
-U = 5
-
+# station_id --> radius
 RADIUS_MP10 = {
     90: H,
     269: B,
@@ -171,6 +171,8 @@ RADIUS_MP10 = {
     86: -1,
     103: Mi
 }
+
+# station_id --> radius
 RADIUS_MP25 = {
     90: -1,
     269: -1,
@@ -211,6 +213,7 @@ RADIUS_MP25 = {
     103: -1
 }
 
+# station_id --> radius
 RADIUS_CO =  {
     90: -1,
     269: -1,
@@ -251,6 +254,7 @@ RADIUS_CO =  {
     103: Mi
 }
 
+# station_id --> radius
 RADIUS_NO2 = {
     90: -1,
     269: B,
@@ -291,6 +295,7 @@ RADIUS_NO2 = {
     103: Mi
 }
 
+# station_id --> radius
 RADIUS_O3 = {
     90: -1,
     269: B,
@@ -331,6 +336,7 @@ RADIUS_O3 = {
     103: -1
 }
 
+# station_id --> radius
 RADIUS_SO2 = {
     90: -1,
     269: -1,
@@ -371,6 +377,12 @@ RADIUS_SO2 = {
     103: -1 
 }
 
+# station_id --> radius
+RADIUS_MAX = {key: max(RADIUS_MP10[key], RADIUS_CO[key], RADIUS_MP25[key],
+                        RADIUS_NO2[key], RADIUS_O3[key], RADIUS_SO2[key])
+              for key in RADIUS_SO2.keys()}
+
+# indicator --> radius_dict
 RADIUS = {
     "BEN": RADIUS_NO2,
     "CO": RADIUS_CO,
@@ -383,4 +395,12 @@ RADIUS = {
     "O3": RADIUS_O3,
     "SO2": RADIUS_SO2,
     "TOL": RADIUS_NO2,
+    "DV": RADIUS_MAX,
+    "DVG": RADIUS_MAX,
+    "PRESS": RADIUS_MAX,
+    "RADG": RADIUS_MAX,
+    "RADUV": RADIUS_MAX,
+    "TEMP": RADIUS_MAX,
+    "UR": RADIUS_MAX,
+    "VV": RADIUS_MAX
 }
