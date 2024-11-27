@@ -2,6 +2,8 @@ FROM python:3.10
 
 WORKDIR /app
 
+COPY src/requirements.txt /app/src/requirements.txt
+
 COPY src /app/src
 COPY tests /app/tests
 COPY data /app/data
