@@ -131,7 +131,7 @@ class KrigingInterpolator(Interpolator):
         }
         """
         super().__init__(data, verbose=verbose)
-        self.param_dict = param_dict
+        self.param_dict = {key: value if isinstance(value, list) else [value] for key, value in param_dict.items()}
         params, self.best_score = self._find_params()
 
         self.interpolator = Krige(**params)
@@ -175,6 +175,9 @@ class KNNInterpolator(Interpolator):
         k -> KNN number of neighbors parameter. Integer for a fixed value or "auto" 
         to select using cross validation
         """
+
+        k = k['k'] if isinstance(k, dict) else k # Allow to receive k as a dict
+
         super().__init__(data, verbose=verbose) 
         if k == 'auto':
             self.k, self.best_score = self._find_k() 
