@@ -3,8 +3,16 @@
         <div class="spinner"></div>
         <p>Carregando dados do gráfico...</p>
     </div>
-    <div *ngIf="!chart">
+    <div *ngIf="successfulMessage !== '' && !loadingState" class="successful-popup">
+        <p>{{ successfulMessage }}</p>
+        <button (click)="successfulMessage = ''">Fechar</button>
+   </div>  
+    <div *ngIf="errorMessage !== '' && !loadingState" class="error-popup">
+        <p>{{ errorMessage }}</p>
+        <button (click)="errorMessage = ''">Fechar</button>
+   </div>    
+    <!-- <div *ngIf="!chart">
         <p>Sem dados disponíveis. Por favor, selecione novas opções para gerar o gráfico.</p>
-    </div>
+    </div> -->
     <canvas id="lineChartCanvas"></canvas>
 </div>

@@ -1,4 +1,8 @@
 <div class="form-component-container" id="heatmap-form-container">
+  <div *ngIf="errorMessage !== '' && !isLoading" class="error-popup">
+    <p>{{ errorMessage }}</p>
+    <button (click)="errorMessage = ''">Fechar</button>
+  </div>
   <form [formGroup]="mapaDeCalorForm" (ngSubmit)="onSubmit()">
       <div class="form-field-container">
         <select formControlName="indicator" id="indicator">
