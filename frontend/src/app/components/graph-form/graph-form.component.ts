@@ -20,6 +20,8 @@ export class GraphFormComponent implements OnInit {
   @Output() formSubmit = new EventEmitter<any>();
   @Input() isLoading : boolean = false;
 
+  errorMessage: string = '';
+
   constructor(private fb: FormBuilder) {
     this.graphForm = this.fb.group({
       indicators: this.fb.array([], Validators.required),
@@ -103,6 +105,8 @@ export class GraphFormComponent implements OnInit {
         this.formSubmit.emit(formData);
       } else {
         console.log('Form is invalid');
+        this.errorMessage = 'Este formulário não é válido, confira as informações preenchidas.';
+        
       }
     }
   }

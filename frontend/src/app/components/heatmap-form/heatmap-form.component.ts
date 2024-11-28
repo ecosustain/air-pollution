@@ -19,6 +19,8 @@ export class HeatmapFormComponent implements OnInit {
   interpolatorMethods = interpolatorMethods;
   selectedMethodParams: any[] = [];
 
+  errorMessage : string = '';
+
   @Output() formSubmit = new EventEmitter<any>();
   @Input() isLoading : boolean = false;
 
@@ -204,6 +206,7 @@ export class HeatmapFormComponent implements OnInit {
         this.formSubmit.emit(formattedValue);
       } else {
         console.error('Form is invalid:', this.mapaDeCalorForm.value);
+        this.errorMessage = 'Este formulário não é válido, confira as informações preenchidas.';
       }
     }
   }

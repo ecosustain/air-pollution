@@ -23,6 +23,8 @@ export class HeatmapComponent implements OnInit, OnChanges {
   timeInterval: string = '';
 
   loadingState: boolean = false; 
+  errorMessage : string = '';
+  successfulMessage: string = '';
 
   private map: L.Map | null = null;
   private legendControl: L.Control | null = null;
@@ -46,6 +48,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.formData) {
+      this.errorMessage = '';
       this.fetchHeatmapData(this.formData);
     }
   }
@@ -63,6 +66,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
       this.heatmapService.getInterpolatedHeatmap(formData).subscribe({
         next: (data) => {
           console.log('Received heatmap data:', data);
+          this.successfulMessage = 'Requisição foi bem sucedida.'
           this.heatmaps = data;
           this.timeInterval = formData.interval;
           this.updateSlider(data);
@@ -72,6 +76,7 @@ export class HeatmapComponent implements OnInit, OnChanges {
         },
         error: (err) => {
           console.error('Error fetching heatmap data:', err);
+          this.errorMessage = 'Sem dados disponíveis. Por favor, selecione novas opções para gerar o gráfico.';
           this.loadingState = false;
           this.isLoading.emit(false); // Stop loading in case of error
         },
