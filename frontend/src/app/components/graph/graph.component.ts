@@ -16,7 +16,9 @@ export class GraphComponent implements OnChanges {
   @Input() formData: any;
   @Output() isLoading = new EventEmitter<boolean>();
 
-  loadingState: boolean = false; 
+  loadingState: boolean = false;
+  errorMessage: string = '';
+  successfulMessage: string = '';
 
   chart: Chart | undefined;
 
@@ -46,12 +48,14 @@ export class GraphComponent implements OnChanges {
       this.graphService.fetchGraphData(formData).subscribe({
         next : (data) => {
           console.log('Received data:', data);
+          this.successfulMessage = 'Requisição foi bem sucedida.';
           this.updateChart(data);
           this.loadingState = false;
           this.isLoading.emit(false); // Stop loading
         },
         error : (err) => {
           console.error('Error fetching graph data:', err);
+          this.errorMessage = 'Sem dados disponíveis. Por favor, selecione novas opções para gerar o gráfico.'
           this.loadingState = false;
           this.isLoading.emit(false);
         } 

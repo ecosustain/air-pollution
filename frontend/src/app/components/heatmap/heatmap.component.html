@@ -4,8 +4,17 @@ crossorigin=""/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
+
      
 <div id="map"></div>
+<div *ngIf="successfulMessage !== '' && !loadingState" class="successful-popup">
+     <p>{{ successfulMessage }}</p>
+     <button (click)="successfulMessage = ''">Fechar</button>
+</div>  
+ <div *ngIf="errorMessage !== '' && !loadingState" class="error-popup">
+     <p>{{ errorMessage }}</p>
+     <button (click)="errorMessage = ''">Fechar</button>
+</div>    
 <div *ngIf="loadingState" class="loading-overlay">
      <div class="spinner"></div>
      <p>Carregando dados do mapa de calor...</p>
