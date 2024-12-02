@@ -1,3 +1,3 @@
 export const environment = {
-    api : 'air.pollution.data'
+    api : '/air.pollution.data'
 };
