@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GraphService {
-  private apiUrl = 'http://127.0.0.1:5000/linegraph';
+  private apiUrl = `${environment.api}/linegraph`;
 
   constructor(private http: HttpClient) {}
 
