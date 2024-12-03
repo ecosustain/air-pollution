@@ -8,9 +8,8 @@ import { GraphFormComponent } from './components/graph-form/graph-form.component
 export const routes: Routes = [
   { path: 'heatmap-form', component: HeatmapFormComponent },
   { path: 'heatmap', component: HeatmapComponent },
-  { path: 'air-pollution', component: HomeComponent }, // Rota para HomeComponent
-  { path: '', redirectTo: '/air-pollution', pathMatch: 'full' }, // Redireciona a rota raiz para /air-pollution
+  { path: '', component: HomeComponent }, // Rota para HomeComponent
   { path: 'linegraph-form', component: GraphFormComponent },
   { path: 'linegraph', component: GraphComponent },
-  { path: '**', redirectTo: '/air-pollution' } // Redireciona rotas inválidas para HomeComponent
+  { path: '**', redirectTo: '' } // Redireciona rotas inválidas para HomeComponent
 ];
