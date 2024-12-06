@@ -10,47 +10,50 @@ from controllers import (
     UpdateController,
     LineGraphController
 )
-
 import json
 from sqlalchemy import create_engine, inspect, Table, MetaData
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from apscheduler.schedulers.background import BackgroundScheduler
 from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from database.create_tables import create_tables
 from database.populate_tables import populate_tables
 import atexit
 
+DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao'
+engine = create_engine(DATABASE_URI)
+
+SessionFactory = sessionmaker(bind=engine)
+Session = scoped_session(SessionFactory)  # Use scoped session for thread safety
 
 def scheduled_update():
     UpdateController().update_data()
-
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(scheduled_update, 'cron', hour=3, minute=0)
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
-
-DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao'
-engine = create_engine(DATABASE_URI)
-
-Session = sessionmaker(bind=engine)
-SESSION = Session()
+app = Flask(__name__)
+CORS(app)
 
 
 try:
     measure_indicator = Table('measure_indicator', MetaData(), autoload_with=engine, schema='poluicao')
-    row_count = SESSION.query(measure_indicator).count()
-    if row_count == 0:
-        populate_tables()
+    with Session() as session:
+        row_count = session.query(measure_indicator).count()
+        if row_count == 0:
+            populate_tables()
 except Exception as e:
-    print(e)
+    print(f"Error during initialization: {e}")
     create_tables()
     populate_tables()
 
 
-app = Flask(__name__)
-CORS(app)
+# This decorator guarantees that the function is automatically invoked at the end of every
+# HTTP request, regardless of whether the request succeeds or fails. 
+@app.teardown_request
+def remove_session(exception=None):
+    Session.remove()
 
 
 @app.route('/')
@@ -90,9 +93,7 @@ def heatmap(payload):
     response = make_response()
 
     if request.method == 'GET':
-        heatmaps = HeatMapController(session=SESSION).get_heatmap(payload=payload)
-        SESSION.close()
-
+        heatmaps = HeatMapController(session=Session()).get_heatmap(payload=payload)
         response = jsonify(heatmaps)
         response.status = 200
 
@@ -117,9 +118,7 @@ def linegraph(payload):
     response = make_response()
 
     if request.method == 'GET':
-        linegraph_ = LineGraphController(session=SESSION).get_line_graph(payload=payload)
-        SESSION.close()
-
+        linegraph_ = LineGraphController(session=Session()).get_line_graph(payload=payload)
         response = jsonify({"line_graph": linegraph_})
         response.status = 200
 

@@ -4,10 +4,10 @@ import tempfile
 from sqlalchemy import create_engine, text
 from datetime import datetime, timedelta
 
-from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from metadata.meta_data import STATIONS, INDICATORS
 from utils.utils import (ddmmyyyyhhmm_yyyymmddhhmm, string_to_float,
                          get_request_response, get_session_id)
+from utils.db_utils import with_session
 
 
 class UpdateData:
@@ -28,7 +28,12 @@ class UpdateData:
     def __init__(self) -> None:
         self.qualar_session_id = get_session_id()
 
-    def update_data(self, data_directory="/app/data/collected_csvs"):
+    @with_session
+    def update_data(self, session, data_directory="/app/data/collected_csvs"):
+        """
+        Updates data in the database and CSV files using the session passed from the decorator.
+        The method will run inside a transaction, and any errors will trigger a rollback.
+        """
         session_id = self.qualar_session_id
 
         for file in os.listdir(data_directory):
@@ -43,14 +48,16 @@ class UpdateData:
                 response_text = get_request_response(session_id, start_date, end_date,
                                                         STATIONS[station][0], INDICATORS[indicator])
                 if response_text is not None:
-                    df_to_update_csv = self.update_database(response_text, station, indicator)
+                    df_to_update_csv = self.update_database(response_text, station, indicator, session)
                     print(f"Successful database update: {station} - {indicator} - up to {end_date}")
                     dfs_to_update_csv[indicator.lower()] = df_to_update_csv
             self.update_csv_file(df, dfs_to_update_csv, data_directory, file)
 
-    def update_database(self, data, station, indicator):
-        db_url = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao"
-        db_connection = create_engine(db_url)
+    def update_database(self, data, station, indicator, session):
+        """
+        Updates the database with data from the API response.
+        """
+        db_connection = session.get_bind()
         with tempfile.NamedTemporaryFile(mode='w+', delete=True) as file:
             file.write(data)
             file.flush()

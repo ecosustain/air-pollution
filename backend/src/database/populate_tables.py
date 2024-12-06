@@ -1,24 +1,34 @@
 import os
 import pandas as pd
-from sqlalchemy import create_engine
-from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from metadata.meta_data import STATIONS, INDICATORS, INDICATORS_DATA
+from utils.db_utils import with_session
 
+@with_session
+def populate_tables(session):
+    """
+    Populates the tables in the 'poluicao' database by processing CSV files
+    and inserting data into the appropriate tables. It iterates over CSV files,
+    extracting data and inserting it into various tables such as 'stations' and
+    'indicators'.
 
-def populate_tables():
+    Parameters:
+        session (SQLAlchemy Session): The active session used for database operations.
+
+    Returns:
+        None
+    """
     CSV_DIRECTORY = '/app/data/collected_csvs'
-    db_connection = create_engine(f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao")
-    insert_stations_data(db_connection)
-    insert_indicators_data(db_connection)
+    insert_stations_data(session)
+    insert_indicators_data(session)
     for file_name in os.listdir(CSV_DIRECTORY):
         if file_name.endswith('.csv'):
             file_path = os.path.join(CSV_DIRECTORY, file_name)
             station_name = file_name.replace(".csv", "")
-            insert_data_from_station(file_path, station_name, db_connection)
+            insert_data_from_station(file_path, station_name, session)
     print("All files processed successfully.")
 
 
-def insert_stations_data(db_connection):
+def insert_stations_data(session):
     """
     Inserts data into the 'stations' table in the database.
 
@@ -28,8 +38,7 @@ def insert_stations_data(db_connection):
     data, the new records are appended.
 
     Parameters:
-        db_connection (SQLAlchemy Connection): The active connection to the database 
-        used for executing SQL operations.
+        session (SQLAlchemy Session): The active session used for database operations.
 
     Returns:
         None
@@ -42,10 +51,10 @@ def insert_stations_data(db_connection):
         "description": ["" for _ in STATIONS]  # Placeholder for description
     }
     stations_df = pd.DataFrame(stations_data)
-    stations_df.to_sql('stations', con=db_connection, if_exists='append', index=False)
+    stations_df.to_sql('stations', con=session.bind, if_exists='append', index=False)
 
 
-def insert_indicators_data(db_connection):
+def insert_indicators_data(session):
     """
     Inserts data into the 'indicators' table in the database.
 
@@ -55,8 +64,7 @@ def insert_indicators_data(db_connection):
     table in the MySQL database. If the `indicators` table already contains data, the new records are appended.
 
     Parameters:
-        db_connection (SQLAlchemy Connection): The active connection to the database used for executing SQL
-        operations.
+        session (SQLAlchemy Session): The active session used for database operations.
 
     Returns:
         None
@@ -69,10 +77,10 @@ def insert_indicators_data(db_connection):
         "is_pollutant": [INDICATORS_DATA[indicator_data][0] for indicator_data in INDICATORS_DATA]
     }
     indicators_df = pd.DataFrame(indicator_data)
-    indicators_df.to_sql('indicators', con=db_connection, if_exists='append', index=False)
+    indicators_df.to_sql('indicators', con=session.bind, if_exists='append', index=False)
 
 
-def insert_data_from_station(file_path, station_name, db_connection):
+def insert_data_from_station(file_path, station_name, session):
     """
     Inserts data from a station's CSV file into the 'measure_indicator' and 'station_indicators' tables.
 
@@ -84,7 +92,7 @@ def insert_data_from_station(file_path, station_name, db_connection):
     Parameters:
         file_path (str): The path to the CSV file containing the station data.
         station_name (str): The name of the station for which the data is being inserted.
-        db_connection (SQLAlchemy Connection): A connection to the database where the data should be inserted.
+        session (SQLAlchemy Session): The active session used for database operations.
 
     Returns:
         None
@@ -101,9 +109,9 @@ def insert_data_from_station(file_path, station_name, db_connection):
     for col in df.columns:
         if col != 'datetime':
             station_indicators = append_to_station_indicators_dict(station_indicators, station_name, col)
-            if append_to_measure_indicator_table(df, station_name, col, db_connection):
+            if append_to_measure_indicator_table(df, station_name, col, session):
                 print(f"{file_path} - {col} inserted into measure_indicator")
-    append_to_station_indicators_table(station_indicators, db_connection)
+    append_to_station_indicators_table(station_indicators, session)
 
 
 def append_to_station_indicators_dict(station_indicators, station_name, column):
@@ -128,7 +136,7 @@ def append_to_station_indicators_dict(station_indicators, station_name, column):
     return station_indicators
 
 
-def append_to_measure_indicator_table(df, station_name, column, db_connection):
+def append_to_measure_indicator_table(df, station_name, column, session):
     """
     Appends data from a DataFrame to the 'measure_indicator' table in the database.
 
@@ -141,7 +149,7 @@ def append_to_measure_indicator_table(df, station_name, column, db_connection):
                                a column for the indicator values.
         station_name (str): The name of the station.
         column (str): The name of the indicator column in the DataFrame.
-        db_connection (SQLAlchemy Connection): A connection to the database where the data should be appended.
+        session (SQLAlchemy Session): The active session used for database operations.
 
     Returns:
         bool: `True` if the data was successfully appended to the 'measure_indicator' table, 
@@ -153,14 +161,15 @@ def append_to_measure_indicator_table(df, station_name, column, db_connection):
     df_indicator.rename(columns={column: 'value'}, inplace=True)
     df_indicator = df_indicator.dropna()
     try:
-        df_indicator.to_sql('measure_indicator', con=db_connection, if_exists='append',
+        df_indicator.to_sql('measure_indicator', con=session.bind, if_exists='append',
                             index=False, chunksize=1000)
         return True
-    except:
-        return False
+    except Exception as e:
+        print(f"Error: {e}")
+        raise e
 
 
-def append_to_station_indicators_table(station_indicators, db_connection):
+def append_to_station_indicators_table(station_indicators, session):
     """
     Appends station-indicator mapping data to the 'station_indicators' table in the database.
 
@@ -171,13 +180,13 @@ def append_to_station_indicators_table(station_indicators, db_connection):
     Parameters:
         station_indicators (dict): A dictionary containing station-indicator mappings. The dictionary should
                                     include keys 'idStation', 'idIndicator', and 'description'.
-        db_connection (SQLAlchemy Connection): A connection to the database where the data should be appended.
+        session (SQLAlchemy Session): The active session used for database operations.
 
     Returns:
         None
     """
     station_indicators_df = pd.DataFrame(station_indicators)
-    station_indicators_df.to_sql('station_indicators', con=db_connection, if_exists='append', index=False)
+    station_indicators_df.to_sql('station_indicators', con=session.bind, if_exists='append', index=False)
 
 
 def adjust_time_string(datetime_str):
