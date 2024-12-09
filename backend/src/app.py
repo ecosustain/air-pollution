@@ -50,7 +50,7 @@ except Exception as e:
 
 
 # This decorator guarantees that the function is automatically invoked at the end of every
-# HTTP request, regardless of whether the request succeeds or fails. 
+# HTTP request, regardless of whether the request succeeds or fails.
 @app.teardown_request
 def remove_session(exception=None):
     Session.remove()
@@ -93,9 +93,10 @@ def heatmap(payload):
     response = make_response()
 
     if request.method == 'GET':
-        heatmaps = HeatMapController(session=Session()).get_heatmap(payload=payload)
-        response = jsonify(heatmaps)
-        response.status = 200
+        with SessionFactory() as _session:
+            heatmaps = HeatMapController(session=_session).get_heatmap(payload=payload)
+            response = jsonify(heatmaps)
+            response.status = 200
 
     return response
 
@@ -118,9 +119,10 @@ def linegraph(payload):
     response = make_response()
 
     if request.method == 'GET':
-        linegraph_ = LineGraphController(session=Session()).get_line_graph(payload=payload)
-        response = jsonify({"line_graph": linegraph_})
-        response.status = 200
+        with SessionFactory() as _session:
+            linegraph_ = LineGraphController(session=_session).get_line_graph(payload=payload)
+            response = jsonify({"line_graph": linegraph_})
+            response.status = 200
 
     return response
 
