@@ -1,9 +1,10 @@
 from sqlalchemy import (create_engine, Column, Integer, MetaData, Table, DateTime, Double,
                         text, String, Boolean, ForeignKey, Index)
-from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
+from utils.db_utils import with_session
 
 
-def create_tables():
+@with_session
+def create_tables(session):
     """
     Creates all tables and indexes defined in the `tables_and_columns` dictionary 
     within the 'poluicao' schema in the MySQL database.
@@ -18,7 +19,7 @@ def create_tables():
     Returns:
         None
     """
-    engine = create_database()
+    engine = create_database(session)
     tables_and_columns = define_tables_and_columns()
     metadata = MetaData(schema='poluicao')
 
@@ -29,13 +30,22 @@ def create_tables():
             table_columns.append(column)
         create_table(table_name, metadata, *table_columns)
 
-    metadata.create_all(engine)
+    metadata.create_all(bind=engine)
     print("Tables and indexes created successfully.")
 
 
-def create_database():
-    DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db"
-    engine = create_engine(DATABASE_URL)
+def create_database(session):
+    """
+    Creates the 'poluicao' database if it doesn't already exist. Uses the session 
+    for the operation to ensure that the same connection is used for database creation.
+
+    Parameters:
+        session (SQLAlchemy Session): The active session used for database operations.
+
+    Returns:
+        engine: The SQLAlchemy engine connected to the database.
+    """
+    engine = session.get_bind()
     with engine.connect() as connection:
         connection.execute(text("CREATE DATABASE IF NOT EXISTS poluicao"))
     return engine
