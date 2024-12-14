@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 
-DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao"
+DATABASE_URL = f"mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db"
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 
