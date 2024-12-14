@@ -4,7 +4,7 @@ from flask import (
     make_response,
     jsonify,
 )
-from flask_cors import CORS  # Import flask_cors
+from flask_cors import CORS
 from controllers import (
     HeatMapController,
     UpdateController,
@@ -14,21 +14,21 @@ from controllers import (
 import json
 from sqlalchemy import create_engine, inspect, Table, MetaData
 from sqlalchemy.orm import sessionmaker
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 from utils.credentials import LOGIN_MYSQL, PASSWORD_MYSQL
 from database.create_tables import create_tables
 from database.populate_tables import populate_tables
-import atexit
+# import atexit
 
 
-def scheduled_update():
-    UpdateController().update_data()
+# def scheduled_update():
+#    UpdateController().update_data()
 
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(scheduled_update, 'cron', hour=3, minute=0)
-scheduler.start()
-atexit.register(lambda: scheduler.shutdown())
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(scheduled_update, 'cron', hour=3, minute=0)
+# scheduler.start()
+# atexit.register(lambda: scheduler.shutdown())
 
 
 DATABASE_URI = f'mysql+pymysql://{LOGIN_MYSQL}:{PASSWORD_MYSQL}@db/poluicao'
